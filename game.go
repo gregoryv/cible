@@ -51,4 +51,7 @@ type Event interface {
 	Event() string
 }
 
-var EventStopGame = EventString("stop game")
+const (
+	EventStopGame EventString = "stop game"
+	EventPing     EventString = "ping"
+)

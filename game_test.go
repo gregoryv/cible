@@ -17,6 +17,12 @@ func TestGame(t *testing.T) {
 		go g.Run(context.Background())
 		g.EventChan() <- EventStopGame
 	})
+	t.Run("handles events", func(t *testing.T) {
+		g := NewGame()
+		go g.Run(context.Background())
+		g.EventChan() <- EventPing
+		g.EventChan() <- EventPing
+	})
 
 }
 
