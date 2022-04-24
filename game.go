@@ -2,6 +2,7 @@ package cible
 
 import (
 	"context"
+	"log"
 )
 
 func NewGame() *Game {
@@ -23,7 +24,13 @@ gameLoop:
 			break gameLoop
 
 		case e := <-me.events: // blocks
-			me.handleEvent(e)
+			switch e {
+			case EventStopGame:
+				log.Println(e)
+				break gameLoop
+			default:
+				me.handleEvent(e)
+			}
 		}
 	}
 
@@ -32,6 +39,7 @@ gameLoop:
 
 func (me *Game) handleEvent(e Event) {
 	// todo handle event
+	log.Println(e)
 }
 
 // EventChan returns a channel for adding events to the game
@@ -42,3 +50,5 @@ func (me *Game) EventChan() chan<- Event {
 type Event interface {
 	Event() string
 }
+
+var EventStopGame = EventString("stop game")

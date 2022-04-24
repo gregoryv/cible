@@ -6,11 +6,18 @@ import (
 )
 
 func TestGame(t *testing.T) {
-	g := NewGame()
-	ctx, cancel := context.WithCancel(context.Background())
-	go g.Run(ctx)
-	g.EventChan() <- EventString("hello")
-	cancel()
+	t.Run("can be cancelled", func(t *testing.T) {
+		g := NewGame()
+		ctx, cancel := context.WithCancel(context.Background())
+		go g.Run(ctx)
+		cancel()
+	})
+	t.Run("can be stopped", func(t *testing.T) {
+		g := NewGame()
+		go g.Run(context.Background())
+		g.EventChan() <- EventStopGame
+	})
+
 }
 
 type EventString string
