@@ -24,9 +24,9 @@ gameLoop:
 			break gameLoop
 
 		case e := <-me.events: // blocks
+			log.Println(e.Event())
 			switch e {
 			case EventStopGame:
-				log.Println(e)
 				break gameLoop
 			default:
 				me.handleEvent(e)
@@ -55,3 +55,7 @@ const (
 	EventStopGame EventString = "stop game"
 	EventPing     EventString = "ping"
 )
+
+type EventString string
+
+func (me EventString) Event() string { return string(me) }

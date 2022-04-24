@@ -25,7 +25,3 @@ func TestGame(t *testing.T) {
 	})
 
 }
-
-type EventString string
-
-func (me EventString) Event() string { return string(me) }
