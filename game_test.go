@@ -1,7 +1,13 @@
 package cible
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func TestGame(t *testing.T) {
-	_ = NewGame()
+	g := NewGame()
+	ctx, cancel := context.WithCancel(context.Background())
+	go g.Run(ctx)
+	cancel()
 }
