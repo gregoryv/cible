@@ -4,3 +4,4 @@ All major changes will be documented in this file.
 
 ## [unreleased]
 
+- Add initial types Game and World with event handling
