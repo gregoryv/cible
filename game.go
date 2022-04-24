@@ -2,14 +2,17 @@ package cible
 
 import (
 	"context"
-	"time"
 )
 
 func NewGame() *Game {
-	return &Game{}
+	return &Game{
+		events: make(chan Event),
+	}
 }
 
-type Game struct{}
+type Game struct {
+	events chan Event
+}
 
 func (me *Game) Run(ctx context.Context) error {
 
@@ -19,12 +22,23 @@ gameLoop:
 		case <-ctx.Done(): // ie. interrupted from the outside
 			break gameLoop
 
-		default:
-			// do stuff
-
-			<-time.After(time.Second) // todo remove later
+		case e := <-me.events: // blocks
+			me.handleEvent(e)
 		}
 	}
 
 	return nil
+}
+
+func (me *Game) handleEvent(e Event) {
+	// todo handle event
+}
+
+// EventChan returns a channel for adding events to the game
+func (me *Game) EventChan() chan<- Event {
+	return me.events
+}
+
+type Event interface {
+	Event() string
 }
