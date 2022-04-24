@@ -4,4 +4,5 @@ All major changes will be documented in this file.
 
 ## [unreleased]
 
+- Add types Player and EventMove
 - Add initial types Game and World with event handling

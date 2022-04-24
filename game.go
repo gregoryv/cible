@@ -47,15 +47,10 @@ func (me *Game) EventChan() chan<- Event {
 	return me.events
 }
 
-type Event interface {
-	Event() string
+type Player struct {
+	name string
 }
 
-const (
-	EventStopGame EventString = "stop game"
-	EventPing     EventString = "ping"
-)
+func (me *Player) SetName(v string) { me.name = v }
 
-type EventString string
-
-func (me EventString) Event() string { return string(me) }
+func (me *Player) Name() string { return me.name }
