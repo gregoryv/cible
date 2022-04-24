@@ -1,0 +1,6 @@
+# Changelog
+
+All major changes will be documented in this file.
+
+## [unreleased]
+
