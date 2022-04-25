@@ -16,6 +16,22 @@ func (me *World) AddArea(v *Area) {
 	me.atlas = append(me.atlas, v)
 }
 
+func (me *World) Location(p At) (*Tile, error) {
+	if p.A >= len(me.atlas) {
+		return nil, fmt.Errorf("Location %s: unknown", p.String())
+	}
+	return me.atlas[p.A].Location(p)
+}
+
+type At struct {
+	A int // Area id
+	T int // Tile id
+}
+
+func (me *At) String() string {
+	return fmt.Sprintf("at %d,%d", me.A, me.T)
+}
+
 func NewArea() *Area {
 	return &Area{}
 }
@@ -25,6 +41,13 @@ type Area struct {
 
 	tiles []*Tile
 	links []Link
+}
+
+func (me *Area) Location(p At) (*Tile, error) {
+	if p.T >= me.Size() {
+		return nil, fmt.Errorf("Location %v: unknown", p.String())
+	}
+	return me.tiles[p.T], nil
 }
 
 func (me *Area) AddTile(t *Tile) {

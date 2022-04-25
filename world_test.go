@@ -7,8 +7,27 @@ func TestWorld(t *testing.T) {
 	a := NewArea()
 	a.AddTile(NewTile())
 	a.AddTile(NewTile())
-
+	a.SetLinks([]Link{
+		{0, 1, East},
+	})
 	w.AddArea(a)
+	t.Run("Location", func(t *testing.T) {
+		t.Run("", func(t *testing.T) {
+			if _, err := w.Location(At{0, 0}); err != nil {
+				t.Error(err)
+			}
+		})
+		t.Run("", func(t *testing.T) {
+			if _, err := w.Location(At{10, 0}); err == nil {
+				t.Error(err)
+			}
+		})
+		t.Run("", func(t *testing.T) {
+			if _, err := w.Location(At{0, 10}); err == nil {
+				t.Error(err)
+			}
+		})
+	})
 }
 
 func TestArea(t *testing.T) {
@@ -36,9 +55,16 @@ func TestArea(t *testing.T) {
 			t.Error(err)
 		}
 
-		badLinks := []Link{{0, 3, South}}
-		if err := a.SetLinks(badLinks); err == nil {
-			t.Error("area does not have tile with id 3, should fail")
+		badCases := map[string][]Link{
+			"missing A": []Link{{3, 0, South}},
+			"missing B": []Link{{0, 3, South}},
+		}
+		for name, links := range badCases {
+			t.Run(name, func(t *testing.T) {
+				if err := a.SetLinks(links); err == nil {
+					t.Fail()
+				}
+			})
 		}
 	})
 }
