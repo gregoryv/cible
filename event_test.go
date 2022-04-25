@@ -10,7 +10,7 @@ func TestEventMove(t *testing.T) {
 		player: Player{
 			name: "john",
 		},
-		dir: Backward,
+		dir: South,
 	}
 	got := e.Event()
 	if !strings.Contains(got, "john") {

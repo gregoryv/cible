@@ -4,9 +4,12 @@ package cible
 type Direction int
 
 const (
-	DirectionUnknown Direction = iota
-	Forward
-	Backward
-	Left
-	Right
+	North Direction = iota
+	NorthEast
+	East
+	SouthEast
+	South
+	SouthWest
+	West
+	NorthWest
 )
