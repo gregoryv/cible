@@ -37,24 +37,24 @@ func NewArea() *Area {
 }
 
 type Area struct {
-	id int
-
-	tiles []*Tile
-	links []Link
+	Tiles []*Tile
+	Links []Link
 }
 
 func (me *Area) Location(p At) (*Tile, error) {
 	if p.T >= me.Size() {
 		return nil, fmt.Errorf("Location %v: unknown", p.String())
 	}
-	return me.tiles[p.T], nil
+	return me.Tiles[p.T], nil
 }
 
 func (me *Area) AddTile(t *Tile) {
-	me.tiles = append(me.tiles, t)
+	me.Tiles = append(me.Tiles, t)
 }
 
 func (me *Area) SetLinks(v []Link) error {
+	mark := make([]bool, len(me.Tiles))
+
 	for _, link := range v {
 		if link.A >= me.Size() {
 			return fmt.Errorf("no tile with index %d", link.A)
@@ -62,11 +62,18 @@ func (me *Area) SetLinks(v []Link) error {
 		if link.B >= me.Size() {
 			return fmt.Errorf("no tile with index %d", link.B)
 		}
+		mark[link.A] = true
+		mark[link.B] = true
+	}
+	for i, v := range mark {
+		if !v {
+			return fmt.Errorf("missing link for %v", i)
+		}
 	}
 	return nil
 }
 
-func (me *Area) Size() int { return len(me.tiles) }
+func (me *Area) Size() int { return len(me.Tiles) }
 
 func NewTile() *Tile {
 	return &Tile{}
