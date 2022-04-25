@@ -1,6 +1,8 @@
 package cible
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestWorld(t *testing.T) {
 	w := NewWorld()

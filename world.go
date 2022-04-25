@@ -110,3 +110,7 @@ type Link struct {
 	From, To int
 	Direction
 }
+
+func (me *Link) String() string {
+	return fmt.Sprintf("%d %v %d", me.From, me.Direction, me.To)
+}
