@@ -12,6 +12,10 @@ type World struct {
 	atlas []*Area
 }
 
+func (me *World) AddArea(v *Area) {
+	me.atlas = append(me.atlas, v)
+}
+
 func NewArea() *Area {
 	return &Area{}
 }

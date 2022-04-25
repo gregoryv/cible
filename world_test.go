@@ -3,7 +3,12 @@ package cible
 import "testing"
 
 func TestWorld(t *testing.T) {
-	_ = NewWorld()
+	w := NewWorld()
+	a := NewArea()
+	a.AddTile(NewTile())
+	a.AddTile(NewTile())
+
+	w.AddArea(a)
 }
 
 func TestArea(t *testing.T) {
@@ -35,7 +40,5 @@ func TestArea(t *testing.T) {
 		if err := a.SetLinks(badLinks); err == nil {
 			t.Error("area does not have tile with id 3, should fail")
 		}
-
 	})
-
 }
