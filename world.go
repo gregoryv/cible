@@ -2,7 +2,6 @@ package cible
 
 import (
 	"fmt"
-	"log"
 )
 
 func NewWorld() *World {
@@ -25,8 +24,8 @@ func (me *World) Move(dir Direction, f From) (*Tile, error) {
 	}
 	area := me.atlas[f.A]
 	for _, link := range area.Links {
-		log.Println("link", link)
-		if link.From == f.T && link.Direction == dir {
+		if link.From == f.T && link.Direction == dir ||
+			link.To == f.T && link.Direction == dir.Opposite() {
 			return area.Tiles[link.To], nil
 		}
 	}
@@ -37,7 +36,7 @@ func (me *World) Move(dir Direction, f From) (*Tile, error) {
 
 func (me *World) Location(p At) (*Tile, error) {
 	if p.A >= len(me.atlas) {
-		return nil, fmt.Errorf("Location %s: unknown", p.String())
+		return nil, fmt.Errorf("Location %s: area unknown", p.String())
 	}
 	return me.atlas[p.A].Location(p)
 }
@@ -64,7 +63,7 @@ type Area struct {
 
 func (me *Area) Location(p At) (*Tile, error) {
 	if p.T >= me.Size() {
-		return nil, fmt.Errorf("Location %v: unknown", p.String())
+		return nil, fmt.Errorf("Location %v: tile unknown", p.String())
 	}
 	return me.Tiles[p.T], nil
 }

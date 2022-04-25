@@ -37,6 +37,9 @@ func TestWorld(t *testing.T) {
 		if _, err := w.Move(East, From{0, 0}); err != nil {
 			t.Error(err)
 		}
+		if _, err := w.Move(West, From{0, 1}); err != nil {
+			t.Error(err)
+		}
 		t.Run("wrong direction", func(t *testing.T) {
 			if _, err := w.Move(West, From{0, 0}); err == nil {
 				t.Error(err)
