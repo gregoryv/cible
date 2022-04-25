@@ -22,4 +22,20 @@ func TestArea(t *testing.T) {
 		}
 	})
 
+	t.Run("SetLinks", func(t *testing.T) {
+		a := NewArea()
+		a.AddTile(NewTile())
+		a.AddTile(NewTile())
+		okLinks := []Link{{0, 1, East}}
+		if err := a.SetLinks(okLinks); err != nil {
+			t.Error(err)
+		}
+
+		badLinks := []Link{{0, 3, South}}
+		if err := a.SetLinks(badLinks); err == nil {
+			t.Error("area does not have tile with id 3, should fail")
+		}
+
+	})
+
 }
