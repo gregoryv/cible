@@ -13,11 +13,11 @@ func TestGame(t *testing.T) {
 	defer cancel()
 
 	t.Run("handles events", func(t *testing.T) {
-		g.EventChan() <- EventPing
-		g.EventChan() <- &EventMove{Direction: E}
+		g.Events <- EventPing
+		g.Events <- &EventMove{Direction: E}
 	})
 	t.Run("handles unknown events", func(t *testing.T) {
-		g.EventChan() <- &EventMove{Direction: Direction(-1)}
+		g.Events <- &EventMove{Direction: Direction(-1)}
 	})
 }
 
@@ -31,7 +31,7 @@ func TestGame_exits(t *testing.T) {
 	t.Run("can be stopped", func(t *testing.T) {
 		g := NewGame()
 		go g.Run(context.Background())
-		g.EventChan() <- EventStopGame
+		g.Events <- EventStopGame
 	})
 }
 

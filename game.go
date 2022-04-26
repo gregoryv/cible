@@ -9,16 +9,19 @@ import (
 )
 
 func NewGame() *Game {
+	ch := make(chan Event)
 	return &Game{
-		events: make(chan Event),
+		events: ch,
+		Events: ch,
 		Logger: logger.Silent,
 	}
 }
 
 type Game struct {
 	events chan Event
+	Events
 	logger.Logger
-	players Players
+	Players
 }
 
 func (me *Game) Run(ctx context.Context) error {
@@ -46,11 +49,6 @@ gameLoop:
 func (me *Game) handleEvent(e Event) {
 	// todo handle event
 	me.Log(e)
-}
-
-// EventChan returns a channel for adding events to the game
-func (me *Game) EventChan() chan<- Event {
-	return me.events
 }
 
 // ----------------------------------------
@@ -133,11 +131,7 @@ type Short string
 type Long string
 type Title string
 
-// gomerge src: event.go
-
-type Event interface {
-	Event() string
-}
+// ----------------------------------------
 
 const (
 	EventStopGame EventString = "stop game"
@@ -157,7 +151,13 @@ func (me *EventMove) Event() string {
 	return fmt.Sprintf("%s moves %s", me.Player.Name, me.Direction)
 }
 
-// gomerge src: direction.go
+type Events chan<- Event
+
+type Event interface {
+	Event() string
+}
+
+// ----------------------------------------
 
 type Direction int
 
