@@ -35,19 +35,14 @@ func TestEventStopGame(t *testing.T) {
 }
 
 func Test_cave(t *testing.T) {
-	area := myCave()
-	for _, tile := range area.Tiles {
+	for _, tile := range myCave().Tiles {
 		t.Log(tile, tile.Nav)
 	}
 }
 
 func TestMove(t *testing.T) {
-	p := Player{
-		Name: "John",
-	}
-	e := &Move{p, S}
-	got := e.Event()
-	if !strings.Contains(got, "John") {
+	e := &Move{Player{Name: "John"}, S}
+	if got := e.Event(); !strings.Contains(got, "John") {
 		t.Errorf("missing name: %q", got)
 	}
 }

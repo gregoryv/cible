@@ -30,7 +30,6 @@ type Game struct {
 }
 
 func (me *Game) Run(ctx context.Context) error {
-
 gameLoop:
 	for {
 		select {
