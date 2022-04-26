@@ -39,7 +39,7 @@ func (me *Game) handleEvent(e Event) error {
 		p := Position{
 			Area: "a1", Tile: "01",
 		}
-		me.Characters = append(me.Characters, Character{
+		me.Characters = append(me.Characters, &Character{
 			Ident:    Ident(e.Player.Name),
 			Position: p,
 		})
@@ -188,7 +188,7 @@ func (me *Game) Place(p Position) (a *Area, t *Tile, err error) {
 func (me *Game) Character(id Ident) (*Character, error) {
 	for _, c := range me.Characters {
 		if c.Ident == id {
-			return &c, nil
+			return c, nil
 		}
 	}
 	return nil, fmt.Errorf("character %q not found", id)
@@ -196,7 +196,7 @@ func (me *Game) Character(id Ident) (*Character, error) {
 
 // ----------------------------------------
 
-type Characters []Character
+type Characters []*Character
 
 type Character struct {
 	Ident
