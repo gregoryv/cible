@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestGame(t *testing.T) {
+func TestGame_play(t *testing.T) {
 	g := NewGame()
 	g.Logger = t
 	ctx, cancel := context.WithCancel(context.Background())
@@ -16,19 +16,15 @@ func TestGame(t *testing.T) {
 
 	p := Player{Name: "John"}
 
-	t.Run("handles events", func(t *testing.T) {
-		g.Events <- &Join{Player: p}
-		// currently the name is used as an identifier of characters
-		g.Events <- &MoveCharacter{"John", E}
-	})
+	g.Events <- &Join{Player: p}
+	// currently the name is used as an identifier of characters
+	g.Events <- &MoveCharacter{"John", N}
 
-	t.Run("handles unknown events", func(t *testing.T) {
-		g.Events <- &MoveCharacter{"John", Direction(-1)}
-	})
+	g.Events <- &MoveCharacter{"John", Direction(-1)}
 
 	// let all events pass
 	<-time.After(10 * time.Millisecond)
-	t.Fail()
+	//	t.Fail()
 }
 
 func TestEventStopGame(t *testing.T) {

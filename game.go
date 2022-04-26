@@ -114,6 +114,11 @@ type Game struct {
 }
 
 func (me *Game) Character(id Ident) (*Character, error) {
+	for _, c := range me.Characters {
+		if c.Ident == id {
+			return &c, nil
+		}
+	}
 	return nil, fmt.Errorf("character %q not found", id)
 }
 
