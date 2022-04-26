@@ -50,6 +50,13 @@ func TestMoveCharacter(t *testing.T) {
 	}
 }
 
+func TestArea_Tile(t *testing.T) {
+	var a Area
+	if _, err := a.Tile("x"); err == nil {
+		t.Fail()
+	}
+}
+
 type badEvent struct{}
 
 func (me *badEvent) Event() string { return "badEvent" }
