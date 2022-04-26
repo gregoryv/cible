@@ -21,16 +21,11 @@ gameLoop:
 				me.Log(e.Event())
 				break gameLoop
 			default:
-				resp, err := me.handleEvent(e)
-				switch {
-				case err != nil:
+				if err := me.handleEvent(e); err != nil {
 					me.Logf("%s: %v", e.Event(), err)
-				case resp != nil:
-					me.Logf("%s: %s", e.Event(), resp.String())
-				default:
+				} else {
 					me.Log(e.Event())
 				}
-
 			}
 		}
 	}
@@ -38,7 +33,7 @@ gameLoop:
 	return nil
 }
 
-func (me *Game) handleEvent(e Event) (Response, error) {
+func (me *Game) handleEvent(e Event) error {
 	switch e := e.(type) {
 	case *Join:
 		p := Position{
@@ -48,33 +43,29 @@ func (me *Game) handleEvent(e Event) (Response, error) {
 			Ident:    Ident(e.Player.Name),
 			Position: p,
 		})
-		return StringResponse(
-			fmt.Sprintf("at %s", p),
-		), nil
+		return nil
 
 	case *Movement:
 		c, err := me.Character(e.Ident)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		_, t, err := me.Place(c.Position)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		next, err := t.Link(e.Direction)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if next == "" {
-			return StringResponse("cannot"), nil
+			e.Response = "cannot"
 		} else {
 			c.Position.Tile = next
-			return StringResponse(
-				fmt.Sprintf("at %v", next),
-			), nil
+			e.Response = fmt.Sprintf("at %v", next)
 		}
 	}
-	return nil, nil
+	return nil
 }
 
 // ----------------------------------------
@@ -161,14 +152,6 @@ func (me *Game) Character(id Ident) (*Character, error) {
 }
 
 // ----------------------------------------
-
-type Response interface {
-	String() string
-}
-
-type StringResponse string
-
-func (me StringResponse) String() string { return string(me) }
 
 type Characters []Character
 
