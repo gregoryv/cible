@@ -56,6 +56,9 @@ func (me *Game) handleEvent(e Event) {
 	case *Join:
 		me.Characters = append(me.Characters, Character{
 			Name: e.Player.Name,
+			Position: Position{
+				Area: "a1", Tile: "01",
+			},
 		})
 	case *MoveCharacter:
 
@@ -161,8 +164,8 @@ func (me Nav) String() string {
 }
 
 type Position struct {
-	Area int
-	Tile int
+	Area Ident
+	Tile Ident
 }
 
 type Ident string
