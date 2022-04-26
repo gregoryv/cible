@@ -16,11 +16,11 @@ func TestGame(t *testing.T) {
 
 	t.Run("handles events", func(t *testing.T) {
 		g.Events <- &Join{Player: p}
-		g.Events <- &EventMove{Player: p, Direction: E}
+		g.Events <- &Move{Player: p, Direction: E}
 	})
 
 	t.Run("handles unknown events", func(t *testing.T) {
-		g.Events <- &EventMove{Direction: Direction(-1)}
+		g.Events <- &Move{Direction: Direction(-1)}
 	})
 }
 
@@ -37,11 +37,11 @@ func Test_cave(t *testing.T) {
 	}
 }
 
-func TestEventMove(t *testing.T) {
+func TestMove(t *testing.T) {
 	p := Player{
 		Name: "John",
 	}
-	e := &EventMove{p, S}
+	e := &Move{p, S}
 	got := e.Event()
 	if !strings.Contains(got, "John") {
 		t.Errorf("missing name: %q", got)

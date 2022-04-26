@@ -145,12 +145,12 @@ type EventString string
 
 func (me EventString) Event() string { return string(me) }
 
-type EventMove struct {
+type Move struct {
 	Player
 	Direction
 }
 
-func (me *EventMove) Event() string {
+func (me *Move) Event() string {
 	return fmt.Sprintf("%s moves %s", me.Player.Name, me.Direction)
 }
 
