@@ -108,6 +108,7 @@ type Characters []Character
 type Character struct {
 	*Player // if nil then, non playable character NPC
 	*Bot
+	Position
 }
 
 type Player struct {
@@ -115,8 +116,6 @@ type Player struct {
 }
 
 type Bot struct{}
-
-type Name string
 
 type World struct {
 	Areas
@@ -154,6 +153,12 @@ func (me Nav) String() string {
 	return strings.Join(res, " ")
 }
 
+type Position struct {
+	Area int
+	Tile int
+}
+
+type Name string
 type Ident string
 type Short string
 type Long string
