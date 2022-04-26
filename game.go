@@ -18,6 +18,7 @@ func NewGame() *Game {
 type Game struct {
 	events chan Event
 	logger.Logger
+	players Players
 }
 
 func (me *Game) Run(ctx context.Context) error {
@@ -88,6 +89,9 @@ func myCave() *Area {
 }
 
 // ----------------------------------------
+
+type Players []Player
+
 type Player struct {
 	Name
 }
@@ -163,15 +167,3 @@ const (
 	S
 	W
 )
-
-func (me Direction) Opposite() Direction {
-	switch me {
-	case N:
-		return S
-	case E:
-		return W
-	case W:
-		return E
-	}
-	return me
-}
