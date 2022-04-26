@@ -59,6 +59,9 @@ type Events chan<- Event
 
 type Event interface {
 	Event() string
+
+	// Done blocks until event is handled, can be called multiple
+	// times.
 	Done() error
 }
 

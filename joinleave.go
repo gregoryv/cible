@@ -1,6 +1,9 @@
 package cible
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 func (me *Game) onJoin(e *EventJoin) error {
 	p := Position{
@@ -26,7 +29,10 @@ func Join(p Player) *EventJoin {
 type EventJoin struct {
 	Player
 
-	Ident  // set when done
+	Ident // set when done
+	err   error
+
+	sync.Once
 	joined chan Ident
 	failed chan error
 }
@@ -39,15 +45,16 @@ func (me *EventJoin) Done() (err error) {
 			me.Ident = id
 		}
 		// otherwise probably closed
-	case err = <-me.failed:
+	case me.err = <-me.failed:
 	}
-	return
+	return me.err
 }
 
 func (me *EventJoin) Close() {
-	defer ignorePanic()
-	close(me.joined)
-	close(me.failed)
+	me.Once.Do(func() {
+		close(me.joined)
+		close(me.failed)
+	})
 }
 
 func (me *EventJoin) Event() string {
