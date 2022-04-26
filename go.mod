@@ -2,4 +2,4 @@ module github.com/gregoryv/cible
 
 go 1.17
 
-require github.com/gregoryv/nexus v0.5.1 // indirect
+require github.com/gregoryv/logger v0.2.0

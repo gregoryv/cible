@@ -3,18 +3,21 @@ package cible
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
+
+	"github.com/gregoryv/logger"
 )
 
 func NewGame() *Game {
 	return &Game{
 		events: make(chan Event),
+		Logger: logger.New(),
 	}
 }
 
 type Game struct {
 	events chan Event
+	logger.Logger
 }
 
 func (me *Game) Run(ctx context.Context) error {
@@ -26,7 +29,7 @@ gameLoop:
 			break gameLoop
 
 		case e := <-me.events: // blocks
-			log.Println(e.Event())
+			me.Log(e.Event())
 			switch e {
 			case EventStopGame:
 				break gameLoop
@@ -41,7 +44,7 @@ gameLoop:
 
 func (me *Game) handleEvent(e Event) {
 	// todo handle event
-	log.Println(e)
+	me.Log(e)
 }
 
 // EventChan returns a channel for adding events to the game
