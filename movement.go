@@ -69,6 +69,7 @@ func (me *Movement) Done() (pos Position, err error) {
 }
 
 func (me *Movement) Close() {
+	defer ignorePanic()
 	close(me.newPosition)
 	close(me.failed)
 }
@@ -76,6 +77,8 @@ func (me *Movement) Close() {
 func (me *Movement) Event() string {
 	return fmt.Sprintf("%s move %s", me.Ident, me.Direction)
 }
+
+func ignorePanic() { _ = recover() }
 
 // ----------------------------------------
 

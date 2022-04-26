@@ -16,11 +16,15 @@ func (me *EventStopGame) Event() string {
 	return "stop game"
 }
 
-func (me *EventStopGame) Done() error {
+func (me *EventStopGame) Done() (err error) {
 	defer me.Close()
-	return <-me.failed
+	select {
+	case err = <-me.failed:
+	}
+	return
 }
 
 func (me *EventStopGame) Close() {
+	defer ignorePanic()
 	close(me.failed)
 }

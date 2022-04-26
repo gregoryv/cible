@@ -54,6 +54,37 @@ func Test_badEvents(t *testing.T) {
 	g.Events <- MoveCharacter(cid, Direction(-1))
 	g.Events <- &badEvent{}
 	_, _ = Trigger(g, MoveCharacter(cid, W)).Done()
+	e := Trigger(g, Leave("no such"))
+	if err := e.Done(); err == nil {
+		t.Error("Leave unknown cid should fail")
+	}
+}
+
+func TestEvent_Done(t *testing.T) {
+	g := NewGame()
+	go g.Run(context.Background())
+	defer g.Stop()
+	t.Run("MoveCharacter", func(t *testing.T) {
+		defer catchPanic(t)
+		e := Trigger(g, MoveCharacter("x", W))
+		e.Done()
+		e.Done()
+	})
+
+	t.Run("StopGame", func(t *testing.T) {
+		defer catchPanic(t)
+		e := Trigger(g, StopGame())
+		e.Done()
+		e.Done()
+	})
+
+}
+
+func catchPanic(t *testing.T) {
+	if err := recover(); err != nil {
+		t.Helper()
+		t.Fatal(err)
+	}
 }
 
 func Test_cancelGame(t *testing.T) {
@@ -86,6 +117,8 @@ func TestArea_Tile(t *testing.T) {
 type badEvent struct{}
 
 func (me *badEvent) Event() string { return "badEvent" }
+
+// ----------------------------------------
 
 func BenchmarkMoveCharacter_1_player(b *testing.B) {
 	g := NewGame()
