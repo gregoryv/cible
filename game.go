@@ -49,7 +49,7 @@ gameLoop:
 func (me *Game) handleEvent(e Event) {
 	me.Log(e)
 	switch e := e.(type) {
-	case *EventJoin:
+	case *Join:
 		me.Players = append(me.Players, e.Player)
 	}
 }
@@ -154,11 +154,11 @@ func (me *EventMove) Event() string {
 	return fmt.Sprintf("%s moves %s", me.Player.Name, me.Direction)
 }
 
-type EventJoin struct {
+type Join struct {
 	Player
 }
 
-func (me *EventJoin) Event() string {
+func (me *Join) Event() string {
 	return fmt.Sprintf("%s joined game", me.Player.Name)
 }
 

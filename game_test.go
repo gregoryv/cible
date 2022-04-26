@@ -15,7 +15,7 @@ func TestGame(t *testing.T) {
 	p := Player{Name: "John"}
 
 	t.Run("handles events", func(t *testing.T) {
-		g.Events <- &EventJoin{Player: p}
+		g.Events <- &Join{Player: p}
 		g.Events <- &EventMove{Player: p, Direction: E}
 	})
 
