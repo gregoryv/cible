@@ -56,6 +56,7 @@ type Characters []*Character
 
 type Character struct {
 	Ident
+	Player
 	Position
 	IsBot
 }

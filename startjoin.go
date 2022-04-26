@@ -18,6 +18,7 @@ gameLoop:
 				me.Log(e.Event())
 				e.failed <- nil //
 				break gameLoop
+
 			default:
 				if err := me.handleEvent(e); err != nil {
 					me.Logf("%s: %v", e.Event(), err)
@@ -39,13 +40,25 @@ func (me *Game) handleEvent(e Event) error {
 		}
 		me.Characters = append(me.Characters, &Character{
 			Ident:    Ident(e.Player.Name),
+			Player:   e.Player,
 			Position: p,
 		})
 		e.joined <- Ident(e.Player.Name)
 		return nil
 
+	case *EventLeave:
+		c, err := me.Character(e.Ident)
+		if err != nil {
+			e.failed <- err
+			return err
+		}
+		e.Name = c.Player.Name
+		e.failed <- nil
+		return nil
+
 	case *Movement:
 		return me.onMovement(e)
+
 	}
 	return nil
 }
@@ -81,6 +94,8 @@ func (me *EventStopGame) Close() {
 	close(me.failed)
 }
 
+// ----------------------------------------
+
 func Join(p Player) *EventJoin {
 	return &EventJoin{
 		Player: p,
@@ -113,6 +128,34 @@ func (me *EventJoin) Close() {
 func (me *EventJoin) Event() string {
 	return fmt.Sprintf("%s join", me.Player.Name)
 }
+
+// ----------------------------------------
+func Leave(cid Ident) *EventLeave {
+	return &EventLeave{
+		Ident:  cid,
+		failed: make(chan error, 1),
+	}
+}
+
+type EventLeave struct {
+	Ident
+	Name
+	failed chan error
+}
+
+func (me *EventLeave) Done() (err error) {
+	defer me.Close()
+	return <-me.failed
+	return
+}
+
+func (me *EventLeave) Close() { close(me.failed) }
+
+func (me *EventLeave) Event() string {
+	return fmt.Sprintf("%s left", me.Name)
+}
+
+// ----------------------------------------
 
 type Events chan<- Event
 

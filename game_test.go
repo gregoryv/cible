@@ -35,6 +35,8 @@ func TestGame_play(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(tile)
+
+	Trigger(g, Leave(cid)).Done()
 }
 
 func Test_badEvents(t *testing.T) {
