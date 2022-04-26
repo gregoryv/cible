@@ -6,6 +6,7 @@ import (
 )
 
 type Area struct {
+	Title
 	Tiles
 }
 
@@ -37,3 +38,4 @@ func (me Nav) String() string {
 type Ident string
 type Short string
 type Long string
+type Title string
