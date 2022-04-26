@@ -55,9 +55,23 @@ func (me *Game) handleEvent(e Event) {
 	switch e := e.(type) {
 	case *Join:
 		me.Characters = append(me.Characters, Character{
-			Player: &e.Player,
+			Name: e.Player.Name,
 		})
+	case *MoveCharacter:
+		c := me.findCharacterByName(e.Name)
+		pos := c.Position
+		_ = c
+		_ = pos
 	}
+}
+
+func (me *Game) findCharacterByName(n Name) *Character {
+	for _, c := range me.Characters {
+		if c.Name == n {
+			return &c
+		}
+	}
+	return nil
 }
 
 // ----------------------------------------
@@ -106,10 +120,12 @@ func myCave() *Area {
 type Characters []Character
 
 type Character struct {
-	*Player // if nil then, non playable character NPC
-	*Bot
+	Name
 	Position
+	IsBot
 }
+
+type IsBot bool
 
 type Player struct {
 	Name
@@ -175,13 +191,13 @@ type EventString string
 
 func (me EventString) Event() string { return string(me) }
 
-type Move struct {
-	Player
+type MoveCharacter struct {
+	Name
 	Direction
 }
 
-func (me *Move) Event() string {
-	return fmt.Sprintf("%s moves %s", me.Player.Name, me.Direction)
+func (me *MoveCharacter) Event() string {
+	return fmt.Sprintf("%s moves %s", me.Name, me.Direction)
 }
 
 type Join struct {

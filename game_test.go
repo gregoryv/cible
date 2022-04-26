@@ -13,15 +13,16 @@ func TestGame(t *testing.T) {
 	go g.Run(ctx)
 	defer cancel()
 
-	p := Player{Name: "John"}
+	john := Name("John")
+	p := Player{Name: john}
 
 	t.Run("handles events", func(t *testing.T) {
 		g.Events <- &Join{Player: p}
-		g.Events <- &Move{Player: p, Direction: E}
+		g.Events <- &MoveCharacter{Name: john, Direction: E}
 	})
 
 	t.Run("handles unknown events", func(t *testing.T) {
-		g.Events <- &Move{Direction: Direction(-1)}
+		g.Events <- &MoveCharacter{Name: john, Direction: Direction(-1)}
 	})
 
 	// let all events pass
@@ -40,8 +41,8 @@ func Test_cave(t *testing.T) {
 	}
 }
 
-func TestMove(t *testing.T) {
-	e := &Move{Player{Name: "John"}, S}
+func TestMoveCharacter(t *testing.T) {
+	e := &MoveCharacter{Name("John"), S}
 	if got := e.Event(); !strings.Contains(got, "John") {
 		t.Errorf("missing name: %q", got)
 	}
