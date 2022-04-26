@@ -18,12 +18,12 @@ func TestGame_play(t *testing.T) {
 
 	g.Events <- &Join{Player: p}
 	// currently the name is used as an identifier of characters
-	g.Events <- &MoveCharacter{"John", N}
+	g.Events <- MoveCharacter("John", N)
 
-	g.Events <- &MoveCharacter{"John", W} // nothing there
-	g.Events <- &MoveCharacter{"Eve", N}  // no such player
-	g.Events <- &MoveCharacter{"god", N}  // cannot be moved
-	g.Events <- &MoveCharacter{"John", Direction(-1)}
+	g.Events <- MoveCharacter("John", W) // nothing ther)
+	g.Events <- MoveCharacter("Eve", N)  // no such playe)
+	g.Events <- MoveCharacter("god", N)  // cannot be move)
+	g.Events <- MoveCharacter("John", Direction(-1))
 	g.Events <- &badEvent{}
 
 	// let all events pass
@@ -43,8 +43,8 @@ func Test_cave(t *testing.T) {
 	}
 }
 
-func TestMoveCharacter(t *testing.T) {
-	e := &MoveCharacter{"John", S}
+func TestMovement(t *testing.T) {
+	e := MoveCharacter("John", S)
 	if got := e.Event(); !strings.Contains(got, "John") {
 		t.Errorf("missing name: %q", got)
 	}

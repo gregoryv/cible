@@ -52,7 +52,7 @@ func (me *Game) handleEvent(e Event) (Response, error) {
 			fmt.Sprintf("at %s", p),
 		), nil
 
-	case *MoveCharacter:
+	case *Movement:
 		c, err := me.Character(e.Ident)
 		if err != nil {
 			return nil, err
@@ -87,12 +87,17 @@ type EventString string
 
 func (me EventString) Event() string { return string(me) }
 
-type MoveCharacter struct {
-	Ident
-	Direction
+func MoveCharacter(id Ident, d Direction) *Movement {
+	return &Movement{id, d, ""}
 }
 
-func (me *MoveCharacter) Event() string {
+type Movement struct {
+	Ident
+	Direction
+	Response string
+}
+
+func (me *Movement) Event() string {
 	return fmt.Sprintf("%s move %s", me.Ident, me.Direction)
 }
 
