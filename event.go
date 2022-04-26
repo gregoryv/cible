@@ -16,10 +16,10 @@ type EventString string
 func (me EventString) Event() string { return string(me) }
 
 type EventMove struct {
-	player Player
-	dir    Direction
+	Player
+	Direction
 }
 
 func (me *EventMove) Event() string {
-	return fmt.Sprintf("%s moves %s", me.player.Name(), me.dir.String())
+	return fmt.Sprintf("%s moves %s", me.Player.Name, me.Direction)
 }

@@ -48,9 +48,7 @@ func (me *Game) EventChan() chan<- Event {
 }
 
 type Player struct {
-	name string
+	Name
 }
 
-func (me *Player) SetName(v string) { me.name = v }
-
-func (me *Player) Name() string { return me.name }
+type Name string
