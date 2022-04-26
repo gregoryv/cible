@@ -55,14 +55,15 @@ type Movement struct {
 	Ident
 	Direction
 
+	Position    // set when done
 	newPosition chan Position
 	failed      chan error
 }
 
-func (me *Movement) Done() (pos Position, err error) {
+func (me *Movement) Done() (err error) {
 	defer me.Close()
 	select {
-	case pos = <-me.newPosition:
+	case me.Position = <-me.newPosition:
 	case err = <-me.failed:
 	}
 	return

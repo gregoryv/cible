@@ -25,7 +25,9 @@ func TestGame_play(t *testing.T) {
 	Trigger(g, MoveCharacter(cid, N)).Done()
 	Trigger(g, MoveCharacter(cid, E)).Done()
 
-	pos, _ := Trigger(g, MoveCharacter(cid, W)).Done()
+	e := Trigger(g, MoveCharacter(cid, W))
+	e.Done()
+	pos := e.Position
 	if pos.Tile != "02" {
 		t.Error("got", pos.Tile, "exp", "02")
 	}
@@ -53,7 +55,7 @@ func Test_badEvents(t *testing.T) {
 	g.Events <- MoveCharacter("god", N) // cannot be move)
 	g.Events <- MoveCharacter(cid, Direction(-1))
 	g.Events <- &badEvent{}
-	_, _ = Trigger(g, MoveCharacter(cid, W)).Done()
+	Trigger(g, MoveCharacter(cid, W)).Done()
 	e := Trigger(g, Leave("no such"))
 	if err := e.Done(); err == nil {
 		t.Error("Leave unknown cid should fail")
@@ -131,6 +133,7 @@ func TestArea_Tile(t *testing.T) {
 type badEvent struct{}
 
 func (me *badEvent) Event() string { return "badEvent" }
+func (me *badEvent) Done() error   { return fmt.Errorf("badEvent") }
 
 // ----------------------------------------
 

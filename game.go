@@ -59,6 +59,7 @@ type Events chan<- Event
 
 type Event interface {
 	Event() string
+	Done() error
 }
 
 func NewGame() *Game {

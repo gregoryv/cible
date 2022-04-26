@@ -26,7 +26,7 @@ func Join(p Player) *EventJoin {
 type EventJoin struct {
 	Player
 
-	Id     Ident
+	Id     Ident // set when done
 	joined chan Ident
 	failed chan error
 }
