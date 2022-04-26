@@ -4,20 +4,20 @@ package cible
 type Direction int
 
 const (
-	North Direction = iota
-	East
-	South
-	West
+	N Direction = iota
+	E
+	S
+	W
 )
 
 func (me Direction) Opposite() Direction {
 	switch me {
-	case North:
-		return South
-	case East:
-		return West
-	case West:
-		return East
+	case N:
+		return S
+	case E:
+		return W
+	case W:
+		return E
 	}
 	return me
 }

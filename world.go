@@ -2,52 +2,38 @@ package cible
 
 import (
 	"fmt"
+	"strings"
 )
 
-func NewWorld() *World {
-	return &World{
-		atlas: make([]*Area, 0),
-	}
+type Tile struct {
+	id    Ident
+	short string
+	long  string
+
+	links Nav // the four directions
 }
 
-type World struct {
-	atlas []*Area
+func (me *Tile) SetId(v Ident)     { me.id = v }
+func (me *Tile) SetShort(v string) { me.short = v }
+func (me *Tile) SetLong(v string)  { me.long = v }
+func (me *Tile) SetLinks(v Nav)    { me.links = v }
+
+func (me *Tile) Links() Nav { return me.links }
+
+func (me *Tile) String() string {
+	return fmt.Sprintf("%s %s", me.id, me.short)
 }
 
-func (me *World) AddArea(v *Area) {
-	me.atlas = append(me.atlas, v)
-}
+type Nav [4]Ident
 
-func (me *World) Move(dir Direction, f From) (*Tile, error) {
-	if _, err := me.Location(f); err != nil {
-		return nil, err
-	}
-	area := me.atlas[f.A]
-	for _, link := range area.Links {
-		if link.From == f.T && link.Direction == dir ||
-			link.To == f.T && link.Direction == dir.Opposite() {
-			return area.Tiles[link.To], nil
+func (me Nav) String() string {
+	var res []string
+	for d, id := range me {
+		if id != "" {
+			res = append(res, Direction(d).String()+":"+string(id))
 		}
 	}
-	return nil, fmt.Errorf(
-		"cannot move %s from %d,%d", dir.String(), f.A, f.T,
-	)
+	return strings.Join(res, " ")
 }
 
-func (me *World) Location(p At) (*Tile, error) {
-	if p.A >= len(me.atlas) {
-		return nil, fmt.Errorf("Location %s: area unknown", p.String())
-	}
-	return me.atlas[p.A].Location(p)
-}
-
-type From = At
-
-type At struct {
-	A int // Area id
-	T int // Tile id
-}
-
-func (me *At) String() string {
-	return fmt.Sprintf("at %d,%d", me.A, me.T)
-}
+type Ident string

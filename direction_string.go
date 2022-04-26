@@ -8,15 +8,15 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[North-0]
-	_ = x[East-1]
-	_ = x[South-2]
-	_ = x[West-3]
+	_ = x[N-0]
+	_ = x[E-1]
+	_ = x[S-2]
+	_ = x[W-3]
 }
 
-const _Direction_name = "NorthEastSouthWest"
+const _Direction_name = "NESW"
 
-var _Direction_index = [...]uint8{0, 5, 9, 14, 18}
+var _Direction_index = [...]uint8{0, 1, 2, 3, 4}
 
 func (i Direction) String() string {
 	if i < 0 || i >= Direction(len(_Direction_index)-1) {

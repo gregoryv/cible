@@ -10,7 +10,7 @@ func TestEventMove(t *testing.T) {
 	p.SetName("John")
 	e := &EventMove{
 		player: p,
-		dir:    South,
+		dir:    S,
 	}
 	got := e.Event()
 	if !strings.Contains(got, "John") {

@@ -21,7 +21,7 @@ func TestGame(t *testing.T) {
 		g := NewGame()
 		go g.Run(context.Background())
 		g.EventChan() <- EventPing
-		g.EventChan() <- &EventMove{dir: East}
+		g.EventChan() <- &EventMove{dir: E}
 	})
 	t.Run("handles unknown events", func(t *testing.T) {
 		g := NewGame()
