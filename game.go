@@ -105,11 +105,14 @@ type Characters []Character
 
 type Character struct {
 	*Player // if nil then, non playable character NPC
+	*Bot
 }
 
 type Player struct {
 	Name
 }
+
+type Bot struct{}
 
 type Name string
 
