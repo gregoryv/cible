@@ -12,27 +12,22 @@ func TestGame(t *testing.T) {
 	go g.Run(ctx)
 	defer cancel()
 
+	p := Player{Name: "John"}
+
 	t.Run("handles events", func(t *testing.T) {
-		g.Events <- EventPing
-		g.Events <- &EventMove{Direction: E}
+		g.Events <- &EventJoin{Player: p}
+		g.Events <- &EventMove{Player: p, Direction: E}
 	})
+
 	t.Run("handles unknown events", func(t *testing.T) {
 		g.Events <- &EventMove{Direction: Direction(-1)}
 	})
 }
 
-func TestGame_exits(t *testing.T) {
-	t.Run("can be cancelled", func(t *testing.T) {
-		g := NewGame()
-		ctx, cancel := context.WithCancel(context.Background())
-		go g.Run(ctx)
-		cancel()
-	})
-	t.Run("can be stopped", func(t *testing.T) {
-		g := NewGame()
-		go g.Run(context.Background())
-		g.Events <- EventStopGame
-	})
+func TestEventStopGame(t *testing.T) {
+	g := NewGame()
+	go g.Run(context.Background())
+	g.Events <- EventStopGame
 }
 
 func Test_cave(t *testing.T) {
