@@ -35,6 +35,13 @@ func (me *Game) onMovement(e *Movement) (err error) {
 	return nil
 }
 
+func (me *Tile) Link(d Direction) (Ident, error) {
+	if d < 0 || int(d) > len(me.Nav) {
+		return "", fmt.Errorf("bad direction")
+	}
+	return me.Nav[int(d)], nil
+}
+
 func MoveCharacter(id Ident, d Direction) *Movement {
 	return &Movement{
 		Ident:       id,
@@ -69,3 +76,14 @@ func (me *Movement) Close() {
 func (me *Movement) Event() string {
 	return fmt.Sprintf("%s move %s", me.Ident, me.Direction)
 }
+
+// ----------------------------------------
+
+type Direction int
+
+const (
+	N Direction = iota
+	E
+	S
+	W
+)

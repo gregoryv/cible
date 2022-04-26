@@ -107,13 +107,6 @@ type Tile struct {
 	Nav
 }
 
-func (me *Tile) Link(d Direction) (Ident, error) {
-	if d < 0 || int(d) > len(me.Nav) {
-		return "", fmt.Errorf("bad direction")
-	}
-	return me.Nav[int(d)], nil
-}
-
 func (me *Tile) String() string {
 	return fmt.Sprintf("%s %s", me.Ident, me.Short)
 }
@@ -182,14 +175,3 @@ func myCave() *Area {
 		Tiles: Tiles{t1, t2, t3},
 	}
 }
-
-// ----------------------------------------
-
-type Direction int
-
-const (
-	N Direction = iota
-	E
-	S
-	W
-)
