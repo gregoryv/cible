@@ -22,21 +22,20 @@ func TestGame_play(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log(Trigger(g, MoveCharacter(cid, N)).Done())
-	t.Log(Trigger(g, MoveCharacter(cid, E)).Done())
+	Trigger(g, MoveCharacter(cid, N)).Done()
+	Trigger(g, MoveCharacter(cid, E)).Done()
 
 	pos, _ := Trigger(g, MoveCharacter(cid, W)).Done()
-	t.Log(pos)
 	if pos.Tile != "02" {
 		t.Error("got", pos.Tile, "exp", "02")
 	}
 	_, tile, err := g.Place(pos)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(tile, err)
 	}
-	t.Log(tile)
-
-	Trigger(g, Leave(cid)).Done()
+	if err := Trigger(g, Leave(cid)).Done(); err != nil {
+		t.Error(err)
+	}
 }
 
 func Test_badEvents(t *testing.T) {

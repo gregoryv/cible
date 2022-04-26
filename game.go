@@ -1,11 +1,65 @@
 package cible
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/gregoryv/logger"
 )
+
+func (me *Game) Run(ctx context.Context) error {
+gameLoop:
+	for {
+		select {
+		case <-ctx.Done(): // ie. interrupted from the outside
+			break gameLoop
+
+		case e := <-me.events: // blocks
+			switch e := e.(type) {
+			case *EventStopGame:
+				me.Log(e.Event())
+				e.failed <- nil
+				break gameLoop
+
+			default:
+				if err := me.handleEvent(e); err != nil {
+					me.Logf("%s: %v", e.Event(), err)
+				} else {
+					me.Log(e.Event())
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func (me *Game) handleEvent(e Event) error {
+	switch e := e.(type) {
+	case *EventJoin:
+		return me.onJoin(e)
+
+	case *EventLeave:
+		return me.onLeave(e)
+
+	case *Movement:
+		return me.onMovement(e)
+
+	}
+	return nil
+}
+
+func Trigger[T Event](g *Game, t T) T {
+	g.Events <- t
+	return t
+}
+
+type Events chan<- Event
+
+type Event interface {
+	Event() string
+}
 
 func NewGame() *Game {
 	max := 10
