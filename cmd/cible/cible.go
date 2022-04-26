@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"os"
 
@@ -17,30 +18,40 @@ func main() {
 	var (
 		cli  = cmdline.NewBasicParser()
 		bind = cli.Option("-b, --bind").String(":8089")
+		srv  = cli.Flag("-s, --server")
 	)
 	cli.Parse()
 
-	g := NewGame()
-	g.Logger = logger.New()
+	if srv {
+		g := NewGame()
+		g.Logger = logger.New()
 
-	srv := &TelnetServer{
-		Logger: logger.New(),
-		Bind:   bind,
-		Game:   g,
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		if err := g.Run(ctx); err != nil {
-			g.Log(err)
+		srv := &TelnetServer{
+			Logger: logger.New(),
+			Bind:   bind,
+			Game:   g,
 		}
-		cancel()
-	}()
 
-	if err := srv.Run(ctx); err != nil {
-		srv.Log(err)
-		os.Exit(1)
+		ctx, cancel := context.WithCancel(context.Background())
+		go func() {
+			if err := g.Run(ctx); err != nil {
+				g.Log(err)
+			}
+			cancel()
+		}()
+
+		if err := srv.Run(ctx); err != nil {
+			srv.Log(err)
+			os.Exit(1)
+		}
+		os.Exit(0)
 	}
+	conn, err := net.Dial("tcp", bind)
+	if err != nil {
+		// handle error
+	}
+	fmt.Fprintf(conn, ":join")
+
 }
 
 type TelnetServer struct {
@@ -87,7 +98,12 @@ func (me *TelnetServer) handleConnection(conn net.Conn) {
 	for {
 		n, err := conn.Read(p)
 		if err != nil {
-			me.Log(err)
+			if err != io.EOF {
+				me.Log(err)
+			}
+			Trigger(me.Game, Leave("x"))
+
+			return
 		}
 		cmd := bytes.TrimRight(p[:n], "\r\n")
 		fmt.Println(string(cmd))
