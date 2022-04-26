@@ -48,7 +48,6 @@ func (me *Game) handleEvent(e Event) {
 
 const (
 	EventStopGame EventString = "stop game"
-	EventPing     EventString = "ping"
 )
 
 type EventString string
