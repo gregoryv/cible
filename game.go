@@ -44,6 +44,42 @@ func (me *Game) handleEvent(e Event) {
 	}
 }
 
+// ----------------------------------------
+
+const (
+	EventStopGame EventString = "stop game"
+	EventPing     EventString = "ping"
+)
+
+type EventString string
+
+func (me EventString) Event() string { return string(me) }
+
+type MoveCharacter struct {
+	Ident
+	Direction
+}
+
+func (me *MoveCharacter) Event() string {
+	return fmt.Sprintf("%s moves %s", me.Ident, me.Direction)
+}
+
+type Join struct {
+	Player
+}
+
+func (me *Join) Event() string {
+	return fmt.Sprintf("%s joined game", me.Player.Name)
+}
+
+type Events chan<- Event
+
+type Event interface {
+	Event() string
+}
+
+// ----------------------------------------
+
 func NewGame() *Game {
 	max := 10
 	ch := make(chan Event, max)
@@ -157,40 +193,6 @@ type Name string
 type Short string
 type Long string
 type Title string
-
-// ----------------------------------------
-
-const (
-	EventStopGame EventString = "stop game"
-	EventPing     EventString = "ping"
-)
-
-type EventString string
-
-func (me EventString) Event() string { return string(me) }
-
-type MoveCharacter struct {
-	Ident
-	Direction
-}
-
-func (me *MoveCharacter) Event() string {
-	return fmt.Sprintf("%s moves %s", me.Ident, me.Direction)
-}
-
-type Join struct {
-	Player
-}
-
-func (me *Join) Event() string {
-	return fmt.Sprintf("%s joined game", me.Player.Name)
-}
-
-type Events chan<- Event
-
-type Event interface {
-	Event() string
-}
 
 // ----------------------------------------
 
