@@ -14,6 +14,7 @@ func NewGame() *Game {
 		events: ch,
 		Events: ch,
 		Logger: logger.Silent,
+		World:  Earth(),
 	}
 }
 
@@ -22,6 +23,7 @@ type Game struct {
 	Events
 	logger.Logger
 	Characters
+	World
 }
 
 func (me *Game) Run(ctx context.Context) error {
@@ -57,6 +59,12 @@ func (me *Game) handleEvent(e Event) {
 }
 
 // ----------------------------------------
+
+func Earth() World {
+	return World{
+		Areas: Areas{myCave()},
+	}
+}
 
 func myCave() *Area {
 	t1 := &Tile{
@@ -104,6 +112,12 @@ type Player struct {
 }
 
 type Name string
+
+type World struct {
+	Areas
+}
+
+type Areas []*Area
 
 type Area struct {
 	Title
