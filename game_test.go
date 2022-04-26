@@ -19,6 +19,8 @@ func TestGame_play(t *testing.T) {
 	g.Events <- &Join{Player: p}
 	// currently the name is used as an identifier of characters
 	g.Events <- &MoveCharacter{"John", N}
+	g.Events <- &MoveCharacter{"Eve", N} // no such player
+	g.Events <- &MoveCharacter{"god", N} // cannot be moved
 
 	g.Events <- &MoveCharacter{"John", Direction(-1)}
 

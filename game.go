@@ -48,11 +48,12 @@ func (me *Game) handleEvent(e Event) error {
 		if err != nil {
 			return err
 		}
-		a, err := me.World.Area(c.Position.Area)
+		a, t, err := me.Place(c.Position)
 		if err != nil {
 			return err
 		}
 		_ = a
+		_ = t
 	}
 	return nil
 }
@@ -99,7 +100,12 @@ func NewGame() *Game {
 		World:  Earth(),
 		Events: ch,
 		Logger: logger.Silent,
-
+		Characters: Characters{
+			{
+				Ident: "god",
+				IsBot: true,
+			},
+		},
 		events: ch,
 	}
 }
@@ -111,6 +117,14 @@ type Game struct {
 	logger.Logger
 
 	events chan Event
+}
+
+func (me *Game) Place(p Position) (a *Area, t *Tile, err error) {
+	if a, err = me.Area(p.Area); err != nil {
+		return
+	}
+	t, err = a.Tile(p.Tile)
+	return
 }
 
 func (me *Game) Character(id Ident) (*Character, error) {
@@ -161,16 +175,13 @@ type Area struct {
 	Tiles
 }
 
-func (me *Area) Tile(id Ident) *Tile {
-	if me == nil {
-		return nil
-	}
+func (me *Area) Tile(id Ident) (*Tile, error) {
 	for _, t := range me.Tiles {
 		if t.Ident == id {
-			return t
+			return t, nil
 		}
 	}
-	return nil
+	return nil, fmt.Errorf("tile %q not found", id)
 }
 
 type Tiles []*Tile
@@ -204,9 +215,6 @@ type Position struct {
 }
 
 type Ident string
-
-func (me Ident) Id() string { return string(me) }
-
 type Name string
 type Short string
 type Long string
