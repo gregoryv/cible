@@ -48,12 +48,20 @@ func (me *Game) handleEvent(e Event) error {
 		if err != nil {
 			return err
 		}
-		a, t, err := me.Place(c.Position)
+		_, t, err := me.Place(c.Position)
 		if err != nil {
 			return err
 		}
-		_ = a
-		_ = t
+		next, err := t.Link(e.Direction)
+		if err != nil {
+			return err
+		}
+		if next == "" {
+			return fmt.Errorf("nothing to the %v", e.Direction)
+		} else {
+			c.Position.Tile = next
+			me.Logf("%s moved to %v", c.Ident, next)
+		}
 	}
 	return nil
 }
@@ -191,6 +199,13 @@ type Tile struct {
 	Short
 	Long
 	Nav
+}
+
+func (me *Tile) Link(d Direction) (Ident, error) {
+	if d < 0 || int(d) > len(me.Nav) {
+		return "", fmt.Errorf("no such direction: %v", d)
+	}
+	return me.Nav[int(d)], nil
 }
 
 func (me *Tile) String() string {
