@@ -11,7 +11,7 @@ func (me *Game) onJoin(e *EventJoin) error {
 	}
 	me.Characters = append(me.Characters, &Character{
 		Ident:    Ident(e.Player.Name),
-		Player:   e.Player,
+		Name:     e.Player.Name,
 		Position: p,
 	})
 	e.joined <- Ident(e.Player.Name)
@@ -61,7 +61,7 @@ func (me *Game) onLeave(e *EventLeave) error {
 		e.failed <- err
 		return err
 	}
-	e.Name = c.Player.Name
+	e.Name = c.Name
 	e.failed <- nil
 	return nil
 }
