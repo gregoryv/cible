@@ -8,27 +8,6 @@ import (
 	"github.com/gregoryv/logger"
 )
 
-func NewGame() *Game {
-	max := 10
-	ch := make(chan Event, max)
-	return &Game{
-		World:  Earth(),
-		Events: ch,
-		Logger: logger.Silent,
-
-		events: ch,
-	}
-}
-
-type Game struct {
-	World
-	Characters
-	Events
-	logger.Logger
-
-	events chan Event
-}
-
 func (me *Game) Run(ctx context.Context) error {
 gameLoop:
 	for {
@@ -63,6 +42,27 @@ func (me *Game) handleEvent(e Event) {
 	case *MoveCharacter:
 
 	}
+}
+
+func NewGame() *Game {
+	max := 10
+	ch := make(chan Event, max)
+	return &Game{
+		World:  Earth(),
+		Events: ch,
+		Logger: logger.Silent,
+
+		events: ch,
+	}
+}
+
+type Game struct {
+	World
+	Characters
+	Events
+	logger.Logger
+
+	events chan Event
 }
 
 // ----------------------------------------
