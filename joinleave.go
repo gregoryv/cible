@@ -80,7 +80,10 @@ func (me *EventLeave) Done() (err error) {
 	return
 }
 
-func (me *EventLeave) Close() { close(me.failed) }
+func (me *EventLeave) Close() {
+	defer ignorePanic()
+	close(me.failed)
+}
 
 func (me *EventLeave) Event() string {
 	return fmt.Sprintf("%s left", me.Name)

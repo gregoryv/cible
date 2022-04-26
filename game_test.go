@@ -63,7 +63,8 @@ func Test_badEvents(t *testing.T) {
 func TestEvent_Done(t *testing.T) {
 	g := NewGame()
 	go g.Run(context.Background())
-	defer g.Stop()
+	// stopped in last subtest
+
 	t.Run("MoveCharacter", func(t *testing.T) {
 		defer catchPanic(t)
 		e := Trigger(g, MoveCharacter("x", W))
@@ -71,13 +72,20 @@ func TestEvent_Done(t *testing.T) {
 		e.Done()
 	})
 
+	t.Run("Leave", func(t *testing.T) {
+		defer catchPanic(t)
+		e := Trigger(g, Leave("no such"))
+		e.Done()
+		e.Done()
+	})
+
+	// keep last as it stops game
 	t.Run("StopGame", func(t *testing.T) {
 		defer catchPanic(t)
 		e := Trigger(g, StopGame())
 		e.Done()
 		e.Done()
 	})
-
 }
 
 func catchPanic(t *testing.T) {
