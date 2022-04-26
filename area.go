@@ -2,9 +2,6 @@ package cible
 
 import (
 	"fmt"
-	"io"
-
-	"github.com/gregoryv/nexus"
 )
 
 func NewArea() *Area {
@@ -104,17 +101,6 @@ func (me *Area) minY() int {
 	return min
 }
 
-func (me *Area) Grid() *Grid {
-	return nil
-}
-
-type Grid [][]int // tiles
-
-func (me *Grid) WriteTo(w io.Writer) (int64, error) {
-	p, err := nexus.NewPrinter(w)
-	return p.Written, *err
-}
-
 func (me *Area) Size() int { return len(me.Tiles) }
 
 func NewTile() *Tile {
@@ -128,6 +114,10 @@ type Tile struct {
 	x, y int // set by SetLinks
 }
 
+func (me *Tile) String() string {
+	return fmt.Sprintf("tile %v,%v", me.x, me.y)
+}
+
 type Link struct {
 	From, To int
 	Direction
@@ -136,3 +126,9 @@ type Link struct {
 func (me *Link) String() string {
 	return fmt.Sprintf("%d %v %d", me.From, me.Direction, me.To)
 }
+
+type byXY []*Tile
+
+func (me byXY) Len() int           { return len(me) }
+func (me byXY) Swap(i, j int)      { me[i], me[j] = me[j], me[i] }
+func (me byXY) Less(i, j int) bool { return me[i].y < me[j].y || me[i].x < me[j].x }

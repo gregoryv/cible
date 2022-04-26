@@ -3,9 +3,29 @@ package cible
 import (
 	"bytes"
 	"testing"
+
+	"github.com/gregoryv/nexus"
 )
 
 func TestArea(t *testing.T) {
+	t.Run("Grid", func(t *testing.T) {
+		a := NewArea()
+		a.AddTile(NewTile())
+		a.AddTile(NewTile())
+		a.AddTile(NewTile())
+		a.SetLinks([]Link{
+			{0, 1, East},
+			{1, 2, South},
+		})
+
+		var buf bytes.Buffer
+		p, _ := nexus.NewPrinter(&buf)
+		for _, tile := range a.Tiles {
+			p.Println(tile.String())
+		}
+		t.Error(buf.String())
+	})
+
 	t.Run("defaults to empty", func(t *testing.T) {
 		if a := NewArea(); a.Size() != 0 {
 			t.Error("not empty, got:", a.Size())
@@ -46,20 +66,5 @@ func TestArea(t *testing.T) {
 				}
 			})
 		}
-	})
-
-	t.Run("Grid", func(t *testing.T) {
-		a := NewArea()
-		a.AddTile(NewTile())
-		a.AddTile(NewTile())
-		a.AddTile(NewTile())
-		a.SetLinks([]Link{
-			{0, 1, East},
-			{1, 2, South},
-		})
-		g := a.Grid()
-		var buf bytes.Buffer
-		g.WriteTo(&buf)
-		t.Error(buf.String())
 	})
 }
