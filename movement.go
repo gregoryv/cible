@@ -68,26 +68,19 @@ type Movement struct {
 
 func (me *Movement) Done() (err error) {
 	me.Once.Do(func() {
-		defer me.Close()
 		select {
 		case me.Position = <-me.newPosition:
 		case me.err = <-me.failed:
 		}
+		close(me.newPosition)
+		close(me.failed)
 	})
 	return me.err
-}
-
-func (me *Movement) Close() {
-	defer ignorePanic()
-	close(me.newPosition)
-	close(me.failed)
 }
 
 func (me *Movement) Event() string {
 	return fmt.Sprintf("%s move %s", me.Ident, me.Direction)
 }
-
-func ignorePanic() { _ = recover() }
 
 // ----------------------------------------
 

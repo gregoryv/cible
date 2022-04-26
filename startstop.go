@@ -1,5 +1,7 @@
 package cible
 
+import "sync"
+
 func (me *Game) Stop() { me.Events <- StopGame() }
 
 func StopGame() *EventStopGame {
@@ -9,6 +11,9 @@ func StopGame() *EventStopGame {
 }
 
 type EventStopGame struct {
+	err error // set when done
+
+	sync.Once
 	failed chan error
 }
 
@@ -16,15 +21,10 @@ func (me *EventStopGame) Event() string {
 	return "stop game"
 }
 
-func (me *EventStopGame) Done() (err error) {
-	defer me.Close()
-	select {
-	case err = <-me.failed:
-	}
-	return
-}
-
-func (me *EventStopGame) Close() {
-	defer ignorePanic()
-	close(me.failed)
+func (me *EventStopGame) Done() error {
+	me.Once.Do(func() {
+		me.err = <-me.failed
+		close(me.failed)
+	})
+	return me.err
 }

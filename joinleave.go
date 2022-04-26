@@ -38,23 +38,15 @@ type EventJoin struct {
 }
 
 func (me *EventJoin) Done() (err error) {
-	defer me.Close()
-	select {
-	case id := <-me.joined:
-		if id != "" {
-			me.Ident = id
-		}
-		// otherwise probably closed
-	case me.err = <-me.failed:
-	}
-	return me.err
-}
-
-func (me *EventJoin) Close() {
 	me.Once.Do(func() {
+		select {
+		case me.Ident = <-me.joined:
+		case me.err = <-me.failed:
+		}
 		close(me.joined)
 		close(me.failed)
 	})
+	return me.err
 }
 
 func (me *EventJoin) Event() string {
@@ -84,18 +76,19 @@ func Leave(cid Ident) *EventLeave {
 type EventLeave struct {
 	Ident
 	Name
+
+	err error // set when done
+
+	sync.Once
 	failed chan error
 }
 
 func (me *EventLeave) Done() (err error) {
-	defer me.Close()
-	return <-me.failed
-	return
-}
-
-func (me *EventLeave) Close() {
-	defer ignorePanic()
-	close(me.failed)
+	me.Once.Do(func() {
+		me.err = <-me.failed
+		close(me.failed)
+	})
+	return me.err
 }
 
 func (me *EventLeave) Event() string {
