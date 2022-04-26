@@ -9,6 +9,7 @@ import (
 )
 
 func (me *Game) Run(ctx context.Context) error {
+	me.Log("start game")
 gameLoop:
 	for {
 		select {

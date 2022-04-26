@@ -3,10 +3,12 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net"
 	"os"
 
+	"github.com/gregoryv/cible"
 	"github.com/gregoryv/cmdline"
 	"github.com/gregoryv/logger"
 )
@@ -17,11 +19,25 @@ func main() {
 		bind = cli.Option("-b, --bind").String(":8089")
 	)
 	cli.Parse()
+
+	g := cible.NewGame()
+	g.Logger = logger.New()
+
 	srv := &TelnetServer{
 		Logger: logger.New(),
 		Bind:   bind,
+		Game:   g,
 	}
-	if err := srv.Run(); err != nil {
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		if err := g.Run(ctx); err != nil {
+			g.Log(err)
+		}
+		cancel()
+	}()
+
+	if err := srv.Run(ctx); err != nil {
 		srv.Log(err)
 		os.Exit(1)
 	}
@@ -30,21 +46,39 @@ func main() {
 type TelnetServer struct {
 	logger.Logger
 	Bind string
+	*cible.Game
 }
 
-func (me *TelnetServer) Run() error {
+func (me *TelnetServer) Run(ctx context.Context) error {
 	ln, err := net.Listen("tcp", me.Bind)
 	if err != nil {
 		return err
 	}
 	me.Log("listen on", me.Bind)
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			me.Log(err)
+
+	c := make(chan net.Conn)
+	go func() {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				me.Log(err)
+				continue
+			}
+			c <- conn
 		}
-		go me.handleConnection(conn)
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			me.Log("server stop")
+			return nil
+		case conn := <-c:
+			go me.handleConnection(conn)
+		}
 	}
+
+	return nil
 }
 
 func (me *TelnetServer) handleConnection(conn net.Conn) {
@@ -60,6 +94,9 @@ func (me *TelnetServer) handleConnection(conn net.Conn) {
 		switch string(cmd) {
 		case ":q", ":quit":
 			conn.Close()
+			return
+		case ":stop game":
+			cible.Trigger(me.Game, cible.StopGame())
 			return
 		}
 	}
