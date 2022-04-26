@@ -8,7 +8,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/gregoryv/cible"
+	. "github.com/gregoryv/cible"
 	"github.com/gregoryv/cmdline"
 	"github.com/gregoryv/logger"
 )
@@ -20,7 +20,7 @@ func main() {
 	)
 	cli.Parse()
 
-	g := cible.NewGame()
+	g := NewGame()
 	g.Logger = logger.New()
 
 	srv := &TelnetServer{
@@ -46,7 +46,7 @@ func main() {
 type TelnetServer struct {
 	logger.Logger
 	Bind string
-	*cible.Game
+	*Game
 }
 
 func (me *TelnetServer) Run(ctx context.Context) error {
@@ -95,8 +95,11 @@ func (me *TelnetServer) handleConnection(conn net.Conn) {
 		case ":q", ":quit":
 			conn.Close()
 			return
+		case ":join":
+			Trigger(me.Game, Join(Player{Name: "x"}))
+
 		case ":stop game":
-			cible.Trigger(me.Game, cible.StopGame())
+			Trigger(me.Game, StopGame())
 			return
 		}
 	}
