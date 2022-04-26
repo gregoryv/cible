@@ -2,6 +2,8 @@ package cible
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"strings"
 	"testing"
 )
@@ -84,3 +86,42 @@ func TestArea_Tile(t *testing.T) {
 type badEvent struct{}
 
 func (me *badEvent) Event() string { return "badEvent" }
+
+func BenchmarkMoveCharacter_1_player(b *testing.B) {
+	g := NewGame()
+	ctx, cancel := context.WithCancel(context.Background())
+	go g.Run(ctx)
+	defer cancel()
+
+	p := Player{Name: "John"}
+	cid, err := Trigger(g, Join(p)).Done() // blocks
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		Trigger(g, MoveCharacter(cid, N)).Done()
+		Trigger(g, MoveCharacter(cid, S)).Done()
+	}
+}
+
+func BenchmarkMoveCharacter_1000_player(b *testing.B) {
+	g := NewGame()
+	ctx, cancel := context.WithCancel(context.Background())
+	go g.Run(ctx)
+	defer cancel()
+
+	for i := 0; i < 1000; i++ {
+		p := Player{Name: Name(fmt.Sprintf("John%v", i))}
+		_, err := Trigger(g, Join(p)).Done() // blocks
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	for i := 0; i < b.N; i++ {
+		cid := Ident(fmt.Sprintf("John%v", rand.Intn(1000)))
+		Trigger(g, MoveCharacter(cid, N)).Done()
+		Trigger(g, MoveCharacter(cid, S)).Done()
+	}
+}
