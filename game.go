@@ -70,7 +70,6 @@ func (me *Game) handleEvent(e Event) error {
 		}
 		if next != "" {
 			c.Position.Tile = next
-
 		}
 	}
 	return nil
