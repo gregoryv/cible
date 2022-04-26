@@ -130,12 +130,36 @@ type World struct {
 	Areas
 }
 
+func (me *World) Area(id Ident) *Area {
+	if me == nil {
+		return nil
+	}
+	for _, a := range me.Areas {
+		if a.Ident == id {
+			return a
+		}
+	}
+	return nil
+}
+
 type Areas []*Area
 
 type Area struct {
 	Ident
 	Title
 	Tiles
+}
+
+func (me *Area) Tile(id Ident) *Tile {
+	if me == nil {
+		return nil
+	}
+	for _, t := range me.Tiles {
+		if t.Ident == id {
+			return t
+		}
+	}
+	return nil
 }
 
 type Tiles []*Tile
