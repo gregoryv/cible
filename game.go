@@ -35,7 +35,7 @@ gameLoop:
 
 func (me *Game) handleEvent(e Event) error {
 	switch e := e.(type) {
-	case *Join:
+	case *EventJoin:
 		p := Position{
 			Area: "a1", Tile: "01",
 		}
@@ -43,6 +43,7 @@ func (me *Game) handleEvent(e Event) error {
 			Ident:    Ident(e.Player.Name),
 			Position: p,
 		})
+		e.joined <- Ident(e.Player.Name)
 		return nil
 
 	case *Movement:
@@ -91,7 +92,11 @@ type EventString string
 func (me EventString) Event() string { return string(me) }
 
 func MoveCharacter(id Ident, d Direction) *Movement {
-	return &Movement{Ident: id, Direction: d, NewPosition: make(chan Position, 1)}
+	return &Movement{
+		Ident:       id,
+		Direction:   d,
+		NewPosition: make(chan Position, 1),
+	}
 }
 
 type Movement struct {
@@ -105,12 +110,37 @@ func (me *Movement) Event() string {
 	return fmt.Sprintf("%s move %s", me.Ident, me.Direction)
 }
 
-type Join struct {
-	Player
+func Join(p Player) *EventJoin {
+	return &EventJoin{
+		Player: p,
+		joined: make(chan Ident, 1), // buffer so event loop doesn't block
+		failed: make(chan error, 1),
+	}
 }
 
-func (me *Join) Event() string {
-	return fmt.Sprintf("%s joined game", me.Player.Name)
+type EventJoin struct {
+	Player
+
+	joined chan Ident
+	failed chan error
+}
+
+func (me *EventJoin) Done() (id Ident, err error) {
+	defer me.Close()
+	select {
+	case id = <-me.joined:
+	case err = <-me.failed:
+	}
+	return
+}
+
+func (me *EventJoin) Close() {
+	close(me.joined)
+	close(me.failed)
+}
+
+func (me *EventJoin) Event() string {
+	return fmt.Sprintf("%s join", me.Player.Name)
 }
 
 type Events chan<- Event

@@ -15,16 +15,18 @@ func TestGame_play(t *testing.T) {
 
 	p := Player{Name: "John"}
 
-	_ = Trigger(g, &Join{Player: p})
-	// currently the name is used as an identifier of characters
+	cid, err := Trigger(g, Join(p)).Done() // blocks
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	g.Events <- MoveCharacter("John", W) // nothing ther)
-	g.Events <- MoveCharacter("Eve", N)  // no such playe)
-	g.Events <- MoveCharacter("god", N)  // cannot be move)
-	g.Events <- MoveCharacter("John", Direction(-1))
+	g.Events <- MoveCharacter(cid, W)   // nothing ther)
+	g.Events <- MoveCharacter("Eve", N) // no such playe)
+	g.Events <- MoveCharacter("god", N) // cannot be move)
+	g.Events <- MoveCharacter(cid, Direction(-1))
 	g.Events <- &badEvent{}
 
-	e := Trigger(g, MoveCharacter("John", N))
+	e := Trigger(g, MoveCharacter(cid, N))
 
 	t.Log(<-e.NewPosition)
 	//t.Fail()
