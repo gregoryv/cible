@@ -26,20 +26,22 @@ func Join(p Player) *EventJoin {
 type EventJoin struct {
 	Player
 
+	Id     Ident
 	joined chan Ident
 	failed chan error
 }
 
-func (me *EventJoin) Done() (id Ident, err error) {
+func (me *EventJoin) Done() (err error) {
 	defer me.Close()
 	select {
-	case id = <-me.joined:
+	case me.Id = <-me.joined:
 	case err = <-me.failed:
 	}
 	return
 }
 
 func (me *EventJoin) Close() {
+	defer ignorePanic()
 	close(me.joined)
 	close(me.failed)
 }

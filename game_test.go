@@ -17,11 +17,11 @@ func TestGame_play(t *testing.T) {
 	}()
 
 	p := Player{Name: "John"}
-	cid, err := Trigger(g, Join(p)).Done()
-	if err != nil {
+	c := Trigger(g, Join(p))
+	if err := c.Done(); err != nil {
 		t.Fatal(err)
 	}
-
+	cid := c.Id
 	Trigger(g, MoveCharacter(cid, N)).Done()
 	Trigger(g, MoveCharacter(cid, E)).Done()
 
@@ -44,11 +44,11 @@ func Test_badEvents(t *testing.T) {
 	defer g.Stop()
 
 	p := Player{Name: "John"}
-	cid, err := Trigger(g, Join(p)).Done() // blocks
-	if err != nil {
+	c := Trigger(g, Join(p))
+	if err := c.Done(); err != nil {
 		t.Fatal(err)
 	}
-
+	cid := c.Id
 	g.Events <- MoveCharacter("Eve", N) // no such playe)
 	g.Events <- MoveCharacter("god", N) // cannot be move)
 	g.Events <- MoveCharacter(cid, Direction(-1))
@@ -64,6 +64,12 @@ func TestEvent_Done(t *testing.T) {
 	g := NewGame()
 	go g.Run(context.Background())
 	// stopped in last subtest
+	t.Run("Join", func(t *testing.T) {
+		defer catchPanic(t)
+		e := Trigger(g, Join(Player{Name: "John"}))
+		e.Done()
+		e.Done()
+	})
 
 	t.Run("MoveCharacter", func(t *testing.T) {
 		defer catchPanic(t)
@@ -134,11 +140,11 @@ func BenchmarkMoveCharacter_1_player(b *testing.B) {
 	defer g.Stop()
 
 	p := Player{Name: "John"}
-	cid, err := Trigger(g, Join(p)).Done() // blocks
-	if err != nil {
+	e := Trigger(g, Join(p))
+	if err := e.Done(); err != nil {
 		b.Fatal(err)
 	}
-
+	cid := e.Id
 	for i := 0; i < b.N; i++ {
 		Trigger(g, MoveCharacter(cid, N)).Done()
 		Trigger(g, MoveCharacter(cid, S)).Done()
@@ -152,8 +158,8 @@ func BenchmarkMoveCharacter_1000_player(b *testing.B) {
 
 	for i := 0; i < 1000; i++ {
 		p := Player{Name: Name(fmt.Sprintf("John%v", i))}
-		_, err := Trigger(g, Join(p)).Done() // blocks
-		if err != nil {
+		e := Trigger(g, Join(p))
+		if err := e.Done(); err != nil {
 			b.Fatal(err)
 		}
 	}
