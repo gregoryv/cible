@@ -9,7 +9,8 @@ import (
 )
 
 func NewGame() *Game {
-	ch := make(chan Event)
+	max := 10
+	ch := make(chan Event, max)
 	return &Game{
 		World:  Earth(),
 		Events: ch,

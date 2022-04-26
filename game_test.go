@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestGame(t *testing.T) {
@@ -22,6 +23,9 @@ func TestGame(t *testing.T) {
 	t.Run("handles unknown events", func(t *testing.T) {
 		g.Events <- &Move{Direction: Direction(-1)}
 	})
+
+	// let all events pass
+	<-time.After(10 * time.Millisecond)
 }
 
 func TestEventStopGame(t *testing.T) {
