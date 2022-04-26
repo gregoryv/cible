@@ -98,6 +98,7 @@ func myCave() *Area {
 	}
 
 	return &Area{
+		Ident: "a1",
 		Title: "Cave of Indy",
 		Tiles: Tiles{t1, t2, t3},
 	}
