@@ -1,6 +1,9 @@
 package cible
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 func (me *Game) onMovement(e *Movement) (err error) {
 	defer func() {
@@ -55,18 +58,23 @@ type Movement struct {
 	Ident
 	Direction
 
-	Position    // set when done
+	Position // set when done
+	err      error
+
+	sync.Once
 	newPosition chan Position
 	failed      chan error
 }
 
 func (me *Movement) Done() (err error) {
-	defer me.Close()
-	select {
-	case me.Position = <-me.newPosition:
-	case err = <-me.failed:
-	}
-	return
+	me.Once.Do(func() {
+		defer me.Close()
+		select {
+		case me.Position = <-me.newPosition:
+		case me.err = <-me.failed:
+		}
+	})
+	return me.err
 }
 
 func (me *Movement) Close() {

@@ -187,6 +187,10 @@ type Position struct {
 	Tile Ident
 }
 
+func (me *Position) Equal(p Position) bool {
+	return me.Area == p.Area && me.Tile == p.Tile
+}
+
 type Ident string
 type Name string
 type Short string

@@ -79,9 +79,13 @@ func TestEvent_Done(t *testing.T) {
 
 	t.Run("MoveCharacter", func(t *testing.T) {
 		defer catchPanic(t)
-		e := Trigger(g, MoveCharacter("x", W))
+		e := Trigger(g, MoveCharacter("John", N))
 		e.Done()
+		first := e.Position
 		e.Done()
+		if !first.Equal(e.Position) {
+			t.Error("multiple calls to Done gave different values")
+		}
 	})
 
 	t.Run("Leave", func(t *testing.T) {
