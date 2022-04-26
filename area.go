@@ -51,23 +51,11 @@ func (me *Area) SetLinks(v []Link) error {
 		switch v[i].Direction {
 		case North:
 			to.y = from.y - 1
-		case NorthEast:
-			to.y = from.y - 1
-			to.x = from.x + 1
 		case East:
-			to.x = from.x + 1
-		case SouthEast:
-			to.y = from.y + 1
 			to.x = from.x + 1
 		case South:
 			to.y = from.y + 1
-		case SouthWest:
-			to.y = from.y + 1
-			to.x = from.x - 1
 		case West:
-			to.x = from.x - 1
-		case NorthWest:
-			to.y = from.y - 1
 			to.x = from.x - 1
 		}
 	}
