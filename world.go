@@ -5,23 +5,21 @@ import (
 	"strings"
 )
 
-type Tile struct {
-	id    Ident
-	short string
-	long  string
-
-	links Nav // the four directions
+type Area struct {
+	Tiles
 }
 
-func (me *Tile) SetId(v Ident)     { me.id = v }
-func (me *Tile) SetShort(v string) { me.short = v }
-func (me *Tile) SetLong(v string)  { me.long = v }
-func (me *Tile) SetLinks(v Nav)    { me.links = v }
+type Tiles []*Tile
 
-func (me *Tile) Links() Nav { return me.links }
+type Tile struct {
+	Ident
+	Short
+	Long
+	Nav
+}
 
 func (me *Tile) String() string {
-	return fmt.Sprintf("%s %s", me.id, me.short)
+	return fmt.Sprintf("%s %s", me.Ident, me.Short)
 }
 
 type Nav [4]Ident
@@ -37,3 +35,5 @@ func (me Nav) String() string {
 }
 
 type Ident string
+type Short string
+type Long string

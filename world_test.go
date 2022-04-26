@@ -6,30 +6,32 @@ import (
 
 func Test_cave(t *testing.T) {
 	area := myCave()
-	for _, tile := range area {
-		t.Error(tile, tile.Links())
+	for _, tile := range area.Tiles {
+		t.Error(tile, tile.Nav)
 	}
 }
 
-func myCave() []*Tile {
+func myCave() *Area {
 	t1 := &Tile{
-		id:    "01",
-		short: "entrance",
-		long:  "longer description",
-		links: Nav{N: "02"},
+		Ident: "01",
+		Short: "entrance",
+		Long:  "longer description",
+		Nav:   Nav{N: "02"},
 	}
 
 	t2 := &Tile{
-		id:    "02",
-		short: "room with high ceiling",
-		links: Nav{E: "03", S: "01"},
+		Ident: "02",
+		Short: "room with high ceiling",
+		Nav:   Nav{E: "03", S: "01"},
 	}
 
 	t3 := &Tile{
-		id:    "03",
-		short: "small area",
-		links: Nav{W: "02"},
+		Ident: "03",
+		Short: "small area",
+		Nav:   Nav{W: "02"},
 	}
 
-	return []*Tile{t1, t2, t3}
+	return &Area{
+		Tiles: Tiles{t1, t2, t3},
+	}
 }
