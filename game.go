@@ -16,12 +16,17 @@ gameLoop:
 			break gameLoop
 
 		case e := <-me.events: // blocks
-			me.Log(e.Event())
 			switch e {
 			case EventStopGame:
+				me.Log(e.Event())
 				break gameLoop
 			default:
-				me.handleEvent(e)
+				if err := me.handleEvent(e); err != nil {
+					me.Logf("%s: %v", e.Event(), err)
+				} else {
+					me.Log(e.Event())
+				}
+
 			}
 		}
 	}
@@ -29,8 +34,7 @@ gameLoop:
 	return nil
 }
 
-func (me *Game) handleEvent(e Event) {
-	me.Log(e)
+func (me *Game) handleEvent(e Event) error {
 	switch e := e.(type) {
 	case *Join:
 		me.Characters = append(me.Characters, Character{
@@ -40,8 +44,17 @@ func (me *Game) handleEvent(e Event) {
 			},
 		})
 	case *MoveCharacter:
-
+		c, err := me.Character(e.Ident)
+		if err != nil {
+			return err
+		}
+		a, err := me.World.Area(c.Position.Area)
+		if err != nil {
+			return err
+		}
+		_ = a
 	}
+	return nil
 }
 
 // ----------------------------------------
@@ -100,6 +113,10 @@ type Game struct {
 	events chan Event
 }
 
+func (me *Game) Character(id Ident) (*Character, error) {
+	return nil, fmt.Errorf("character %q not found", id)
+}
+
 // ----------------------------------------
 
 type Characters []Character
@@ -122,16 +139,13 @@ type World struct {
 	Areas
 }
 
-func (me *World) Area(id Ident) *Area {
-	if me == nil {
-		return nil
-	}
+func (me *World) Area(id Ident) (*Area, error) {
 	for _, a := range me.Areas {
 		if a.Ident == id {
-			return a
+			return a, nil
 		}
 	}
-	return nil
+	return nil, fmt.Errorf("area %q not found", id)
 }
 
 type Areas []*Area

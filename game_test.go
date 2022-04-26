@@ -9,6 +9,7 @@ import (
 
 func TestGame(t *testing.T) {
 	g := NewGame()
+	g.Logger = t
 	ctx, cancel := context.WithCancel(context.Background())
 	go g.Run(ctx)
 	defer cancel()
@@ -27,6 +28,7 @@ func TestGame(t *testing.T) {
 
 	// let all events pass
 	<-time.After(10 * time.Millisecond)
+	t.Fail()
 }
 
 func TestEventStopGame(t *testing.T) {
