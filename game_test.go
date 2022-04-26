@@ -11,13 +11,11 @@ import (
 func TestGame_play(t *testing.T) {
 	g := NewGame()
 	g.Logger = t
-	ctx, cancel := context.WithCancel(context.Background())
-	go g.Run(ctx)
-	defer cancel()
+	go g.Run(context.Background())
+	defer g.Stop()
 
 	p := Player{Name: "John"}
-
-	cid, err := Trigger(g, Join(p)).Done() // blocks
+	cid, err := Trigger(g, Join(p)).Done()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,10 +37,8 @@ func TestGame_play(t *testing.T) {
 
 func Test_badEvents(t *testing.T) {
 	g := NewGame()
-	g.Logger = t
-	ctx, cancel := context.WithCancel(context.Background())
-	go g.Run(ctx)
-	defer cancel()
+	go g.Run(context.Background())
+	defer g.Stop()
 
 	p := Player{Name: "John"}
 	cid, err := Trigger(g, Join(p)).Done() // blocks
@@ -57,10 +53,11 @@ func Test_badEvents(t *testing.T) {
 	_, _ = Trigger(g, MoveCharacter(cid, W)).Done()
 }
 
-func TestEventStopGame(t *testing.T) {
+func Test_cancelGame(t *testing.T) {
 	g := NewGame()
-	go g.Run(context.Background())
-	g.Events <- EventStopGame
+	ctx, cancel := context.WithCancel(context.Background())
+	go g.Run(ctx)
+	cancel()
 }
 
 func Test_cave(t *testing.T) {
@@ -89,9 +86,8 @@ func (me *badEvent) Event() string { return "badEvent" }
 
 func BenchmarkMoveCharacter_1_player(b *testing.B) {
 	g := NewGame()
-	ctx, cancel := context.WithCancel(context.Background())
-	go g.Run(ctx)
-	defer cancel()
+	go g.Run(context.Background())
+	defer g.Stop()
 
 	p := Player{Name: "John"}
 	cid, err := Trigger(g, Join(p)).Done() // blocks
@@ -107,9 +103,8 @@ func BenchmarkMoveCharacter_1_player(b *testing.B) {
 
 func BenchmarkMoveCharacter_1000_player(b *testing.B) {
 	g := NewGame()
-	ctx, cancel := context.WithCancel(context.Background())
-	go g.Run(ctx)
-	defer cancel()
+	go g.Run(context.Background())
+	defer g.Stop()
 
 	for i := 0; i < 1000; i++ {
 		p := Player{Name: Name(fmt.Sprintf("John%v", i))}

@@ -134,6 +134,10 @@ type Game struct {
 	events chan Event
 }
 
+func (me *Game) Stop() {
+	me.Events <- EventStopGame
+}
+
 func (me *Game) Place(p Position) (a *Area, t *Tile, err error) {
 	if a, err = me.Area(p.Area); err != nil {
 		return
