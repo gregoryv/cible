@@ -24,6 +24,7 @@ func TestGame_play(t *testing.T) {
 	g.Events <- &MoveCharacter{"Eve", N}  // no such player
 	g.Events <- &MoveCharacter{"god", N}  // cannot be moved
 	g.Events <- &MoveCharacter{"John", Direction(-1)}
+	g.Events <- &badEvent{}
 
 	// let all events pass
 	<-time.After(10 * time.Millisecond)
@@ -48,3 +49,7 @@ func TestMoveCharacter(t *testing.T) {
 		t.Errorf("missing name: %q", got)
 	}
 }
+
+type badEvent struct{}
+
+func (me *badEvent) Event() string { return "badEvent" }

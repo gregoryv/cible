@@ -21,9 +21,13 @@ gameLoop:
 				me.Log(e.Event())
 				break gameLoop
 			default:
-				if err := me.handleEvent(e); err != nil {
+				resp, err := me.handleEvent(e)
+				switch {
+				case err != nil:
 					me.Logf("%s: %v", e.Event(), err)
-				} else {
+				case resp != nil:
+					me.Logf("%s: %s", e.Event(), resp.String())
+				default:
 					me.Log(e.Event())
 				}
 
@@ -34,36 +38,43 @@ gameLoop:
 	return nil
 }
 
-func (me *Game) handleEvent(e Event) error {
+func (me *Game) handleEvent(e Event) (Response, error) {
 	switch e := e.(type) {
 	case *Join:
+		p := Position{
+			Area: "a1", Tile: "01",
+		}
 		me.Characters = append(me.Characters, Character{
-			Ident: Ident(e.Player.Name),
-			Position: Position{
-				Area: "a1", Tile: "01",
-			},
+			Ident:    Ident(e.Player.Name),
+			Position: p,
 		})
+		return StringResponse(
+			fmt.Sprintf("at %s", p),
+		), nil
+
 	case *MoveCharacter:
 		c, err := me.Character(e.Ident)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		_, t, err := me.Place(c.Position)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		next, err := t.Link(e.Direction)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if next == "" {
-			return fmt.Errorf("nothing to the %v", e.Direction)
+			return StringResponse("cannot"), nil
 		} else {
 			c.Position.Tile = next
-			me.Logf("%s moved to %v", c.Ident, next)
+			return StringResponse(
+				fmt.Sprintf("at %v", next),
+			), nil
 		}
 	}
-	return nil
+	return nil, nil
 }
 
 // ----------------------------------------
@@ -82,7 +93,7 @@ type MoveCharacter struct {
 }
 
 func (me *MoveCharacter) Event() string {
-	return fmt.Sprintf("%s moves %s", me.Ident, me.Direction)
+	return fmt.Sprintf("%s move %s", me.Ident, me.Direction)
 }
 
 type Join struct {
@@ -146,6 +157,14 @@ func (me *Game) Character(id Ident) (*Character, error) {
 
 // ----------------------------------------
 
+type Response interface {
+	String() string
+}
+
+type StringResponse string
+
+func (me StringResponse) String() string { return string(me) }
+
 type Characters []Character
 
 type Character struct {
@@ -203,7 +222,7 @@ type Tile struct {
 
 func (me *Tile) Link(d Direction) (Ident, error) {
 	if d < 0 || int(d) > len(me.Nav) {
-		return "", fmt.Errorf("no such direction: %v", d)
+		return "", fmt.Errorf("bad direction")
 	}
 	return me.Nav[int(d)], nil
 }
