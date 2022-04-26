@@ -34,7 +34,7 @@ func (me *Game) handleEvent(e Event) {
 	switch e := e.(type) {
 	case *Join:
 		me.Characters = append(me.Characters, Character{
-			Name: e.Player.Name,
+			Ident: Ident(e.Player.Name),
 			Position: Position{
 				Area: "a1", Tile: "01",
 			},
@@ -71,7 +71,6 @@ type Characters []Character
 
 type Character struct {
 	Ident
-	Name
 	Position
 	IsBot
 }
@@ -171,12 +170,12 @@ type EventString string
 func (me EventString) Event() string { return string(me) }
 
 type MoveCharacter struct {
-	Name
+	Ident
 	Direction
 }
 
 func (me *MoveCharacter) Event() string {
-	return fmt.Sprintf("%s moves %s", me.Name, me.Direction)
+	return fmt.Sprintf("%s moves %s", me.Ident, me.Direction)
 }
 
 type Join struct {
