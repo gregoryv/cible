@@ -12,7 +12,9 @@ func TestGame_play(t *testing.T) {
 	g := NewGame()
 	g.Logger = t
 	go g.Run(context.Background())
-	defer g.Stop()
+	defer func() {
+		Trigger(g, StopGame()).Done()
+	}()
 
 	p := Player{Name: "John"}
 	cid, err := Trigger(g, Join(p)).Done()
