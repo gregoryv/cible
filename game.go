@@ -21,7 +21,7 @@ type Game struct {
 	events chan Event
 	Events
 	logger.Logger
-	Players
+	Characters
 }
 
 func (me *Game) Run(ctx context.Context) error {
@@ -50,7 +50,9 @@ func (me *Game) handleEvent(e Event) {
 	me.Log(e)
 	switch e := e.(type) {
 	case *Join:
-		me.Players = append(me.Players, e.Player)
+		me.Characters = append(me.Characters, Character{
+			Player: &e.Player,
+		})
 	}
 }
 
@@ -91,7 +93,11 @@ func myCave() *Area {
 
 // ----------------------------------------
 
-type Players []Player
+type Characters []Character
+
+type Character struct {
+	*Player // if nil then, non playable character NPC
+}
 
 type Player struct {
 	Name
