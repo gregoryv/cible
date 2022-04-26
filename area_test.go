@@ -1,6 +1,9 @@
 package cible
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 func TestArea(t *testing.T) {
 	t.Run("defaults to empty", func(t *testing.T) {
@@ -43,5 +46,20 @@ func TestArea(t *testing.T) {
 				}
 			})
 		}
+	})
+
+	t.Run("Grid", func(t *testing.T) {
+		a := NewArea()
+		a.AddTile(NewTile())
+		a.AddTile(NewTile())
+		a.AddTile(NewTile())
+		a.SetLinks([]Link{
+			{0, 1, East},
+			{1, 2, South},
+		})
+		g := a.Grid()
+		var buf bytes.Buffer
+		g.WriteTo(&buf)
+		t.Error(buf.String())
 	})
 }
