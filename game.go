@@ -58,20 +58,8 @@ func (me *Game) handleEvent(e Event) {
 			Name: e.Player.Name,
 		})
 	case *MoveCharacter:
-		c := me.findCharacterByName(e.Name)
-		pos := c.Position
-		_ = c
-		_ = pos
-	}
-}
 
-func (me *Game) findCharacterByName(n Name) *Character {
-	for _, c := range me.Characters {
-		if c.Name == n {
-			return &c
-		}
 	}
-	return nil
 }
 
 // ----------------------------------------
@@ -120,6 +108,7 @@ func myCave() *Area {
 type Characters []Character
 
 type Character struct {
+	Ident
 	Name
 	Position
 	IsBot
@@ -140,6 +129,7 @@ type World struct {
 type Areas []*Area
 
 type Area struct {
+	Ident
 	Title
 	Tiles
 }
@@ -174,8 +164,11 @@ type Position struct {
 	Tile int
 }
 
-type Name string
 type Ident string
+
+func (me Ident) Id() string { return string(me) }
+
+type Name string
 type Short string
 type Long string
 type Title string
