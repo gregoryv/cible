@@ -20,10 +20,10 @@ func TestGame_play(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log(<-Trigger(g, MoveCharacter(cid, N)).NewPosition)
-	t.Log(<-Trigger(g, MoveCharacter(cid, E)).NewPosition)
+	t.Log(Trigger(g, MoveCharacter(cid, N)).Done())
+	t.Log(Trigger(g, MoveCharacter(cid, E)).Done())
 
-	pos := <-Trigger(g, MoveCharacter(cid, W)).NewPosition
+	pos, _ := Trigger(g, MoveCharacter(cid, W)).Done()
 	t.Log(pos)
 	if pos.Tile != "02" {
 		t.Error("got", pos.Tile, "exp", "02")
@@ -52,7 +52,7 @@ func Test_badEvents(t *testing.T) {
 	g.Events <- MoveCharacter("god", N) // cannot be move)
 	g.Events <- MoveCharacter(cid, Direction(-1))
 	g.Events <- &badEvent{}
-	<-Trigger(g, MoveCharacter(cid, W)).NewPosition
+	_, _ = Trigger(g, MoveCharacter(cid, W)).Done()
 }
 
 func TestEventStopGame(t *testing.T) {

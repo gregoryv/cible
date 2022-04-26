@@ -47,30 +47,7 @@ func (me *Game) handleEvent(e Event) error {
 		return nil
 
 	case *Movement:
-		c, err := me.Character(e.Ident)
-		// always send a position as someone might be waiting for a
-		// response
-		defer func() {
-			if c == nil {
-				return
-			}
-			e.NewPosition <- c.Position
-		}()
-		if err != nil {
-			return err
-		}
-
-		_, t, err := me.Place(c.Position)
-		if err != nil {
-			return err
-		}
-		next, err := t.Link(e.Direction)
-		if err != nil {
-			return err
-		}
-		if next != "" {
-			c.Position.Tile = next
-		}
+		return me.onMovement(e)
 	}
 	return nil
 }
@@ -89,25 +66,6 @@ const (
 type EventString string
 
 func (me EventString) Event() string { return string(me) }
-
-func MoveCharacter(id Ident, d Direction) *Movement {
-	return &Movement{
-		Ident:       id,
-		Direction:   d,
-		NewPosition: make(chan Position, 1),
-	}
-}
-
-type Movement struct {
-	Ident
-	Direction
-
-	NewPosition chan Position
-}
-
-func (me *Movement) Event() string {
-	return fmt.Sprintf("%s move %s", me.Ident, me.Direction)
-}
 
 func Join(p Player) *EventJoin {
 	return &EventJoin{
