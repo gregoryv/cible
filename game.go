@@ -11,19 +11,21 @@ import (
 func NewGame() *Game {
 	ch := make(chan Event)
 	return &Game{
-		events: ch,
+		World:  Earth(),
 		Events: ch,
 		Logger: logger.Silent,
-		World:  Earth(),
+
+		events: ch,
 	}
 }
 
 type Game struct {
-	events chan Event
+	World
+	Characters
 	Events
 	logger.Logger
-	Characters
-	World
+
+	events chan Event
 }
 
 func (me *Game) Run(ctx context.Context) error {
