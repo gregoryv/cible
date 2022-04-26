@@ -47,9 +47,18 @@ func (me *Game) handleEvent(e Event) error {
 
 	case *Movement:
 		c, err := me.Character(e.Ident)
+		// always send a position as someone might be waiting for a
+		// response
+		defer func() {
+			if c == nil {
+				return
+			}
+			e.NewPosition <- c.Position
+		}()
 		if err != nil {
 			return err
 		}
+
 		_, t, err := me.Place(c.Position)
 		if err != nil {
 			return err
@@ -58,14 +67,17 @@ func (me *Game) handleEvent(e Event) error {
 		if err != nil {
 			return err
 		}
-		if next == "" {
-			e.Response = "cannot"
-		} else {
+		if next != "" {
 			c.Position.Tile = next
-			e.Response = fmt.Sprintf("at %v", next)
+
 		}
 	}
 	return nil
+}
+
+func Trigger[T Event](g *Game, t T) T {
+	g.Events <- t
+	return t
 }
 
 // ----------------------------------------
@@ -79,13 +91,14 @@ type EventString string
 func (me EventString) Event() string { return string(me) }
 
 func MoveCharacter(id Ident, d Direction) *Movement {
-	return &Movement{id, d, ""}
+	return &Movement{Ident: id, Direction: d, NewPosition: make(chan Position, 1)}
 }
 
 type Movement struct {
 	Ident
 	Direction
-	Response string
+
+	NewPosition chan Position
 }
 
 func (me *Movement) Event() string {

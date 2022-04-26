@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestGame_play(t *testing.T) {
@@ -16,9 +15,8 @@ func TestGame_play(t *testing.T) {
 
 	p := Player{Name: "John"}
 
-	g.Events <- &Join{Player: p}
+	_ = Trigger(g, &Join{Player: p})
 	// currently the name is used as an identifier of characters
-	g.Events <- MoveCharacter("John", N)
 
 	g.Events <- MoveCharacter("John", W) // nothing ther)
 	g.Events <- MoveCharacter("Eve", N)  // no such playe)
@@ -26,8 +24,9 @@ func TestGame_play(t *testing.T) {
 	g.Events <- MoveCharacter("John", Direction(-1))
 	g.Events <- &badEvent{}
 
-	// let all events pass
-	<-time.After(10 * time.Millisecond)
+	e := Trigger(g, MoveCharacter("John", N))
+
+	t.Log(<-e.NewPosition)
 	//t.Fail()
 }
 
