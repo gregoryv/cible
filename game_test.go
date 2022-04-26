@@ -7,6 +7,21 @@ import (
 )
 
 func TestGame(t *testing.T) {
+	g := NewGame()
+	ctx, cancel := context.WithCancel(context.Background())
+	go g.Run(ctx)
+	defer cancel()
+
+	t.Run("handles events", func(t *testing.T) {
+		g.EventChan() <- EventPing
+		g.EventChan() <- &EventMove{Direction: E}
+	})
+	t.Run("handles unknown events", func(t *testing.T) {
+		g.EventChan() <- &EventMove{Direction: Direction(-1)}
+	})
+}
+
+func TestGame_exits(t *testing.T) {
 	t.Run("can be cancelled", func(t *testing.T) {
 		g := NewGame()
 		ctx, cancel := context.WithCancel(context.Background())
@@ -17,17 +32,6 @@ func TestGame(t *testing.T) {
 		g := NewGame()
 		go g.Run(context.Background())
 		g.EventChan() <- EventStopGame
-	})
-	t.Run("handles events", func(t *testing.T) {
-		g := NewGame()
-		go g.Run(context.Background())
-		g.EventChan() <- EventPing
-		g.EventChan() <- &EventMove{Direction: E}
-	})
-	t.Run("handles unknown events", func(t *testing.T) {
-		g := NewGame()
-		go g.Run(context.Background())
-		g.EventChan() <- &EventMove{Direction: Direction(-1)}
 	})
 }
 
