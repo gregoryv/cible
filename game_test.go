@@ -21,7 +21,7 @@ func TestGame_play(t *testing.T) {
 	if err := c.Done(); err != nil {
 		t.Fatal(err)
 	}
-	cid := c.Id
+	cid := c.Ident
 	Trigger(g, MoveCharacter(cid, N)).Done()
 	Trigger(g, MoveCharacter(cid, E)).Done()
 
@@ -50,7 +50,7 @@ func Test_badEvents(t *testing.T) {
 	if err := c.Done(); err != nil {
 		t.Fatal(err)
 	}
-	cid := c.Id
+	cid := c.Ident
 	g.Events <- MoveCharacter("Eve", N) // no such playe)
 	g.Events <- MoveCharacter("god", N) // cannot be move)
 	g.Events <- MoveCharacter(cid, Direction(-1))
@@ -70,7 +70,11 @@ func TestEvent_Done(t *testing.T) {
 		defer catchPanic(t)
 		e := Trigger(g, Join(Player{Name: "John"}))
 		e.Done()
+		first := e.Ident
 		e.Done()
+		if first != e.Ident {
+			t.Error("multiple calls to Done gave different values")
+		}
 	})
 
 	t.Run("MoveCharacter", func(t *testing.T) {
@@ -147,7 +151,7 @@ func BenchmarkMoveCharacter_1_player(b *testing.B) {
 	if err := e.Done(); err != nil {
 		b.Fatal(err)
 	}
-	cid := e.Id
+	cid := e.Ident
 	for i := 0; i < b.N; i++ {
 		Trigger(g, MoveCharacter(cid, N)).Done()
 		Trigger(g, MoveCharacter(cid, S)).Done()
