@@ -18,7 +18,7 @@ type EventJoin struct {
 	Ident // set when done
 	err   error
 
-	sync.Once
+	once   sync.Once
 	joined chan Ident
 	failed chan error
 }
@@ -38,7 +38,7 @@ func (e *EventJoin) Affect(g *Game) error {
 }
 
 func (me *EventJoin) Done() (err error) {
-	me.Once.Do(func() {
+	me.once.Do(func() {
 		select {
 		case me.Ident = <-me.joined:
 		case me.err = <-me.failed:
@@ -68,7 +68,7 @@ type EventLeave struct {
 
 	err error // set when done
 
-	sync.Once
+	once   sync.Once
 	failed chan error
 }
 
@@ -84,7 +84,7 @@ func (e *EventLeave) Affect(g *Game) error {
 }
 
 func (me *EventLeave) Done() (err error) {
-	me.Once.Do(func() {
+	me.once.Do(func() {
 		me.err = <-me.failed
 		close(me.failed)
 	})

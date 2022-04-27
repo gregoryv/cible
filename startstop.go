@@ -14,7 +14,7 @@ func StopGame() *EventStopGame {
 type EventStopGame struct {
 	err error // set when done
 
-	sync.Once
+	once   sync.Once
 	failed chan error
 }
 
@@ -30,7 +30,7 @@ func (e *EventStopGame) Affect(g *Game) error {
 var endEventLoop = fmt.Errorf("end event loop")
 
 func (e *EventStopGame) Done() error {
-	e.Once.Do(func() {
+	e.once.Do(func() {
 		e.err = <-e.failed
 		close(e.failed)
 	})

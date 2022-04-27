@@ -24,19 +24,21 @@ func TestServer(t *testing.T) {
 
 	pause("10ms")
 	c := NewClient()
+	c.Logger = t
 	c.Host = srv.Addr.String()
 
-	go func() {
-		if err := c.Connect(ctx); err != nil {
-			t.Fatal(err)
-		}
-	}()
+	if err := c.Connect(ctx); err != nil {
+		t.Fatal(err)
+	}
 
-	pause("5ms")
+	p := Player{Name: "test"}
+	join := Join(p)
+	Send(c, join)
+	// join.Done() todo
+
+	pause("10ms")
 	cancel()
-
 	<-ctx.Done()
-
 }
 
 func TestGame_play(t *testing.T) {

@@ -1,24 +1,29 @@
 package cible
 
 import (
-	"bytes"
 	"context"
+	"encoding/gob"
 	"fmt"
 	"io"
 	"net"
-	"os"
-	"strings"
 
 	"github.com/gregoryv/logger"
 )
 
 func NewClient() *Client {
-	return &Client{}
+	return &Client{
+		Logger: logger.Silent,
+	}
 }
 
 type Client struct {
 	logger.Logger
 	Host string
+
+	net.Conn
+
+	enc *gob.Encoder
+	dec *gob.Decoder
 }
 
 func (me *Client) Connect(ctx context.Context) error {
@@ -26,19 +31,29 @@ func (me *Client) Connect(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	me.Conn = conn
+	me.Log("connected to", me.Host)
+	me.enc = gob.NewEncoder(conn)
+	me.dec = gob.NewDecoder(conn)
 
-	// send command
-	// todo maybe use gobs?
-	fmt.Fprintf(conn, os.Getenv("USER")+" join")
+	return nil
+}
 
-	for {
-		select {
-		case <-ctx.Done():
-		}
+func Send[T Event](c *Client, e T) {
+	if c.Conn == nil {
+		e.setErr(fmt.Errorf("no connection"))
+		c.Log("send failed: no connection")
+		return
 	}
 
-	return conn.Close()
+	r := Request{e}
+	if err := c.enc.Encode(r); err != nil {
+		c.Log(err)
+	}
+	// todo wait for response and update event
 }
+
+// ----------------------------------------
 
 func NewServer() *Server {
 	return &Server{
@@ -70,7 +85,7 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 			conn, err := ln.Accept()
 			if err != nil {
 				me.Log(err)
-				continue
+				continue // todo this may spin out of control
 			}
 			c <- conn
 		}
@@ -98,26 +113,34 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 		conn.Close()
 	}()
 	me.Log("connect ", conn.RemoteAddr())
-	p := make([]byte, 1024)
+
+	enc := gob.NewEncoder(conn)
+	dec := gob.NewDecoder(conn)
+
 	for {
-		n, err := conn.Read(p)
-		if err != nil {
+		var r Request // todo how to know what is comming, envelope ?
+		if err := dec.Decode(&r); err != nil {
 			if err != io.EOF {
 				me.Log(err)
 			}
 			return
 		}
-		cmd := bytes.TrimRight(p[:n], "\r\n")
-		args := strings.Fields(string(cmd))
-		switch args[0] {
-		case ":q", ":quit":
-			return
-		case ":join":
-			Trigger(g, Join(Player{Name: Name(args[1])}))
-
-		case ":stop game":
-			Trigger(g, StopGame())
-			return
+		switch e := r.Event.(type) {
+		case EventJoin:
+			me.Log("join", e.Name)
+		default:
+			me.Log("unknown event")
 		}
+		// todo send response
+		_ = enc
+
 	}
+}
+
+type Request struct {
+	Event interface{}
+}
+
+func init() {
+	gob.Register(EventJoin{})
 }

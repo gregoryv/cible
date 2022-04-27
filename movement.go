@@ -21,7 +21,7 @@ type Movement struct {
 	Position // set when done
 	err      error
 
-	sync.Once
+	once        sync.Once
 	newPosition chan Position
 	failed      chan error
 }
@@ -61,7 +61,7 @@ func (e *Movement) Affect(g *Game) (err error) {
 }
 
 func (me *Movement) Done() (err error) {
-	me.Once.Do(func() {
+	me.once.Do(func() {
 		select {
 		case me.Position = <-me.newPosition:
 		case me.err = <-me.failed:
