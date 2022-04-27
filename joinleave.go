@@ -24,7 +24,7 @@ type EventJoin struct {
 }
 
 func (e *EventJoin) Affect(g *Game) error {
-	g.Log("%s join", e.Player.Name)
+	g.Logf("%s join", e.Player.Name)
 	p := Position{
 		Area: "a1", Tile: "01",
 	}
@@ -60,7 +60,6 @@ func Leave(cid Ident) *EventLeave {
 
 type EventLeave struct {
 	Ident
-	Name // player name
 
 	err error // set when done
 
@@ -69,14 +68,13 @@ type EventLeave struct {
 }
 
 func (e *EventLeave) Affect(g *Game) error {
-	g.Logf("%s left", e.Name)
 	c, err := g.Character(e.Ident)
 	if err != nil {
 		e.failed <- err
 		return err
 	}
-	e.Name = c.Name
 	e.failed <- nil
+	g.Logf("%s left", c.Name)
 	return nil
 }
 
