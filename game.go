@@ -2,6 +2,7 @@ package cible
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -17,25 +18,21 @@ eventLoop:
 			break eventLoop
 
 		case e := <-me.events: // blocks
-			switch e := e.(type) {
-			case *EventStopGame:
-				me.Log(e.Event())
-				e.failed <- nil
-				break eventLoop
-
-			default:
-				if err := e.Affect(me); err != nil {
-					me.Logf("%s: %v", e.Event(), err)
-				} else {
-					me.Log(e.Event())
+			// One event affects the game
+			if err := e.Affect(me); err != nil {
+				if errors.Is(endEventLoop, err) {
+					break eventLoop
 				}
-				// Make sure any event can be cleaned up. Triggering
-				// side will most likely also wait for event to be
-				// done, but this is here to give them the option to
-				// ignore it. This does impact performance quite a bit
-				// though.
-				go e.Done()
+				me.Logf("%s: %v", e.Event(), err)
+				continue
 			}
+			me.Log(e.Event())
+			// Make sure any event can be cleaned up. Triggering
+			// side will most likely also wait for event to be
+			// done, but this is here to give them the option to
+			// ignore it. This does impact performance quite a bit
+			// though.
+			go e.Done()
 		}
 	}
 

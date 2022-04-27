@@ -1,6 +1,7 @@
 package cible
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -19,10 +20,16 @@ type EventStopGame struct {
 	failed chan error
 }
 
-func (me *EventStopGame) Affect(g *Game) error {
-	// special event that ends the loop
-	return nil
+func (e *EventStopGame) Affect(g *Game) error {
+	// special event that ends the loop, thus we do things here as
+	// no other events should be affecting the game
+	g.Log("shutting down...")
+
+	e.failed <- nil
+	return endEventLoop
 }
+
+var endEventLoop = fmt.Errorf("end event loop")
 
 func (me *EventStopGame) Event() string {
 	return "stop game"
