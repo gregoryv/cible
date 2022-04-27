@@ -14,7 +14,6 @@ func TriggerWait[T Event](g *Game, e T) (r T) {
 // Trigger an event which affects the game. Callers should call Done
 // to wait for the event.
 func Trigger[T Event](g *Game, e T) (task *Task, r T) {
-	fmt.Printf("triggering: %#v", e)
 	r = e // during panic t, would be nil
 	defer func() {
 		if err := recover(); err != nil {

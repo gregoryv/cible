@@ -12,7 +12,6 @@ import (
 
 func TestServer(t *testing.T) {
 	g := startNewGame(t)
-	g.Logger = t
 	srv := NewServer()
 	srv.Logger = t
 	defer func() { srv.Logger = logger.Silent }()
@@ -36,7 +35,6 @@ func TestServer(t *testing.T) {
 	if err := Send(c, join); err != nil {
 		t.Fatal(err)
 	}
-
 	if join.Ident == "" {
 		t.Error("join failed, missing ident")
 	}
@@ -194,6 +192,7 @@ func (e *badEvent) setErr(v error) {
 
 func startNewGame(t *testing.T) *Game {
 	g := NewGame()
+	g.Logger = t
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(func() {
 		g.Logger = logger.Silent

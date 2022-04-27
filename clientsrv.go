@@ -51,6 +51,11 @@ func Send[T Event](c *Client, e T) error {
 		return err
 	}
 	c.Logf("send: %T", e)
+
+	if err := c.dec.Decode(&r); err != nil {
+		c.Logf("response: %#v", r)
+		return err
+	}
 	return nil
 	// todo wait for response and update event
 }
@@ -112,8 +117,8 @@ connectLoop:
 
 func (me *Server) handleConnection(conn net.Conn, g *Game) {
 	defer func() {
-		_ = recover()
-		// todo Trigger(g, Leave("x"))
+		// graceful connection handling
+		me.Log(recover())
 		conn.Close()
 	}()
 	me.Log("connect ", conn.RemoteAddr())
@@ -130,23 +135,23 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 			return
 		}
 		me.Logf("received: %T", r.Event)
-		// todo why doesn't this actually trigger anything
-		j, _ := Trigger(g, r.Event.(Event))
-		if err := j.Done(); err != nil {
-			me.Log(err)
-			continue
-		}
+		// todo figure out how to call Trigger on everything that comes in
+
 		switch e := r.Event.(type) {
 		case EventJoin:
-			j, _ := Trigger(g, &e)
+			j, x := Trigger(g, &e)
 			if err := j.Done(); err != nil {
 				me.Log(err)
 				continue
 			}
+			me.Logf("got %#v", x)
+			r.Event = x
 		}
 
 		// todo send response
-		_ = enc
+		if err := enc.Encode(r); err != nil {
+			me.Log(err)
+		}
 
 	}
 }
