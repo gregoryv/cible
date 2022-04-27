@@ -6,8 +6,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
+	"strings"
 
 	. "github.com/gregoryv/cible"
 	"github.com/gregoryv/cmdline"
@@ -21,16 +23,10 @@ func main() {
 		srv  = cli.Flag("-s, --server")
 	)
 	cli.Parse()
-
+	l := logger.Wrap(log.New(os.Stderr, "", log.LstdFlags))
 	if srv {
 		g := NewGame()
-		g.Logger = logger.New()
-
-		srv := &TelnetServer{
-			Logger: logger.New(),
-			Bind:   bind,
-			Game:   g,
-		}
+		g.Logger = l
 
 		ctx, cancel := context.WithCancel(context.Background())
 		go func() {
@@ -40,7 +36,11 @@ func main() {
 			cancel()
 		}()
 
-		if err := srv.Run(ctx); err != nil {
+		srv := &Server{
+			Logger: l,
+			Bind:   bind,
+		}
+		if err := srv.Run(ctx, g); err != nil {
 			srv.Log(err)
 			os.Exit(1)
 		}
@@ -48,19 +48,19 @@ func main() {
 	}
 	conn, err := net.Dial("tcp", bind)
 	if err != nil {
-		// handle error
+		l.Log(err)
 	}
-	fmt.Fprintf(conn, ":join")
-
+	// send command
+	// todo maybe use gobs?
+	fmt.Fprintf(conn, os.Getenv("USER")+" join")
 }
 
-type TelnetServer struct {
+type Server struct {
 	logger.Logger
 	Bind string
-	*Game
 }
 
-func (me *TelnetServer) Run(ctx context.Context) error {
+func (me *Server) Run(ctx context.Context, g *Game) error {
 	ln, err := net.Listen("tcp", me.Bind)
 	if err != nil {
 		return err
@@ -85,15 +85,20 @@ func (me *TelnetServer) Run(ctx context.Context) error {
 			me.Log("server stop")
 			return nil
 		case conn := <-c:
-			go me.handleConnection(conn)
+			go me.handleConnection(conn, g)
 		}
 	}
 
 	return nil
 }
 
-func (me *TelnetServer) handleConnection(conn net.Conn) {
-	me.Log("connect", conn.RemoteAddr())
+func (me *Server) handleConnection(conn net.Conn, g *Game) {
+	defer func() {
+		_ = recover()
+		Trigger(g, Leave("x"))
+		conn.Close()
+	}()
+	me.Log("connect ", conn.RemoteAddr())
 	p := make([]byte, 1024)
 	for {
 		n, err := conn.Read(p)
@@ -101,21 +106,18 @@ func (me *TelnetServer) handleConnection(conn net.Conn) {
 			if err != io.EOF {
 				me.Log(err)
 			}
-			Trigger(me.Game, Leave("x"))
-
 			return
 		}
 		cmd := bytes.TrimRight(p[:n], "\r\n")
-		fmt.Println(string(cmd))
-		switch string(cmd) {
+		args := strings.Fields(string(cmd))
+		switch args[0] {
 		case ":q", ":quit":
-			conn.Close()
 			return
 		case ":join":
-			Trigger(me.Game, Join(Player{Name: "x"}))
+			Trigger(g, Join(Player{Name: Name(args[1])}))
 
 		case ":stop game":
-			Trigger(me.Game, StopGame())
+			Trigger(g, StopGame())
 			return
 		}
 	}
