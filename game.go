@@ -9,6 +9,32 @@ import (
 	"github.com/gregoryv/logger"
 )
 
+func NewGame() *Game {
+	max := 10
+	ch := make(chan Event, max)
+	return &Game{
+		World:  Earth(),
+		Events: ch,
+		Logger: logger.Silent,
+		Characters: Characters{
+			{
+				Ident: "god",
+				IsBot: true,
+			},
+		},
+		events: ch,
+	}
+}
+
+type Game struct {
+	World
+	Characters
+	Events
+	logger.Logger
+
+	events chan Event
+}
+
 func (me *Game) Run(ctx context.Context) error {
 	me.Log("start game")
 eventLoop:
@@ -36,47 +62,6 @@ eventLoop:
 	}
 	me.Log("game stopped")
 	return nil
-}
-
-func Trigger[T Event](g *Game, t T) T {
-	g.Events <- t
-	return t
-}
-
-type Events chan<- Event
-
-type Event interface {
-	Affect(*Game) error // called in the event loop
-
-	// Done blocks until event is handled, can be called multiple
-	// times.
-	Done() error
-}
-
-func NewGame() *Game {
-	max := 10
-	ch := make(chan Event, max)
-	return &Game{
-		World:  Earth(),
-		Events: ch,
-		Logger: logger.Silent,
-		Characters: Characters{
-			{
-				Ident: "god",
-				IsBot: true,
-			},
-		},
-		events: ch,
-	}
-}
-
-type Game struct {
-	World
-	Characters
-	Events
-	logger.Logger
-
-	events chan Event
 }
 
 func (me *Game) Place(p Position) (a *Area, t *Tile, err error) {
