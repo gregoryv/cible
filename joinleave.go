@@ -49,6 +49,11 @@ func (me *EventJoin) Done() (err error) {
 	return me.err
 }
 
+func (e *EventJoin) setErr(v error) {
+	e.err = v
+	close(e.failed)
+}
+
 // ----------------------------------------
 
 func Leave(cid Ident) *EventLeave {
@@ -84,4 +89,8 @@ func (me *EventLeave) Done() (err error) {
 		close(me.failed)
 	})
 	return me.err
+}
+func (e *EventLeave) setErr(v error) {
+	e.err = v
+	close(e.failed)
 }

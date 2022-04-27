@@ -31,10 +31,15 @@ func (e *EventStopGame) Affect(g *Game) error {
 
 var endEventLoop = fmt.Errorf("end event loop")
 
-func (me *EventStopGame) Done() error {
-	me.Once.Do(func() {
-		me.err = <-me.failed
-		close(me.failed)
+func (e *EventStopGame) Done() error {
+	e.Once.Do(func() {
+		e.err = <-e.failed
+		close(e.failed)
 	})
-	return me.err
+	return e.err
+}
+
+func (e *EventStopGame) setErr(v error) {
+	go e.Done()
+	e.failed <- v
 }

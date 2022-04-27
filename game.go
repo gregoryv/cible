@@ -28,10 +28,10 @@ func NewGame() *Game {
 type Game struct {
 	World
 	Characters
-	Events
+	Events chan<- Event // todo maybe always use Trigger?
 	logger.Logger
 
-	events chan Event
+	events chan Event // for reading
 }
 
 func (g *Game) Run(ctx context.Context) error {
@@ -58,6 +58,7 @@ eventLoop:
 			e.Done()
 		}
 	}
+	close(g.events)
 	g.Log("game stopped")
 	return nil
 }

@@ -6,29 +6,22 @@ import (
 	"math/rand"
 	"testing"
 	"time"
-
-	"github.com/gregoryv/logger"
 )
 
 func TestServer(t *testing.T) {
-	g := NewGame()
-	go g.Run(context.Background())
-
+	g := startNewGame(t)
 	srv := NewServer()
 	srv.Logger = t
-	go srv.Run(context.Background(), g)
-	<-time.After(10 * time.Millisecond)
-	Trigger(g, StopGame()).Done()
+	ctx, cancel := context.WithCancel(context.Background())
+	_ = time.AfterFunc(100*time.Millisecond, cancel)
+	if err := srv.Run(ctx, g); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestGame_play(t *testing.T) {
-	g := NewGame()
+	g := startNewGame(t)
 	g.Logger = t
-	defer func() { g.Logger = logger.Silent }()
-	go g.Run(context.Background())
-	defer func() {
-		Trigger(g, StopGame()).Done()
-	}()
 
 	p := Player{Name: "John"}
 	c := Trigger(g, Join(p))
@@ -55,9 +48,7 @@ func TestGame_play(t *testing.T) {
 }
 
 func Test_badEvents(t *testing.T) {
-	g := NewGame()
-	go g.Run(context.Background())
-	defer g.Stop()
+	g := startNewGame(t)
 
 	p := Player{Name: "John"}
 	c := Trigger(g, Join(p))
@@ -77,8 +68,12 @@ func Test_badEvents(t *testing.T) {
 }
 
 func TestEvent_Done(t *testing.T) {
+	// can't use startNewGame here as
 	g := NewGame()
-	go g.Run(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	go g.Run(ctx)
+	t.Cleanup(cancel)
+
 	// stopped in last subtest
 	t.Run("Join", func(t *testing.T) {
 		defer catchPanic(t)
@@ -149,11 +144,25 @@ func TestDirection(t *testing.T) {
 	_ = Direction(-1).String() // should work
 }
 
-type badEvent struct{}
+type badEvent struct {
+	err error
+}
 
 func (me *badEvent) Event() string      { return "badEvent" }
-func (me *badEvent) Done() error        { return fmt.Errorf("badEvent") }
-func (me *badEvent) Affect(*Game) error { return fmt.Errorf("badEvent") }
+func (me *badEvent) Done() error        { return me.err }
+func (me *badEvent) Affect(*Game) error { return me.err }
+func (e *badEvent) setErr(v error) {
+	e.err = v
+}
+
+func startNewGame(t *testing.T) *Game {
+	g := NewGame()
+	t.Cleanup(func() {
+		Trigger(g, StopGame()).Done() // wait for it to complete
+	})
+	go g.Run(context.Background())
+	return g
+}
 
 // ----------------------------------------
 

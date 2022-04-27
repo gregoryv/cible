@@ -72,6 +72,11 @@ func (me *Movement) Done() (err error) {
 	return me.err
 }
 
+func (e *Movement) setErr(v error) {
+	e.err = v
+	close(e.failed)
+}
+
 func (me *Tile) Link(d Direction) (Ident, error) {
 	if d < 0 || int(d) > len(me.Nav) {
 		return "", fmt.Errorf("bad direction")

@@ -12,14 +12,16 @@ import (
 
 func NewServer() *Server {
 	return &Server{
-		Logger: logger.Silent,
-		Bind:   "",
+		Logger:         logger.Silent,
+		Bind:           "",
+		MaxConnections: 100,
 	}
 }
 
 type Server struct {
 	logger.Logger
-	Bind string
+	Bind           string
+	MaxConnections int
 }
 
 func (me *Server) Run(ctx context.Context, g *Game) error {
@@ -29,7 +31,7 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 	}
 	me.Log("server listen on", ln.Addr())
 
-	c := make(chan net.Conn)
+	c := make(chan net.Conn, me.MaxConnections)
 	go func() {
 		for {
 			conn, err := ln.Accept()
@@ -41,16 +43,18 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 		}
 	}()
 
+connectLoop:
 	for {
 		select {
 		case <-ctx.Done():
-			me.Log("server stop")
-			return nil
+			Trigger(g, StopGame()).Done()
+			break connectLoop
 		case conn := <-c:
 			go me.handleConnection(conn, g)
 		}
 	}
 
+	me.Log("server closed")
 	return nil
 }
 
