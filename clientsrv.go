@@ -3,12 +3,42 @@ package cible
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net"
+	"os"
 	"strings"
 
 	"github.com/gregoryv/logger"
 )
+
+func NewClient() *Client {
+	return &Client{}
+}
+
+type Client struct {
+	logger.Logger
+	Host string
+}
+
+func (me *Client) Connect(ctx context.Context) error {
+	conn, err := net.Dial("tcp", me.Host)
+	if err != nil {
+		return err
+	}
+
+	// send command
+	// todo maybe use gobs?
+	fmt.Fprintf(conn, os.Getenv("USER")+" join")
+
+	for {
+		select {
+		case <-ctx.Done():
+		}
+	}
+
+	return conn.Close()
+}
 
 func NewServer() *Server {
 	return &Server{
@@ -22,6 +52,8 @@ type Server struct {
 	logger.Logger
 	Bind           string
 	MaxConnections int
+
+	net.Addr // set after running
 }
 
 func (me *Server) Run(ctx context.Context, g *Game) error {
@@ -29,6 +61,7 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 	if err != nil {
 		return err
 	}
+	me.Addr = ln.Addr()
 	me.Log("server listen on", ln.Addr())
 
 	c := make(chan net.Conn, me.MaxConnections)

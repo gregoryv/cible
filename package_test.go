@@ -12,11 +12,31 @@ func TestServer(t *testing.T) {
 	g := startNewGame(t)
 	srv := NewServer()
 	srv.Logger = t
+
 	ctx, cancel := context.WithCancel(context.Background())
-	_ = time.AfterFunc(100*time.Millisecond, cancel)
-	if err := srv.Run(ctx, g); err != nil {
-		t.Error(err)
-	}
+
+	// start server
+	go func() {
+		if err := srv.Run(ctx, g); err != nil {
+			t.Error(err)
+		}
+	}()
+
+	pause("10ms")
+	c := NewClient()
+	c.Host = srv.Addr.String()
+
+	go func() {
+		if err := c.Connect(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	pause("5ms")
+	cancel()
+
+	<-ctx.Done()
+
 }
 
 func TestGame_play(t *testing.T) {
@@ -75,7 +95,7 @@ func TestEvent_Done(t *testing.T) {
 	go g.Run(ctx)
 	t.Cleanup(cancel)
 
-	<-time.After(10 * time.Millisecond)
+	pause("10ms")
 	// stopped in last subtest
 	t.Run("Join", func(t *testing.T) {
 		e := Trigger(g, Join(Player{Name: "John"}))
@@ -178,6 +198,14 @@ func startNewGame(t *testing.T) *Game {
 	go g.Run(context.Background())
 	time.Sleep(10 * time.Millisecond) // let it start
 	return g
+}
+
+func pause(v string) {
+	dur, err := time.ParseDuration(v)
+	if err != nil {
+		panic(err.Error())
+	}
+	<-time.After(dur)
 }
 
 // ----------------------------------------
