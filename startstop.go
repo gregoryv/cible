@@ -1,6 +1,8 @@
 package cible
 
-import "sync"
+import (
+	"sync"
+)
 
 func (me *Game) Stop() { me.Events <- StopGame() }
 
@@ -15,6 +17,11 @@ type EventStopGame struct {
 
 	sync.Once
 	failed chan error
+}
+
+func (me *EventStopGame) Affect(g *Game) error {
+	// special event that ends the loop
+	return nil
 }
 
 func (me *EventStopGame) Event() string {

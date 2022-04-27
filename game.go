@@ -24,7 +24,7 @@ eventLoop:
 				break eventLoop
 
 			default:
-				if err := me.handleEvent(e); err != nil {
+				if err := e.Affect(me); err != nil {
 					me.Logf("%s: %v", e.Event(), err)
 				} else {
 					me.Log(e.Event())
@@ -42,21 +42,6 @@ eventLoop:
 	return nil
 }
 
-func (me *Game) handleEvent(e Event) error {
-	switch e := e.(type) {
-	case *EventJoin:
-		return me.onJoin(e)
-
-	case *EventLeave:
-		return me.onLeave(e)
-
-	case *Movement:
-		return me.onMovement(e)
-
-	}
-	return nil
-}
-
 func Trigger[T Event](g *Game, t T) T {
 	g.Events <- t
 	return t
@@ -65,6 +50,7 @@ func Trigger[T Event](g *Game, t T) T {
 type Events chan<- Event
 
 type Event interface {
+	Affect(*Game) error // called in the event loop
 	Event() string
 
 	// Done blocks until event is handled, can be called multiple

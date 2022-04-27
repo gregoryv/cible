@@ -5,46 +5,6 @@ import (
 	"sync"
 )
 
-func (me *Game) onMovement(e *Movement) (err error) {
-	defer func() {
-		if err != nil {
-			e.failed <- err
-		}
-	}()
-	c, err := me.Character(e.Ident)
-	// always send a position as someone might be waiting for a
-	// response
-	defer func() {
-		if c == nil {
-			return
-		}
-		e.newPosition <- c.Position
-	}()
-	if err != nil {
-		return err
-	}
-
-	_, t, err := me.Place(c.Position)
-	if err != nil {
-		return err
-	}
-	next, err := t.Link(e.Direction)
-	if err != nil {
-		return err
-	}
-	if next != "" {
-		c.Position.Tile = next
-	}
-	return nil
-}
-
-func (me *Tile) Link(d Direction) (Ident, error) {
-	if d < 0 || int(d) > len(me.Nav) {
-		return "", fmt.Errorf("bad direction")
-	}
-	return me.Nav[int(d)], nil
-}
-
 func MoveCharacter(id Ident, d Direction) *Movement {
 	return &Movement{
 		Ident:       id,
@@ -66,6 +26,39 @@ type Movement struct {
 	failed      chan error
 }
 
+func (e *Movement) Affect(g *Game) (err error) {
+	defer func() {
+		if err != nil {
+			e.failed <- err
+		}
+	}()
+	c, err := g.Character(e.Ident)
+	// always send a position as someone might be waiting for a
+	// response
+	defer func() {
+		if c == nil {
+			return
+		}
+		e.newPosition <- c.Position
+	}()
+	if err != nil {
+		return err
+	}
+
+	_, t, err := g.Place(c.Position)
+	if err != nil {
+		return err
+	}
+	next, err := t.Link(e.Direction)
+	if err != nil {
+		return err
+	}
+	if next != "" {
+		c.Position.Tile = next
+	}
+	return nil
+}
+
 func (me *Movement) Done() (err error) {
 	me.Once.Do(func() {
 		select {
@@ -80,6 +73,13 @@ func (me *Movement) Done() (err error) {
 
 func (me *Movement) Event() string {
 	return fmt.Sprintf("%s move %s", me.Ident, me.Direction)
+}
+
+func (me *Tile) Link(d Direction) (Ident, error) {
+	if d < 0 || int(d) > len(me.Nav) {
+		return "", fmt.Errorf("bad direction")
+	}
+	return me.Nav[int(d)], nil
 }
 
 // ----------------------------------------

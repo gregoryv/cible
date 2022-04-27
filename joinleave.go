@@ -5,19 +5,6 @@ import (
 	"sync"
 )
 
-func (me *Game) onJoin(e *EventJoin) error {
-	p := Position{
-		Area: "a1", Tile: "01",
-	}
-	me.Characters = append(me.Characters, &Character{
-		Ident:    Ident(e.Player.Name),
-		Name:     e.Player.Name,
-		Position: p,
-	})
-	e.joined <- Ident(e.Player.Name)
-	return nil
-}
-
 func Join(p Player) *EventJoin {
 	return &EventJoin{
 		Player: p,
@@ -35,6 +22,19 @@ type EventJoin struct {
 	sync.Once
 	joined chan Ident
 	failed chan error
+}
+
+func (e *EventJoin) Affect(g *Game) error {
+	p := Position{
+		Area: "a1", Tile: "01",
+	}
+	g.Characters = append(g.Characters, &Character{
+		Ident:    Ident(e.Player.Name),
+		Name:     e.Player.Name,
+		Position: p,
+	})
+	e.joined <- Ident(e.Player.Name)
+	return nil
 }
 
 func (me *EventJoin) Done() (err error) {
@@ -55,17 +55,6 @@ func (me *EventJoin) Event() string {
 
 // ----------------------------------------
 
-func (me *Game) onLeave(e *EventLeave) error {
-	c, err := me.Character(e.Ident)
-	if err != nil {
-		e.failed <- err
-		return err
-	}
-	e.Name = c.Name
-	e.failed <- nil
-	return nil
-}
-
 func Leave(cid Ident) *EventLeave {
 	return &EventLeave{
 		Ident:  cid,
@@ -81,6 +70,17 @@ type EventLeave struct {
 
 	sync.Once
 	failed chan error
+}
+
+func (e *EventLeave) Affect(g *Game) error {
+	c, err := g.Character(e.Ident)
+	if err != nil {
+		e.failed <- err
+		return err
+	}
+	e.Name = c.Name
+	e.failed <- nil
+	return nil
 }
 
 func (me *EventLeave) Done() (err error) {

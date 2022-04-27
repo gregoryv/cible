@@ -143,8 +143,9 @@ func TestArea_Tile(t *testing.T) {
 
 type badEvent struct{}
 
-func (me *badEvent) Event() string { return "badEvent" }
-func (me *badEvent) Done() error   { return fmt.Errorf("badEvent") }
+func (me *badEvent) Event() string      { return "badEvent" }
+func (me *badEvent) Done() error        { return fmt.Errorf("badEvent") }
+func (me *badEvent) Affect(*Game) error { return fmt.Errorf("badEvent") }
 
 // ----------------------------------------
 
