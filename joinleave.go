@@ -1,14 +1,8 @@
 package cible
 
-import (
-	"sync"
-)
-
 func Join(p Player) *EventJoin {
 	return &EventJoin{
 		Player: p,
-		joined: make(chan Ident, 1), // buffer so event loop doesn't block
-		failed: make(chan error, 1),
 	}
 }
 
@@ -16,11 +10,7 @@ type EventJoin struct {
 	Player
 
 	Ident // set when done
-	err   error
 
-	once   sync.Once
-	joined chan Ident
-	failed chan error
 }
 
 func (me EventJoin) New() *EventJoin {
@@ -32,69 +22,33 @@ func (e *EventJoin) Affect(g *Game) error {
 	p := Position{
 		Area: "a1", Tile: "01",
 	}
-	g.Characters = append(g.Characters, &Character{
+	c := &Character{
 		Ident:    Ident(e.Player.Name),
 		Name:     e.Player.Name,
 		Position: p,
-	})
-	e.joined <- Ident(e.Player.Name)
+	}
+	g.Characters = append(g.Characters, c)
+	e.Ident = c.Ident
 	return nil
-}
-
-func (me *EventJoin) Done() (err error) {
-	me.once.Do(func() {
-		select {
-		case me.Ident = <-me.joined:
-		case me.err = <-me.failed:
-		}
-		close(me.joined)
-		close(me.failed)
-	})
-	return me.err
-}
-
-func (e *EventJoin) setErr(v error) {
-	go e.Done()
-	e.failed <- v
 }
 
 // ----------------------------------------
 
 func Leave(cid Ident) *EventLeave {
 	return &EventLeave{
-		Ident:  cid,
-		failed: make(chan error, 1),
+		Ident: cid,
 	}
 }
 
 type EventLeave struct {
 	Ident
-
-	err error // set when done
-
-	once   sync.Once
-	failed chan error
 }
 
 func (e *EventLeave) Affect(g *Game) error {
 	c, err := g.Character(e.Ident)
 	if err != nil {
-		e.failed <- err
 		return err
 	}
-	e.failed <- nil
 	g.Logf("%s left", c.Name)
 	return nil
-}
-
-func (me *EventLeave) Done() (err error) {
-	me.once.Do(func() {
-		me.err = <-me.failed
-		close(me.failed)
-	})
-	return me.err
-}
-func (e *EventLeave) setErr(v error) {
-	go e.Done()
-	e.failed <- v
 }

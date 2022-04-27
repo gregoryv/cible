@@ -39,17 +39,18 @@ func (me *Client) Connect(ctx context.Context) error {
 	return nil
 }
 
-func Send[T Event](c *Client, e T) {
+func Send[T Event](c *Client, e T) error {
 	if c.Conn == nil {
-		e.setErr(fmt.Errorf("no connection"))
 		c.Log("send failed: no connection")
-		return
+		return fmt.Errorf("no connection")
 	}
 
 	r := Request{e}
 	if err := c.enc.Encode(r); err != nil {
 		c.Log(err)
+		return err
 	}
+	return nil
 	// todo wait for response and update event
 }
 
@@ -98,7 +99,8 @@ connectLoop:
 	for {
 		select {
 		case <-ctx.Done():
-			Trigger(g, StopGame()).Done()
+			t, _ := Trigger(g, StopGame())
+			t.Done()
 			break connectLoop
 		case conn := <-c:
 			go me.handleConnection(conn, g)
@@ -132,7 +134,7 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 		switch e := r.Event.(type) {
 		case EventJoin:
 			// the incomming event is inactive, create a new
-			j := Trigger(g, e.New())
+			j, _ := Trigger(g, e.New())
 			if err := j.Done(); err != nil {
 				me.Log(err)
 				continue

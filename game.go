@@ -10,9 +10,9 @@ import (
 
 func NewGame() *Game {
 	return &Game{
-		World:     Earth(),
-		MaxEvents: 10,
-		Logger:    logger.Silent,
+		World:    Earth(),
+		MaxTasks: 10,
+		Logger:   logger.Silent,
 		Characters: Characters{
 			{
 				Ident: "god",
@@ -25,16 +25,16 @@ func NewGame() *Game {
 type Game struct {
 	World
 	Characters
-	MaxEvents int
+	MaxTasks int
 
-	ch chan<- Event
+	ch chan<- *Task
 	logger.Logger
 }
 
 func (g *Game) Run(ctx context.Context) error {
 	g.Log("start game")
 
-	ch := make(chan Event, g.MaxEvents)
+	ch := make(chan *Task, g.MaxTasks)
 	defer func() {
 		close(ch)
 		g.Log("game stopped")
@@ -47,20 +47,24 @@ eventLoop:
 		case <-ctx.Done(): // ie. interrupted from the outside
 			break eventLoop
 
-		case e := <-ch: // blocks
+		case task := <-ch: // blocks
 			// One event affects the game
-			if err := e.Affect(g); err != nil {
+			err := task.Event.Affect(g)
+
+			if err != nil {
 				if errors.Is(endEventLoop, err) {
+					task.setErr(nil)
 					break eventLoop
 				}
 				g.Log("event: ", err)
 			}
+
 			// Make sure any event can be cleaned up. Triggering
 			// side will most likely also wait for event to be
 			// done, but this is here to give them the option to
 			// ignore it. This does impact performance quite a bit
 			// though.
-			e.Done()
+			task.setErr(err)
 		}
 	}
 	return nil
