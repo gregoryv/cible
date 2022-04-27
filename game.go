@@ -35,21 +35,21 @@ type Game struct {
 	events chan Event
 }
 
-func (me *Game) Run(ctx context.Context) error {
-	me.Log("start game")
+func (g *Game) Run(ctx context.Context) error {
+	g.Log("start game")
 eventLoop:
 	for {
 		select {
 		case <-ctx.Done(): // ie. interrupted from the outside
 			break eventLoop
 
-		case e := <-me.events: // blocks
+		case e := <-g.events: // blocks
 			// One event affects the game
-			if err := e.Affect(me); err != nil {
+			if err := e.Affect(g); err != nil {
 				if errors.Is(endEventLoop, err) {
 					break eventLoop
 				}
-				me.Log("event: ", err)
+				g.Log("event: ", err)
 			}
 			// Make sure any event can be cleaned up. Triggering
 			// side will most likely also wait for event to be
@@ -59,13 +59,13 @@ eventLoop:
 			e.Done()
 		}
 	}
-	me.Log("game stopped")
+	g.Log("game stopped")
 	return nil
 }
 
 // Place returns the position as area and tile.
-func (me *Game) Place(p Position) (a *Area, t *Tile, err error) {
-	if a, err = me.Area(p.Area); err != nil {
+func (g *Game) Place(p Position) (a *Area, t *Tile, err error) {
+	if a, err = g.Area(p.Area); err != nil {
 		return
 	}
 	t, err = a.Tile(p.Tile)
@@ -73,8 +73,8 @@ func (me *Game) Place(p Position) (a *Area, t *Tile, err error) {
 }
 
 // Character returns a character in the game by id.
-func (me *Game) Character(id Ident) (*Character, error) {
-	for _, c := range me.Characters {
+func (g *Game) Character(id Ident) (*Character, error) {
+	for _, c := range g.Characters {
 		if c.Ident == id {
 			return c, nil
 		}
@@ -105,8 +105,8 @@ type World struct {
 	Areas
 }
 
-func (me *World) Area(id Ident) (*Area, error) {
-	for _, a := range me.Areas {
+func (w *World) Area(id Ident) (*Area, error) {
+	for _, a := range w.Areas {
 		if a.Ident == id {
 			return a, nil
 		}
@@ -122,8 +122,8 @@ type Area struct {
 	Tiles
 }
 
-func (me *Area) Tile(id Ident) (*Tile, error) {
-	for _, t := range me.Tiles {
+func (a *Area) Tile(id Ident) (*Tile, error) {
+	for _, t := range a.Tiles {
 		if t.Ident == id {
 			return t, nil
 		}
@@ -140,15 +140,15 @@ type Tile struct {
 	Nav
 }
 
-func (me *Tile) String() string {
-	return fmt.Sprintf("%s %s", me.Ident, me.Short)
+func (t *Tile) String() string {
+	return fmt.Sprintf("%s %s", t.Ident, t.Short)
 }
 
 type Nav [4]Ident
 
-func (me Nav) String() string {
+func (n Nav) String() string {
 	var res []string
-	for d, id := range me {
+	for d, id := range n {
 		if id != "" {
 			res = append(res, Direction(d).String()+":"+string(id))
 		}
@@ -161,8 +161,8 @@ type Position struct {
 	Tile Ident
 }
 
-func (me *Position) Equal(p Position) bool {
-	return me.Area == p.Area && me.Tile == p.Tile
+func (p *Position) Equal(v Position) bool {
+	return p.Area == v.Area && p.Tile == v.Tile
 }
 
 type Ident string
