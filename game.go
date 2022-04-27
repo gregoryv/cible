@@ -23,10 +23,9 @@ eventLoop:
 				if errors.Is(endEventLoop, err) {
 					break eventLoop
 				}
-				me.Logf("%s: %v", e.Event(), err)
+				me.Log("event: ", err)
 				continue
 			}
-			me.Log(e.Event())
 			// Make sure any event can be cleaned up. Triggering
 			// side will most likely also wait for event to be
 			// done, but this is here to give them the option to
@@ -35,7 +34,7 @@ eventLoop:
 			go e.Done()
 		}
 	}
-
+	me.Log("game stopped")
 	return nil
 }
 
@@ -48,7 +47,6 @@ type Events chan<- Event
 
 type Event interface {
 	Affect(*Game) error // called in the event loop
-	Event() string
 
 	// Done blocks until event is handled, can be called multiple
 	// times.

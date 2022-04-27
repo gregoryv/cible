@@ -27,6 +27,7 @@ type Movement struct {
 }
 
 func (e *Movement) Affect(g *Game) (err error) {
+	g.Logf("%s move %s", e.Ident, e.Direction)
 	defer func() {
 		if err != nil {
 			e.failed <- err
@@ -69,10 +70,6 @@ func (me *Movement) Done() (err error) {
 		close(me.failed)
 	})
 	return me.err
-}
-
-func (me *Movement) Event() string {
-	return fmt.Sprintf("%s move %s", me.Ident, me.Direction)
 }
 
 func (me *Tile) Link(d Direction) (Ident, error) {

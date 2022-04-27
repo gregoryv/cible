@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"strings"
 	"testing"
 
 	"github.com/gregoryv/logger"
@@ -124,13 +123,6 @@ func Test_cancelGame(t *testing.T) {
 func Test_cave(t *testing.T) {
 	for _, tile := range myCave().Tiles {
 		t.Log(tile, tile.Nav)
-	}
-}
-
-func TestMovement(t *testing.T) {
-	e := MoveCharacter("John", S)
-	if got := e.Event(); !strings.Contains(got, "John") {
-		t.Errorf("missing name: %q", got)
 	}
 }
 

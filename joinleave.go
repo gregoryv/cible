@@ -1,7 +1,6 @@
 package cible
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -25,6 +24,7 @@ type EventJoin struct {
 }
 
 func (e *EventJoin) Affect(g *Game) error {
+	g.Log("%s join", e.Player.Name)
 	p := Position{
 		Area: "a1", Tile: "01",
 	}
@@ -49,10 +49,6 @@ func (me *EventJoin) Done() (err error) {
 	return me.err
 }
 
-func (me *EventJoin) Event() string {
-	return fmt.Sprintf("%s join", me.Player.Name)
-}
-
 // ----------------------------------------
 
 func Leave(cid Ident) *EventLeave {
@@ -64,7 +60,7 @@ func Leave(cid Ident) *EventLeave {
 
 type EventLeave struct {
 	Ident
-	Name
+	Name // player name
 
 	err error // set when done
 
@@ -73,6 +69,7 @@ type EventLeave struct {
 }
 
 func (e *EventLeave) Affect(g *Game) error {
+	g.Logf("%s left", e.Name)
 	c, err := g.Character(e.Ident)
 	if err != nil {
 		e.failed <- err
@@ -89,8 +86,4 @@ func (me *EventLeave) Done() (err error) {
 		close(me.failed)
 	})
 	return me.err
-}
-
-func (me *EventLeave) Event() string {
-	return fmt.Sprintf("%s left", me.Name)
 }
