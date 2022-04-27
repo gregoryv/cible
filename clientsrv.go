@@ -10,6 +10,13 @@ import (
 	"github.com/gregoryv/logger"
 )
 
+func NewServer() *Server {
+	return &Server{
+		Logger: logger.Silent,
+		Bind:   "",
+	}
+}
+
 type Server struct {
 	logger.Logger
 	Bind string
@@ -20,7 +27,7 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 	if err != nil {
 		return err
 	}
-	me.Log("listen on", me.Bind)
+	me.Log("server listen on", ln.Addr())
 
 	c := make(chan net.Conn)
 	go func() {

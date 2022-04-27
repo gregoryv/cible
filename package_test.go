@@ -5,9 +5,21 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/gregoryv/logger"
 )
+
+func TestServer(t *testing.T) {
+	g := NewGame()
+	go g.Run(context.Background())
+
+	srv := NewServer()
+	srv.Logger = t
+	go srv.Run(context.Background(), g)
+	<-time.After(10 * time.Millisecond)
+	Trigger(g, StopGame()).Done()
+}
 
 func TestGame_play(t *testing.T) {
 	g := NewGame()
