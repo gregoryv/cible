@@ -25,6 +25,7 @@ func TestGame_play(t *testing.T) {
 
 	p := Player{Name: "John"}
 	c := Trigger(g, Join(p))
+	t.Log("here")
 	if err := c.Done(); err != nil {
 		t.Fatal(err)
 	}
@@ -74,9 +75,9 @@ func TestEvent_Done(t *testing.T) {
 	go g.Run(ctx)
 	t.Cleanup(cancel)
 
+	<-time.After(10 * time.Millisecond)
 	// stopped in last subtest
 	t.Run("Join", func(t *testing.T) {
-		defer catchPanic(t)
 		e := Trigger(g, Join(Player{Name: "John"}))
 		e.Done()
 		first := e.Ident
@@ -87,7 +88,6 @@ func TestEvent_Done(t *testing.T) {
 	})
 
 	t.Run("MoveCharacter", func(t *testing.T) {
-		defer catchPanic(t)
 		e := Trigger(g, MoveCharacter("John", N))
 		e.Done()
 		first := e.Position
@@ -98,7 +98,6 @@ func TestEvent_Done(t *testing.T) {
 	})
 
 	t.Run("Leave", func(t *testing.T) {
-		defer catchPanic(t)
 		e := Trigger(g, Leave("no such"))
 		e.Done()
 		e.Done()
@@ -106,7 +105,6 @@ func TestEvent_Done(t *testing.T) {
 
 	// keep last as it stops game
 	t.Run("StopGame", func(t *testing.T) {
-		defer catchPanic(t)
 		e := Trigger(g, StopGame())
 		e.Done()
 		e.Done()
@@ -144,6 +142,23 @@ func TestDirection(t *testing.T) {
 	_ = Direction(-1).String() // should work
 }
 
+func TestTrigger(t *testing.T) {
+	g := startNewGame(t) // not running
+	events := []Event{
+		Join(Player{Name: "John"}),
+		MoveCharacter("John", N),
+		Leave("John"),
+		StopGame(),
+	}
+	Trigger(g, StopGame()).Done()
+
+	for _, e := range events {
+		t.Run(fmt.Sprintf("%T", e), func(t *testing.T) {
+			Trigger(g, e).Done()
+		})
+	}
+}
+
 type badEvent struct {
 	err error
 }
@@ -161,6 +176,7 @@ func startNewGame(t *testing.T) *Game {
 		Trigger(g, StopGame()).Done() // wait for it to complete
 	})
 	go g.Run(context.Background())
+	time.Sleep(10 * time.Millisecond) // let it start
 	return g
 }
 

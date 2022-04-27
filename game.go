@@ -9,32 +9,31 @@ import (
 )
 
 func NewGame() *Game {
-	max := 10
-	ch := make(chan Event, max)
 	return &Game{
-		World:  Earth(),
-		Events: ch,
-		Logger: logger.Silent,
+		World:     Earth(),
+		MaxEvents: 10,
+		Logger:    logger.Silent,
 		Characters: Characters{
 			{
 				Ident: "god",
 				IsBot: true,
 			},
 		},
-		events: ch,
 	}
 }
 
 type Game struct {
 	World
 	Characters
-	Events chan<- Event // todo maybe always use Trigger?
+	MaxEvents int
+	Events    chan<- Event // todo maybe always use Trigger?
 	logger.Logger
-
-	events chan Event // for reading
 }
 
 func (g *Game) Run(ctx context.Context) error {
+	ch := make(chan Event, g.MaxEvents)
+	g.Events = ch
+
 	g.Log("start game")
 eventLoop:
 	for {
@@ -42,7 +41,7 @@ eventLoop:
 		case <-ctx.Done(): // ie. interrupted from the outside
 			break eventLoop
 
-		case e := <-g.events: // blocks
+		case e := <-ch: // blocks
 			// One event affects the game
 			if err := e.Affect(g); err != nil {
 				if errors.Is(endEventLoop, err) {
@@ -58,7 +57,7 @@ eventLoop:
 			e.Done()
 		}
 	}
-	close(g.events)
+	close(ch)
 	g.Log("game stopped")
 	return nil
 }

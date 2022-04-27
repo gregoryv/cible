@@ -50,8 +50,8 @@ func (me *EventJoin) Done() (err error) {
 }
 
 func (e *EventJoin) setErr(v error) {
-	e.err = v
-	close(e.failed)
+	go e.Done()
+	e.failed <- v
 }
 
 // ----------------------------------------
@@ -91,6 +91,6 @@ func (me *EventLeave) Done() (err error) {
 	return me.err
 }
 func (e *EventLeave) setErr(v error) {
-	e.err = v
-	close(e.failed)
+	go e.Done()
+	e.failed <- v
 }

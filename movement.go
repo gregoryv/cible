@@ -73,8 +73,8 @@ func (me *Movement) Done() (err error) {
 }
 
 func (e *Movement) setErr(v error) {
-	e.err = v
-	close(e.failed)
+	go e.Done()
+	e.failed <- v
 }
 
 func (me *Tile) Link(d Direction) (Ident, error) {
