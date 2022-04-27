@@ -57,10 +57,10 @@ func Test_badEvents(t *testing.T) {
 		t.Fatal(err)
 	}
 	cid := c.Ident
-	g.Events <- MoveCharacter("Eve", N) // no such playe)
-	g.Events <- MoveCharacter("god", N) // cannot be move)
-	g.Events <- MoveCharacter(cid, Direction(-1))
-	g.Events <- &badEvent{}
+	Trigger(g, MoveCharacter("Eve", N)) // no such playe)
+	Trigger(g, MoveCharacter("god", N)) // cannot be move)
+	Trigger(g, MoveCharacter(cid, Direction(-1)))
+	Trigger(g, &badEvent{})
 	Trigger(g, MoveCharacter(cid, W)).Done()
 	e := Trigger(g, Leave("no such"))
 	if err := e.Done(); err == nil {
@@ -185,7 +185,7 @@ func startNewGame(t *testing.T) *Game {
 func BenchmarkMoveCharacter_1_player(b *testing.B) {
 	g := NewGame()
 	go g.Run(context.Background())
-	defer g.Stop()
+	defer Trigger(g, StopGame())
 
 	p := Player{Name: "John"}
 	e := Trigger(g, Join(p))
@@ -202,7 +202,7 @@ func BenchmarkMoveCharacter_1_player(b *testing.B) {
 func BenchmarkMoveCharacter_1000_player(b *testing.B) {
 	g := NewGame()
 	go g.Run(context.Background())
-	defer g.Stop()
+	defer Trigger(g, StopGame())
 
 	for i := 0; i < 1000; i++ {
 		p := Player{Name: Name(fmt.Sprintf("John%v", i))}

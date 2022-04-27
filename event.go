@@ -5,14 +5,14 @@ import "fmt"
 // Trigger an event which affects the game. Callers should call Done
 // to wait for the event.
 func Trigger[T Event](g *Game, t T) (r T) {
-	r = t // if
+	r = t // during panic t, would be nil
 	defer func() {
 		if err := recover(); err != nil {
 			r.setErr(fmt.Errorf("game stopped, event dropped"))
 		}
 	}()
 
-	g.Events <- t
+	g.ch <- t
 	return
 }
 

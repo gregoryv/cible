@@ -5,8 +5,6 @@ import (
 	"sync"
 )
 
-func (me *Game) Stop() { me.Events <- StopGame() }
-
 func StopGame() *EventStopGame {
 	return &EventStopGame{
 		failed: make(chan error, 1),

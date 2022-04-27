@@ -26,15 +26,21 @@ type Game struct {
 	World
 	Characters
 	MaxEvents int
-	Events    chan<- Event // todo maybe always use Trigger?
+
+	ch chan<- Event
 	logger.Logger
 }
 
 func (g *Game) Run(ctx context.Context) error {
-	ch := make(chan Event, g.MaxEvents)
-	g.Events = ch
-
 	g.Log("start game")
+
+	ch := make(chan Event, g.MaxEvents)
+	defer func() {
+		close(ch)
+		g.Log("game stopped")
+	}()
+	g.ch = ch
+
 eventLoop:
 	for {
 		select {
@@ -57,8 +63,6 @@ eventLoop:
 			e.Done()
 		}
 	}
-	close(ch)
-	g.Log("game stopped")
 	return nil
 }
 
