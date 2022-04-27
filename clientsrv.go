@@ -69,6 +69,8 @@ type Server struct {
 	MaxConnections int
 
 	net.Addr // set after running
+
+	game *Game
 }
 
 func (me *Server) Run(ctx context.Context, g *Game) error {
@@ -91,6 +93,7 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 		}
 	}()
 
+	me.game = g
 connectLoop:
 	for {
 		select {
@@ -118,18 +121,28 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 	dec := gob.NewDecoder(conn)
 
 	for {
-		var r Request // todo how to know what is comming, envelope ?
+		var r Request
 		if err := dec.Decode(&r); err != nil {
 			if err != io.EOF {
 				me.Log(err)
 			}
 			return
 		}
+
 		switch e := r.Event.(type) {
 		case EventJoin:
-			me.Log("join", e.Name)
+			// the incomming event is inactive, create a new
+			j := Trigger(g, e.New())
+			if err := j.Done(); err != nil {
+				me.Log(err)
+				continue
+			}
+			// todo why doesn't the trigger affect the game??
+			// todo respond
+
 		default:
 			me.Log("unknown event")
+			continue
 		}
 		// todo send response
 		_ = enc
@@ -138,7 +151,7 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 }
 
 type Request struct {
-	Event interface{}
+	Event interface{} // if only Event then we cannot gob encode it
 }
 
 func init() {
