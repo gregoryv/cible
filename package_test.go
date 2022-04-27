@@ -6,36 +6,40 @@ import (
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/gregoryv/logger"
 )
 
 func TestServer(t *testing.T) {
 	g := startNewGame(t)
+	g.Logger = t
 	srv := NewServer()
 	srv.Logger = t
+	defer func() { srv.Logger = logger.Silent }()
 
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// start server
-	go func() {
-		if err := srv.Run(ctx, g); err != nil {
-			t.Error(err)
-		}
-	}()
+	go srv.Run(ctx, g)
 
 	pause("10ms")
 	c := NewClient()
 	c.Logger = t
 	c.Host = srv.Addr.String()
-
 	if err := c.Connect(ctx); err != nil {
 		t.Fatal(err)
 	}
+	pause("10ms")
 
 	p := Player{Name: "test"}
 	join := Join(p)
-	Send(c, join)
-	// join.Done() todo
+	if err := Send(c, join); err != nil {
+		t.Fatal(err)
+	}
 
+	if join.Ident == "" {
+		t.Error("join failed, missing ident")
+	}
 	pause("10ms")
 	cancel()
 	<-ctx.Done()
@@ -190,10 +194,12 @@ func (e *badEvent) setErr(v error) {
 
 func startNewGame(t *testing.T) *Game {
 	g := NewGame()
+	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(func() {
-		TriggerWait(g, StopGame())
+		g.Logger = logger.Silent
+		cancel()
 	})
-	go g.Run(context.Background())
+	go g.Run(ctx)
 	time.Sleep(10 * time.Millisecond) // let it start
 	return g
 }

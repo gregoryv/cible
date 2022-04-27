@@ -50,6 +50,7 @@ func Send[T Event](c *Client, e T) error {
 		c.Log(err)
 		return err
 	}
+	c.Logf("send: %T", e)
 	return nil
 	// todo wait for response and update event
 }
@@ -99,8 +100,6 @@ connectLoop:
 	for {
 		select {
 		case <-ctx.Done():
-			t, _ := Trigger(g, StopGame())
-			t.Done()
 			break connectLoop
 		case conn := <-c:
 			go me.handleConnection(conn, g)
@@ -114,7 +113,7 @@ connectLoop:
 func (me *Server) handleConnection(conn net.Conn, g *Game) {
 	defer func() {
 		_ = recover()
-		Trigger(g, Leave("x"))
+		// todo Trigger(g, Leave("x"))
 		conn.Close()
 	}()
 	me.Log("connect ", conn.RemoteAddr())
@@ -130,22 +129,22 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 			}
 			return
 		}
-
+		me.Logf("received: %T", r.Event)
+		// todo why doesn't this actually trigger anything
+		j, _ := Trigger(g, r.Event.(Event))
+		if err := j.Done(); err != nil {
+			me.Log(err)
+			continue
+		}
 		switch e := r.Event.(type) {
 		case EventJoin:
-			// the incomming event is inactive, create a new
-			j, _ := Trigger(g, e.New())
+			j, _ := Trigger(g, &e)
 			if err := j.Done(); err != nil {
 				me.Log(err)
 				continue
 			}
-			// todo why doesn't the trigger affect the game??
-			// todo respond
-
-		default:
-			me.Log("unknown event")
-			continue
 		}
+
 		// todo send response
 		_ = enc
 

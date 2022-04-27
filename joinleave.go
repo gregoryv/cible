@@ -13,10 +13,6 @@ type EventJoin struct {
 
 }
 
-func (me EventJoin) New() *EventJoin {
-	return Join(me.Player)
-}
-
 func (e *EventJoin) Affect(g *Game) error {
 	g.Logf("%s join", e.Player.Name)
 	p := Position{
