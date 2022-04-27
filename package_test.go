@@ -6,11 +6,14 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+
+	"github.com/gregoryv/logger"
 )
 
 func TestGame_play(t *testing.T) {
 	g := NewGame()
 	g.Logger = t
+	defer func() { g.Logger = logger.Silent }()
 	go g.Run(context.Background())
 	defer func() {
 		Trigger(g, StopGame()).Done()
