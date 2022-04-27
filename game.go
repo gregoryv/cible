@@ -10,18 +10,18 @@ import (
 
 func (me *Game) Run(ctx context.Context) error {
 	me.Log("start game")
-gameLoop:
+eventLoop:
 	for {
 		select {
 		case <-ctx.Done(): // ie. interrupted from the outside
-			break gameLoop
+			break eventLoop
 
 		case e := <-me.events: // blocks
 			switch e := e.(type) {
 			case *EventStopGame:
 				me.Log(e.Event())
 				e.failed <- nil
-				break gameLoop
+				break eventLoop
 
 			default:
 				if err := me.handleEvent(e); err != nil {
