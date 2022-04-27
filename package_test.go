@@ -133,6 +133,10 @@ func TestArea_Tile(t *testing.T) {
 	}
 }
 
+func TestDirection(t *testing.T) {
+	_ = Direction(-1).String() // should work
+}
+
 type badEvent struct{}
 
 func (me *badEvent) Event() string      { return "badEvent" }

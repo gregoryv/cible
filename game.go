@@ -50,20 +50,20 @@ eventLoop:
 					break eventLoop
 				}
 				me.Log("event: ", err)
-				continue
 			}
 			// Make sure any event can be cleaned up. Triggering
 			// side will most likely also wait for event to be
 			// done, but this is here to give them the option to
 			// ignore it. This does impact performance quite a bit
 			// though.
-			go e.Done()
+			e.Done()
 		}
 	}
 	me.Log("game stopped")
 	return nil
 }
 
+// Place returns the position as area and tile.
 func (me *Game) Place(p Position) (a *Area, t *Tile, err error) {
 	if a, err = me.Area(p.Area); err != nil {
 		return
@@ -72,6 +72,7 @@ func (me *Game) Place(p Position) (a *Area, t *Tile, err error) {
 	return
 }
 
+// Character returns a character in the game by id.
 func (me *Game) Character(id Ident) (*Character, error) {
 	for _, c := range me.Characters {
 		if c.Ident == id {
