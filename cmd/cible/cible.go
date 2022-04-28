@@ -42,6 +42,7 @@ func main() {
 		os.Exit(0)
 	}
 
+	os.Stdout.Write(logo)
 	// connect client
 	c := NewClient()
 	c.Logger = l
@@ -90,3 +91,12 @@ func main() {
 		}
 	}
 }
+
+var logo = []byte(`
+  ____ ___ ____  _     _____ 
+ / ___|_ _| __ )| |   | ____|
+| |    | ||  _ \| |   |  _|  
+| |___ | || |_) | |___| |___ 
+ \____|___|____/|_____|_____|
+                             
+`)
