@@ -38,25 +38,25 @@ func (me *Client) Connect(ctx context.Context) error {
 	return nil
 }
 
-func Send(c *Client, r *Request) error {
+func Send[T any](c *Client, e *T) (T, error) {
 	if c.Conn == nil {
 		c.Log("send failed: no connection")
-		return fmt.Errorf("no connection")
+		return *e, fmt.Errorf("no connection")
 	}
 
-	if err := c.enc.Encode(r); err != nil {
+	r := Request{Event: e}
+	if err := c.enc.Encode(&r); err != nil {
 		c.Log(err)
-		return err
+		return *e, err
 	}
-	c.Logf("send: %T", r.Event)
+	c.Logf("send: %T", e)
 
 	if err := c.dec.Decode(&r); err != nil {
 		c.Log(err)
-		return err
+		return *e, err
 	}
-	c.Logf("received: %#v", r.Event)
-	return nil
-	// todo wait for response and update event
+	c.Logf("resp: %#v", r.Event)
+	return r.Event.(T), nil
 }
 
 // ----------------------------------------
@@ -67,4 +67,5 @@ type Request struct {
 
 func init() {
 	gob.Register(EventJoin{})
+	gob.Register(Request{})
 }

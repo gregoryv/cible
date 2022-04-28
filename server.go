@@ -81,7 +81,7 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 			}
 			return
 		}
-		me.Logf("received: %T", r.Event)
+		me.Logf("recv: %T", r.Event)
 		// todo figure out how to call Trigger on everything that comes in
 
 		switch e := r.Event.(type) {
@@ -92,7 +92,7 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 				continue
 			}
 			r.Event = x
-			me.Logf("response: %#v", x)
+			me.Logf("resp: %#v", x)
 		}
 
 		if err := enc.Encode(r); err != nil {
