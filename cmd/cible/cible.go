@@ -62,6 +62,7 @@ func main() {
 	}
 	cid := j.Ident
 
+	var m Movement
 	for {
 		fmt.Printf("%s> ", p.Name)
 		scanner := bufio.NewScanner(os.Stdin)
@@ -76,7 +77,9 @@ func main() {
 
 		switch input {
 		case "n":
-			_, err = Send(c, MoveCharacter(cid, N))
+			m, err = Send(c, MoveCharacter(cid, N))
+			fmt.Println(m.String())
+			fmt.Println(m.Tile.Short)
 		case "w":
 			_, err = Send(c, MoveCharacter(cid, W))
 		case "s":

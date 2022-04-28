@@ -65,6 +65,7 @@ type Movement struct {
 	Direction
 
 	Position // set when done
+	*Tile
 }
 
 func (e *Movement) Affect(g *Game) (err error) {
@@ -86,7 +87,12 @@ func (e *Movement) Affect(g *Game) (err error) {
 		c.Position.Tile = next
 	}
 	e.Position = c.Position
+	e.Tile = t
 	return nil
+}
+
+func (me *Movement) String() string {
+	return fmt.Sprintf("%s => %s", me.Direction, me.Position)
 }
 
 func link(t *Tile, d Direction) (Ident, error) {
