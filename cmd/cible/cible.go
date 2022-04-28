@@ -59,6 +59,7 @@ func main() {
 		l.Log("join failed, missing ident", err)
 		os.Exit(1)
 	}
+	cid := j.Ident
 
 	for {
 		fmt.Print("> ")
@@ -70,6 +71,22 @@ func main() {
 			os.Exit(1)
 		}
 		// todo handle commands
-	}
+		input := scanner.Text()
 
+		switch input {
+		case "n":
+			_, err = Send(c, MoveCharacter(cid, N))
+		case "w":
+			_, err = Send(c, MoveCharacter(cid, W))
+		case "s":
+			_, err = Send(c, MoveCharacter(cid, S))
+		case "e":
+			_, err = Send(c, MoveCharacter(cid, E))
+		default:
+			err = fmt.Errorf("?")
+		}
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 }
