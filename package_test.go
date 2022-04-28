@@ -17,7 +17,7 @@ func TestServer(t *testing.T) {
 	defer func() { srv.Logger = logger.Silent }()
 
 	ctx, cancel := context.WithCancel(context.Background())
-
+	t.Cleanup(cancel)
 	// start server
 	go srv.Run(ctx, g)
 
@@ -25,22 +25,13 @@ func TestServer(t *testing.T) {
 	c := NewClient()
 	c.Logger = t
 	c.Host = srv.Addr.String()
-	if err := c.Connect(ctx); err != nil {
-		t.Fatal(err)
-	}
-	pause("10ms")
+	t.Log(c.Connect(ctx))
 
 	p := Player{Name: "test"}
 	join, err := Send(c, &EventJoin{Player: p})
-	if err != nil {
-		t.Fatal(err)
-	}
 	if join.Ident == "" {
-		t.Error("join failed, missing ident")
+		t.Error("join failed, missing ident", err)
 	}
-	pause("10ms")
-	cancel()
-	<-ctx.Done()
 }
 
 func TestGame_play(t *testing.T) {
