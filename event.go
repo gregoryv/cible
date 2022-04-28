@@ -127,19 +127,16 @@ func newNamedEvent(name string) (interface{}, bool) {
 
 func init() {
 	// register events that remote clients could send
-	registerEvent(
-		&EventJoin{},
-	)
+	registerEvent(&EventJoin{})
+	registerEvent(&Movement{})
 }
 
 // register pointer to events
-func registerEvent[T any](t ...*T) {
-	for _, t := range t {
-		gob.Register(*t)
-		eventConstructors[fmt.Sprintf("%T", *t)] = func() interface{} {
-			var x T
-			return &x
-		}
+func registerEvent[T any](t *T) {
+	gob.Register(*t)
+	eventConstructors[fmt.Sprintf("%T", *t)] = func() interface{} {
+		var x T
+		return &x
 	}
 }
 
