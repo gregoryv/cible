@@ -183,12 +183,9 @@ type badEvent struct {
 	err error
 }
 
-func (me *badEvent) Event() string      { return "badEvent" }
-func (me *badEvent) Done() error        { return me.err }
-func (me *badEvent) Affect(*Game) error { return me.err }
-func (e *badEvent) setErr(v error) {
-	e.err = v
-}
+func (e *badEvent) Event() string      { return "badEvent" }
+func (e *badEvent) Done() error        { return e.err }
+func (e *badEvent) Affect(*Game) error { return e.err }
 
 func startNewGame(t *testing.T) *Game {
 	g := NewGame()
