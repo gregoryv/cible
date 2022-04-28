@@ -76,16 +76,10 @@ func main() {
 		input := scanner.Text()
 
 		switch input {
-		case "n":
-			m, err = Send(c, MoveCharacter(cid, N))
-			fmt.Println(m.String())
-			fmt.Println(m.Tile.Short)
-		case "w":
-			_, err = Send(c, MoveCharacter(cid, W))
-		case "s":
-			_, err = Send(c, MoveCharacter(cid, S))
-		case "e":
-			_, err = Send(c, MoveCharacter(cid, E))
+		case "n", "w", "s", "e":
+			m, err = Send(c, MoveCharacter(cid, nav[input]))
+			fmt.Println(m.Direction, " => ", m.Tile.Short)
+
 		case "h", "help":
 			os.Stdout.Write(usage)
 		case "q":
@@ -99,6 +93,13 @@ func main() {
 			fmt.Println(err)
 		}
 	}
+}
+
+var nav = map[string]Direction{
+	"n": N,
+	"e": E,
+	"s": S,
+	"w": W,
 }
 
 var usage = []byte(`
