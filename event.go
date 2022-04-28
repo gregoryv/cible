@@ -16,7 +16,7 @@ type EventJoin struct {
 }
 
 func (e *EventJoin) Affect(g *Game) error {
-	g.Logf("%s join", e.Player.Name)
+	g.Logf("%s joined game", e.Player.Name)
 	p := Position{
 		Area: "a1", Tile: "01",
 	}

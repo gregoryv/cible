@@ -38,23 +38,23 @@ func (me *Client) Connect(ctx context.Context) error {
 	return nil
 }
 
-func Send[T Event](c *Client, e T) error {
+func Send(c *Client, r *Request) error {
 	if c.Conn == nil {
 		c.Log("send failed: no connection")
 		return fmt.Errorf("no connection")
 	}
 
-	r := Request{e}
 	if err := c.enc.Encode(r); err != nil {
 		c.Log(err)
 		return err
 	}
-	c.Logf("send: %T", e)
+	c.Logf("send: %T", r.Event)
 
 	if err := c.dec.Decode(&r); err != nil {
-		c.Logf("response: %#v", r)
+		c.Log(err)
 		return err
 	}
+	c.Logf("received: %#v", r.Event)
 	return nil
 	// todo wait for response and update event
 }

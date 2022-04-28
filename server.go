@@ -91,11 +91,10 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 				me.Log(err)
 				continue
 			}
-			me.Logf("got %#v", x)
 			r.Event = x
+			me.Logf("response: %#v", x)
 		}
 
-		// todo send response
 		if err := enc.Encode(r); err != nil {
 			me.Log(err)
 		}

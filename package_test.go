@@ -32,10 +32,11 @@ func TestServer(t *testing.T) {
 
 	p := Player{Name: "test"}
 	join := Join(p)
-	if err := Send(c, join); err != nil {
+	r := &Request{Event: join}
+	if err := Send(c, r); err != nil {
 		t.Fatal(err)
 	}
-	if join.Ident == "" {
+	if r.Event.(EventJoin).Ident == "" {
 		t.Error("join failed, missing ident")
 	}
 	pause("10ms")
