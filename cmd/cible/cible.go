@@ -83,6 +83,8 @@ func main() {
 			_, err = Send(c, MoveCharacter(cid, S))
 		case "e":
 			_, err = Send(c, MoveCharacter(cid, E))
+		case "h", "help":
+			os.Stdout.Write(usage)
 		default:
 			err = fmt.Errorf("?")
 		}
@@ -91,6 +93,17 @@ func main() {
 		}
 	}
 }
+
+var usage = []byte(`
+Navigation
+
+n - north
+e - east
+s - south
+w - west
+
+h, help for this help
+`)
 
 var logo = []byte(`
   ____ ___ ____  _     _____ 
