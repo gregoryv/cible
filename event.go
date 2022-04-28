@@ -13,7 +13,7 @@ type Event interface {
 
 type EventJoin struct {
 	Player
-	Ident // set when done
+	*Character
 }
 
 func (e *EventJoin) Affect(g *Game) error {
@@ -25,7 +25,7 @@ func (e *EventJoin) Affect(g *Game) error {
 		Position: p,
 	}
 	g.Characters.Add(c)
-	e.Ident = c.Ident
+	e.Character = c
 	g.Logf("%s joined game as %s", e.Player.Name, c.Ident)
 	return nil
 }

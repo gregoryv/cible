@@ -63,6 +63,10 @@ func main() {
 	cid := j.Ident
 
 	var m Movement
+	// uggly way to set current pos, todo fix it
+	m, _ = Send(c, MoveCharacter(cid, N))
+	m, _ = Send(c, MoveCharacter(cid, S))
+
 	for {
 		fmt.Printf("%s> ", p.Name)
 		scanner := bufio.NewScanner(os.Stdin)
@@ -72,13 +76,14 @@ func main() {
 			l.Log(err)
 			os.Exit(1)
 		}
-		// todo handle commands
-		input := scanner.Text()
 
+		input := scanner.Text()
 		switch input {
 		case "n", "w", "s", "e":
 			m, err = Send(c, MoveCharacter(cid, nav[input]))
-			fmt.Println(m.Direction, " => ", m.Tile.Short)
+			if err == nil {
+				fmt.Println(m.Direction, " => ", m.Tile.Short)
+			}
 
 		case "l":
 			// todo first position
