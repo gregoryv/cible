@@ -21,11 +21,10 @@ func (e *EventJoin) Affect(g *Game) error {
 		Area: "a1", Tile: "01",
 	}
 	c := &Character{
-		Ident:    Ident(e.Player.Name),
 		Name:     e.Player.Name,
 		Position: p,
 	}
-	g.Characters = append(g.Characters, c)
+	g.Characters.Add(c)
 	e.Ident = c.Ident
 	return nil
 }

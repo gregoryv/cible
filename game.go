@@ -93,6 +93,11 @@ func (g *Game) Character(id Ident) (*Character, error) {
 
 type Characters []*Character
 
+func (me *Characters) Add(c *Character) {
+	*me = append(*me, c)
+	c.Ident = Ident(fmt.Sprintf("char%02v", len(*me)))
+}
+
 type Character struct {
 	Ident
 	Name

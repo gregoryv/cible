@@ -41,11 +41,12 @@ func main() {
 		os.Exit(0)
 	}
 
+	// todo use the client
 	conn, err := net.Dial("tcp", bind)
 	if err != nil {
 		l.Log(err)
 	}
 	// send command
-	// todo maybe use gobs?
+
 	fmt.Fprintf(conn, os.Getenv("USER")+" join")
 }
