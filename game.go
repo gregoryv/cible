@@ -123,7 +123,3 @@ func (p *Position) Equal(v Position) bool {
 }
 
 type Ident string
-type Name string
-type Short string
-type Long string
-type Title string

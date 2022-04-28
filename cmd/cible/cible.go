@@ -80,6 +80,12 @@ func main() {
 			m, err = Send(c, MoveCharacter(cid, nav[input]))
 			fmt.Println(m.Direction, " => ", m.Tile.Short)
 
+		case "l":
+			// todo first position
+			if m.Tile != nil {
+				os.Stdout.Write([]byte(m.Tile.Long))
+				fmt.Println()
+			}
 		case "h", "help":
 			os.Stdout.Write(usage)
 		case "q":
@@ -110,6 +116,7 @@ e - east
 s - south
 w - west
 
+l - look around
 q - quit
 h, help - for this help
 `)

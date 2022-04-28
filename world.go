@@ -27,8 +27,8 @@ func myCave() *Area {
 		Nav:   Nav{E: "03", S: "01"},
 
 		Long: `A small streek of light comes in from a hole in the
-		ceiling. The entrance is a dark patch on the west wall, dryer
-		than the other walls.`,
+ceiling. The entrance is a dark patch on the west wall, dryer
+than the other walls.`,
 		//
 	}
 
@@ -108,3 +108,8 @@ const (
 	S
 	W
 )
+
+type Name string
+type Short string
+type Long string
+type Title string
