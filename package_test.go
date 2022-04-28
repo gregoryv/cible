@@ -14,14 +14,16 @@ func TestServer(t *testing.T) {
 	g := startNewGame(t)
 	srv := NewServer()
 	srv.Logger = t
+	// so we don't log After test is done
 	defer func() { srv.Logger = logger.Silent }()
 
+	// start server
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	// start server
 	go srv.Run(ctx, g)
-
 	pause("10ms")
+
+	// connect client
 	c := NewClient()
 	c.Logger = t
 	c.Host = srv.Addr.String()

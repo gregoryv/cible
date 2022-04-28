@@ -86,15 +86,15 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 
 		switch e := r.Event.(type) {
 		case EventJoin:
-			j, x := Trigger(g, &e)
-			if err := j.Done(); err != nil {
+			task, x := Trigger(g, &e)
+			if err := task.Done(); err != nil {
 				me.Log(err)
 				continue
 			}
 			r.Event = x
-			me.Logf("resp: %#v", x)
 		}
 
+		me.Logf("send: %#v", r.Event)
 		if err := enc.Encode(r); err != nil {
 			me.Log(err)
 		}

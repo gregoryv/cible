@@ -44,18 +44,18 @@ func Send[T any](c *Client, e *T) (T, error) {
 		return *e, fmt.Errorf("no connection")
 	}
 
-	r := Request{Event: e}
+	r := Request{Event: *e}
 	if err := c.enc.Encode(&r); err != nil {
 		c.Log(err)
 		return *e, err
 	}
-	c.Logf("send: %T", e)
+	c.Logf("send: %T", *e)
 
 	if err := c.dec.Decode(&r); err != nil {
 		c.Log(err)
 		return *e, err
 	}
-	c.Logf("resp: %#v", r.Event)
+	c.Logf("recv: %#v", r.Event)
 	return r.Event.(T), nil
 }
 
@@ -66,6 +66,7 @@ type Request struct {
 }
 
 func init() {
+	// todo all events must be registerd for transfer via request
 	gob.Register(EventJoin{})
 	gob.Register(Request{})
 }
