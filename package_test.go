@@ -34,10 +34,12 @@ func TestServer(t *testing.T) {
 	if j.Ident == "" {
 		t.Error("join failed, missing ident", err)
 	}
-
-	if _, err := Send(c, MoveCharacter(j.Ident, N)); err != nil {
+	t.Log(j)
+	m, err := Send(c, MoveCharacter(j.Ident, N))
+	if err != nil {
 		t.Fatal(err)
 	}
+	t.Log(m)
 
 }
 
