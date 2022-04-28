@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"fmt"
 	"io"
 	"net"
 
@@ -85,27 +86,29 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 		me.Logf("recv %s, body %v bytes", r.EventName, len(r.Body))
 		x, found := newNamedEvent(r.EventName)
 		if !found {
-			me.Logf("missing named event %s", r.EventName)
-			// todo how to respond on error
-			continue
-		}
-
-		dec := gob.NewDecoder(bytes.NewReader(r.Body))
-		if err := dec.Decode(x); err != nil {
+			err := fmt.Errorf("missing named event %s", r.EventName)
+			r.Body = []byte(err.Error())
 			me.Log(err)
-		}
+			r.EventName = "error"
+		} else {
 
-		task, x := Trigger(g, (x).(Event))
-		if err := task.Done(); err != nil {
-			me.Log(err)
-			continue
-		}
+			dec := gob.NewDecoder(bytes.NewReader(r.Body))
+			if err := dec.Decode(x); err != nil {
+				me.Log(err)
+			}
 
-		var buf bytes.Buffer
-		if err := gob.NewEncoder(&buf).Encode(x); err != nil {
-			me.Log(err)
+			task, x := Trigger(g, (x).(Event))
+			if err := task.Done(); err != nil {
+				me.Log(err)
+				continue
+			}
+
+			var buf bytes.Buffer
+			if err := gob.NewEncoder(&buf).Encode(x); err != nil {
+				me.Log(err)
+			}
+			r.Body = buf.Bytes()
 		}
-		r.Body = buf.Bytes()
 		me.Logf("send %s, body %v bytes", r.EventName, len(r.Body))
 		if err := enc.Encode(r); err != nil {
 			me.Log(err)

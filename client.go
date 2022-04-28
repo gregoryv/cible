@@ -61,6 +61,11 @@ func Send[T any](c *Client, e *T) (T, error) {
 		c.Log(err)
 		return *e, err
 	}
+	if r.EventName == "error" {
+		err := fmt.Errorf("%s", string(r.Body))
+		c.Logf("recv %v", err)
+		return *e, err
+	}
 	var x T
 	dec := gob.NewDecoder(bytes.NewReader(r.Body))
 	if err := dec.Decode(&x); err != nil {

@@ -112,6 +112,8 @@ func (e *EventStopGame) Affect(g *Game) error {
 	return endEventLoop
 }
 
+// ----------------------------------------
+
 var endEventLoop = fmt.Errorf("end event loop")
 
 // value must be interface{}, but also implement Event
@@ -124,9 +126,10 @@ func newNamedEvent(name string) (interface{}, bool) {
 }
 
 func init() {
-	// todo all events must be registerd for transfer via request
-	registerEvent(&EventJoin{})
-	gob.Register(Request{})
+	// register events that remote clients could send
+	registerEvent(
+		&EventJoin{},
+	)
 }
 
 // register pointer to events

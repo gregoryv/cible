@@ -30,10 +30,15 @@ func TestServer(t *testing.T) {
 	_ = c.Connect(ctx)
 
 	p := Player{Name: "test"}
-	join, err := Send(c, &EventJoin{Player: p})
-	if join.Ident == "" {
+	j, err := Send(c, &EventJoin{Player: p})
+	if j.Ident == "" {
 		t.Error("join failed, missing ident", err)
 	}
+
+	if _, err := Send(c, MoveCharacter(j.Ident, N)); err != nil {
+		t.Fatal(err)
+	}
+
 }
 
 func TestGame_play(t *testing.T) {
