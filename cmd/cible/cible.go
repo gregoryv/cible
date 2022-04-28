@@ -63,7 +63,7 @@ func main() {
 	cid := j.Ident
 
 	for {
-		fmt.Print("> ")
+		fmt.Printf("%s> ", p.Name)
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Scan()
 		err := scanner.Err()
@@ -85,6 +85,10 @@ func main() {
 			_, err = Send(c, MoveCharacter(cid, E))
 		case "h", "help":
 			os.Stdout.Write(usage)
+		case "q":
+			c.Close()
+			fmt.Println("bye")
+			os.Exit(0)
 		default:
 			err = fmt.Errorf("?")
 		}
@@ -102,7 +106,8 @@ e - east
 s - south
 w - west
 
-h, help for this help
+q - quit
+h, help - for this help
 `)
 
 var logo = []byte(`
