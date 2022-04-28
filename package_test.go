@@ -17,15 +17,21 @@ func TestServer(t *testing.T) {
 	// so we don't log After test is done
 	defer func() { srv.Logger = logger.Silent }()
 
-	// start server
-	ctx, cancel := context.WithCancel(context.Background())
-	t.Cleanup(cancel)
-	go srv.Run(ctx, g)
-	pause("10ms")
-
 	// connect client
 	c := NewClient()
 	c.Logger = t
+
+	// connect if server is down, should not work
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	if err := c.Connect(ctx); err == nil {
+		t.Error("connected to nothing?")
+	}
+
+	// start server
+	go srv.Run(ctx, g)
+	pause("10ms")
+
 	c.Host = srv.Addr.String()
 	_ = c.Connect(ctx)
 
