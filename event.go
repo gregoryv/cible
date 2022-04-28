@@ -1,6 +1,7 @@
 package cible
 
 import (
+	"encoding/gob"
 	"fmt"
 )
 
@@ -115,9 +116,28 @@ var endEventLoop = fmt.Errorf("end event loop")
 
 // value must be interface{}, but also implement Event
 func newNamedEvent(name string) (interface{}, bool) {
-	switch name {
-	case "cible.EventJoin":
-		return &EventJoin{}, true
+	if fn, found := eventConstructors[name]; !found {
+		return nil, false
+	} else {
+		return fn(), true
 	}
-	return nil, false
 }
+
+func init() {
+	// todo all events must be registerd for transfer via request
+	registerEvent(&EventJoin{})
+	gob.Register(Request{})
+}
+
+// register pointer to events
+func registerEvent[T any](t ...*T) {
+	for _, t := range t {
+		gob.Register(*t)
+		eventConstructors[fmt.Sprintf("%T", *t)] = func() interface{} {
+			var x T
+			return &x
+		}
+	}
+}
+
+var eventConstructors = make(map[string]func() interface{})

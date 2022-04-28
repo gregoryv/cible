@@ -87,6 +87,7 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 		if !found {
 			me.Logf("missing named event %s", r.EventName)
 			// todo how to respond on error
+			continue
 		}
 
 		dec := gob.NewDecoder(bytes.NewReader(r.Body))

@@ -77,9 +77,3 @@ type Request struct {
 	EventName string
 	Body      []byte
 }
-
-func init() {
-	// todo all events must be registerd for transfer via request
-	gob.Register(EventJoin{})
-	gob.Register(Request{})
-}
