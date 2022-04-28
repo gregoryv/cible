@@ -82,10 +82,11 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 			}
 			return
 		}
-		me.Logf("recv: %s", r.EventName)
-		x, found := namedEvents[r.EventName]
+		me.Logf("recv %s, body %v bytes", r.EventName, len(r.Body))
+		x, found := newNamedEvent(r.EventName)
 		if !found {
 			me.Logf("missing named event %s", r.EventName)
+			// todo how to respond on error
 		}
 
 		dec := gob.NewDecoder(bytes.NewReader(r.Body))
@@ -104,15 +105,9 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 			me.Log(err)
 		}
 		r.Body = buf.Bytes()
-
-		me.Logf("send: %s", r.EventName)
+		me.Logf("send %s, body %v bytes", r.EventName, len(r.Body))
 		if err := enc.Encode(r); err != nil {
 			me.Log(err)
 		}
-
 	}
-}
-
-var namedEvents = map[string]interface{}{
-	"*cible.EventJoin": &EventJoin{},
 }

@@ -112,3 +112,12 @@ func (e *EventStopGame) Affect(g *Game) error {
 }
 
 var endEventLoop = fmt.Errorf("end event loop")
+
+// value must be interface{}, but also implement Event
+func newNamedEvent(name string) (interface{}, bool) {
+	switch name {
+	case "cible.EventJoin":
+		return &EventJoin{}, true
+	}
+	return nil, false
+}

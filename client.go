@@ -48,14 +48,14 @@ func Send[T any](c *Client, e *T) (T, error) {
 	var buf bytes.Buffer
 	gob.NewEncoder(&buf).Encode(*e)
 	r := Request{
-		EventName: fmt.Sprintf("%T", e),
+		EventName: fmt.Sprintf("%T", *e),
 		Body:      buf.Bytes(),
 	}
 	if err := c.enc.Encode(&r); err != nil {
 		c.Log(err)
 		return *e, err
 	}
-	c.Logf("send: %T", *e)
+	c.Logf("send %s, body %v bytes", r.EventName, len(r.Body))
 
 	if err := c.dec.Decode(&r); err != nil {
 		c.Log(err)
@@ -67,7 +67,7 @@ func Send[T any](c *Client, e *T) (T, error) {
 		c.Log(err)
 		return *e, err
 	}
-	c.Logf("recv: %#v", r.EventName)
+	c.Logf("recv %s, body %v bytes", r.EventName, len(r.Body))
 	return x, nil
 }
 

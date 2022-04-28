@@ -27,7 +27,7 @@ func TestServer(t *testing.T) {
 	c := NewClient()
 	c.Logger = t
 	c.Host = srv.Addr.String()
-	t.Log(c.Connect(ctx))
+	_ = c.Connect(ctx)
 
 	p := Player{Name: "test"}
 	join, err := Send(c, &EventJoin{Player: p})
