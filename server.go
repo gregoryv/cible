@@ -65,12 +65,15 @@ connectLoop:
 }
 
 func (me *Server) handleConnection(conn net.Conn, g *Game) {
+	var cid Ident // set on first EventJoin
 	defer func() {
 		// graceful connection handling
 		e := recover()
 		if e != nil {
 			me.Log(e)
 		}
+		Trigger(g, Leave(cid))
+		me.Log(cid, " disconnected")
 		conn.Close()
 	}()
 	me.Log("connect ", conn.RemoteAddr())
@@ -105,7 +108,9 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 				me.Log(err)
 				continue
 			}
-
+			if r.EventName == "cible.EventJoin" {
+				cid = x.(*EventJoin).Ident
+			}
 			var buf bytes.Buffer
 			if err := gob.NewEncoder(&buf).Encode(x); err != nil {
 				me.Log(err)
