@@ -67,7 +67,10 @@ connectLoop:
 func (me *Server) handleConnection(conn net.Conn, g *Game) {
 	defer func() {
 		// graceful connection handling
-		me.Log(recover())
+		e := recover()
+		if e != nil {
+			me.Log(e)
+		}
 		conn.Close()
 	}()
 	me.Log("connect ", conn.RemoteAddr())
