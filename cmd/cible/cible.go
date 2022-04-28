@@ -2,7 +2,9 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -18,8 +20,9 @@ func main() {
 		srv  = cli.Flag("-s, --server")
 	)
 	cli.Parse()
-	l := logger.Wrap(log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile))
+	l := logger.Silent
 	if srv {
+		l = logger.Wrap(log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile))
 		g := NewGame()
 		g.Logger = l
 
@@ -55,6 +58,18 @@ func main() {
 	if j.Ident == "" {
 		l.Log("join failed, missing ident", err)
 		os.Exit(1)
+	}
+
+	for {
+		fmt.Print("> ")
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+		err := scanner.Err()
+		if err != nil {
+			l.Log(err)
+			os.Exit(1)
+		}
+		// todo handle commands
 	}
 
 }
