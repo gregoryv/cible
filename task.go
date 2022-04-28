@@ -65,7 +65,3 @@ func Join(p Player) *EventJoin {
 		Player: p,
 	}
 }
-
-type Event interface {
-	Affect(*Game) error // called in the event loop
-}

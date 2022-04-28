@@ -99,3 +99,12 @@ func (n Nav) String() string {
 	}
 	return strings.Join(res, " ")
 }
+
+type Direction int
+
+const (
+	N Direction = iota
+	E
+	S
+	W
+)

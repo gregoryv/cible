@@ -4,6 +4,12 @@ import (
 	"fmt"
 )
 
+// Events follow a command pattern so we can send events accross the
+// wire using some encoding.
+type Event interface {
+	Affect(*Game) error // called in the event loop
+}
+
 type EventJoin struct {
 	Player
 	Ident // set when done
@@ -45,7 +51,7 @@ func (e *EventLeave) Affect(g *Game) error {
 	return nil
 }
 
-// gomerge src: movement.go
+// ----------------------------------------
 
 func MoveCharacter(id Ident, d Direction) *Movement {
 	return &Movement{
@@ -72,7 +78,7 @@ func (e *Movement) Affect(g *Game) (err error) {
 	if err != nil {
 		return err
 	}
-	next, err := t.Link(e.Direction)
+	next, err := link(t, e.Direction)
 	if err != nil {
 		return err
 	}
@@ -83,25 +89,14 @@ func (e *Movement) Affect(g *Game) (err error) {
 	return nil
 }
 
-func (me *Tile) Link(d Direction) (Ident, error) {
-	if d < 0 || int(d) > len(me.Nav) {
+func link(t *Tile, d Direction) (Ident, error) {
+	if d < 0 || int(d) > len(t.Nav) {
 		return "", fmt.Errorf("bad direction")
 	}
-	return me.Nav[int(d)], nil
+	return t.Nav[int(d)], nil
 }
 
 // ----------------------------------------
-
-type Direction int
-
-const (
-	N Direction = iota
-	E
-	S
-	W
-)
-
-// gomerge src: startstop.go
 
 func StopGame() *EventStopGame {
 	return &EventStopGame{}
