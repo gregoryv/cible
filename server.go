@@ -1,6 +1,7 @@
 package cible
 
 import (
+	"bytes"
 	"context"
 	"encoding/gob"
 	"io"
@@ -81,23 +82,37 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 			}
 			return
 		}
-		me.Logf("recv: %T", r.Event)
-		// todo figure out how to call Trigger on everything that comes in
-
-		switch e := r.Event.(type) {
-		case EventJoin:
-			task, x := Trigger(g, &e)
-			if err := task.Done(); err != nil {
-				me.Log(err)
-				continue
-			}
-			r.Event = x
+		me.Logf("recv: %s", r.EventName)
+		x, found := namedEvents[r.EventName]
+		if !found {
+			me.Logf("missing named event %s", r.EventName)
 		}
 
-		me.Logf("send: %#v", r.Event)
+		dec := gob.NewDecoder(bytes.NewReader(r.Body))
+		if err := dec.Decode(x); err != nil {
+			me.Log(err)
+		}
+
+		task, x := Trigger(g, (x).(Event))
+		if err := task.Done(); err != nil {
+			me.Log(err)
+			continue
+		}
+
+		var buf bytes.Buffer
+		if err := gob.NewEncoder(&buf).Encode(x); err != nil {
+			me.Log(err)
+		}
+		r.Body = buf.Bytes()
+
+		me.Logf("send: %s", r.EventName)
 		if err := enc.Encode(r); err != nil {
 			me.Log(err)
 		}
 
 	}
+}
+
+var namedEvents = map[string]interface{}{
+	"*cible.EventJoin": &EventJoin{},
 }

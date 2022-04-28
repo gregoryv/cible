@@ -1,6 +1,7 @@
 package cible
 
 import (
+	"bytes"
 	"context"
 	"encoding/gob"
 	"fmt"
@@ -44,7 +45,12 @@ func Send[T any](c *Client, e *T) (T, error) {
 		return *e, fmt.Errorf("no connection")
 	}
 
-	r := Request{Event: *e}
+	var buf bytes.Buffer
+	gob.NewEncoder(&buf).Encode(*e)
+	r := Request{
+		EventName: fmt.Sprintf("%T", e),
+		Body:      buf.Bytes(),
+	}
 	if err := c.enc.Encode(&r); err != nil {
 		c.Log(err)
 		return *e, err
@@ -55,14 +61,21 @@ func Send[T any](c *Client, e *T) (T, error) {
 		c.Log(err)
 		return *e, err
 	}
-	c.Logf("recv: %#v", r.Event)
-	return r.Event.(T), nil
+	var x T
+	dec := gob.NewDecoder(bytes.NewReader(r.Body))
+	if err := dec.Decode(&x); err != nil {
+		c.Log(err)
+		return *e, err
+	}
+	c.Logf("recv: %#v", r.EventName)
+	return x, nil
 }
 
 // ----------------------------------------
 
 type Request struct {
-	Event interface{} // if only Event then we cannot gob encode it
+	EventName string
+	Body      []byte
 }
 
 func init() {
