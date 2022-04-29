@@ -82,7 +82,7 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 	dec := gob.NewDecoder(conn)
 
 	for {
-		var r Request
+		var r Message
 		if err := dec.Decode(&r); err != nil {
 			if err != io.EOF {
 				me.Log(err)

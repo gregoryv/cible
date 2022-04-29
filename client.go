@@ -47,7 +47,7 @@ func Send[T any](c *Client, e *T) (T, error) {
 
 	var buf bytes.Buffer
 	gob.NewEncoder(&buf).Encode(*e)
-	r := Request{
+	r := Message{
 		EventName: fmt.Sprintf("%T", *e),
 		Body:      buf.Bytes(),
 	}
@@ -78,7 +78,7 @@ func Send[T any](c *Client, e *T) (T, error) {
 
 // ----------------------------------------
 
-type Request struct {
+type Message struct {
 	EventName string
 	Body      []byte
 }
