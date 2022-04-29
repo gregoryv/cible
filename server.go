@@ -82,23 +82,23 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 	dec := gob.NewDecoder(conn)
 
 	for {
-		var r Message
-		if err := dec.Decode(&r); err != nil {
+		var msg Message
+		if err := dec.Decode(&msg); err != nil {
 			if err != io.EOF {
 				me.Log(err)
 			}
 			return
 		}
-		me.Logf("recv %s", r.String())
-		x, found := newNamedEvent(r.EventName)
+		me.Logf("recv %s", msg.String())
+		x, found := newNamedEvent(msg.EventName)
 		if !found {
-			err := fmt.Errorf("missing named event %s", r.EventName)
-			r.Body = []byte(err.Error())
+			err := fmt.Errorf("missing named event %s", msg.EventName)
+			msg.Body = []byte(err.Error())
 			me.Log(err)
-			r.EventName = "error"
+			msg.EventName = "error"
 		} else {
 
-			dec := gob.NewDecoder(bytes.NewReader(r.Body))
+			dec := gob.NewDecoder(bytes.NewReader(msg.Body))
 			if err := dec.Decode(x); err != nil {
 				me.Log(err)
 			}
@@ -108,17 +108,17 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 				me.Log(err)
 				continue
 			}
-			if r.EventName == "cible.EventJoin" {
+			if msg.EventName == "cible.EventJoin" {
 				cid = x.(*EventJoin).Ident
 			}
 			var buf bytes.Buffer
 			if err := gob.NewEncoder(&buf).Encode(x); err != nil {
 				me.Log(err)
 			}
-			r.Body = buf.Bytes()
+			msg.Body = buf.Bytes()
 		}
-		me.Logf("send %v", r.String())
-		if err := enc.Encode(r); err != nil {
+		me.Logf("send %v", msg.String())
+		if err := enc.Encode(msg); err != nil {
 			me.Log(err)
 		}
 	}
