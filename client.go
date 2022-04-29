@@ -39,32 +39,30 @@ func (me *Client) Connect(ctx context.Context) error {
 	return nil
 }
 
-// Send
 func Send[T any](c *Client, e *T) (T, error) {
 	if c.Conn == nil {
-		c.Log("send failed: no connection")
 		return *e, fmt.Errorf("no connection")
 	}
 
+	// write message on the wire
 	msg := NewMessage(e)
 	if err := c.enc.Encode(&msg); err != nil {
-		c.Log(err)
 		return *e, err
 	}
 
+	// read response, reuse same message
 	if err := c.dec.Decode(&msg); err != nil {
-		c.Log(err)
 		return *e, err
 	}
 	if msg.EventName == "error" {
 		err := fmt.Errorf("%s", string(msg.Body))
-		c.Logf("recv %v", err)
 		return *e, err
 	}
+
+	// decode the body and return the same type
 	var x T
 	dec := gob.NewDecoder(bytes.NewReader(msg.Body))
 	if err := dec.Decode(&x); err != nil {
-		c.Log(err)
 		return *e, err
 	}
 	return x, nil
