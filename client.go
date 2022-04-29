@@ -46,12 +46,7 @@ func Send[T any](c *Client, e *T) (T, error) {
 		return *e, fmt.Errorf("no connection")
 	}
 
-	var buf bytes.Buffer
-	gob.NewEncoder(&buf).Encode(*e)
-	msg := Message{
-		EventName: fmt.Sprintf("%T", *e),
-		Body:      buf.Bytes(),
-	}
+	msg := NewMessage(e)
 	if err := c.enc.Encode(&msg); err != nil {
 		c.Log(err)
 		return *e, err
@@ -76,6 +71,15 @@ func Send[T any](c *Client, e *T) (T, error) {
 }
 
 // ----------------------------------------
+
+func NewMessage[T any](v *T) Message {
+	var buf bytes.Buffer
+	gob.NewEncoder(&buf).Encode(*v)
+	return Message{
+		EventName: fmt.Sprintf("%T", *v),
+		Body:      buf.Bytes(),
+	}
+}
 
 type Message struct {
 	EventName string
