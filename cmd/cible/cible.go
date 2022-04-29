@@ -15,14 +15,20 @@ import (
 
 func main() {
 	var (
-		cli  = cmdline.NewBasicParser()
-		bind = cli.Option("-b, --bind").String(":8089")
-		srv  = cli.Flag("-s, --server")
+		cli       = cmdline.NewBasicParser()
+		bind      = cli.Option("-b, --bind").String(":8089")
+		debugFlag = cli.Flag("-d, --debug")
+		srv       = cli.Flag("-s, --server")
 	)
+
 	cli.Parse()
 	l := logger.Silent
 	if srv {
-		l = logger.Wrap(log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile))
+		lgr := log.New(os.Stderr, "", log.LstdFlags)
+		if debugFlag {
+			lgr.SetFlags(log.LstdFlags | log.Lshortfile)
+		}
+		l = logger.Wrap(lgr)
 		g := NewGame()
 		g.Logger = l
 

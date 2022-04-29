@@ -86,6 +86,12 @@ type Message struct {
 
 func (m *Message) String() string {
 	return fmt.Sprintf(
-		"message %s, body %v bytes", m.EventName, len(m.Body),
+		"message %s %v bytes", m.EventName, m.Size(),
 	)
+}
+
+func (m *Message) Size() int {
+	var buf bytes.Buffer
+	gob.NewEncoder(&buf).Encode(*m)
+	return buf.Len()
 }
