@@ -25,6 +25,12 @@ func main() {
 	l := logger.Silent
 	if srv {
 		lgr := log.New(os.Stderr, "", log.LstdFlags)
+		w, err := os.Create("server.log")
+		if err != nil {
+			lgr.Println(err)
+		} else {
+			lgr.SetOutput(w)
+		}
 		if debugFlag {
 			lgr.SetFlags(log.LstdFlags | log.Lshortfile)
 		}
