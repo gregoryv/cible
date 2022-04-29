@@ -55,15 +55,15 @@ func main() {
 	c.Host = bind
 	ctx := context.Background()
 	if err := c.Connect(ctx); err != nil {
-		l.Log(err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	// send command
+	// create player and join game
 	p := Player{Name: Name(os.Getenv("USER"))}
 	j, err := Send(c, &EventJoin{Player: p})
-	if j.Ident == "" {
-		l.Log("join failed, missing ident", err)
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 	cid := j.Ident
