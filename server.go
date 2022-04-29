@@ -89,7 +89,7 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 			}
 			return
 		}
-		me.Logf("recv %s, body %v bytes", r.EventName, len(r.Body))
+		me.Logf("recv %s", r.String())
 		x, found := newNamedEvent(r.EventName)
 		if !found {
 			err := fmt.Errorf("missing named event %s", r.EventName)
@@ -117,7 +117,7 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 			}
 			r.Body = buf.Bytes()
 		}
-		me.Logf("send %s, body %v bytes", r.EventName, len(r.Body))
+		me.Logf("send %v", r.String())
 		if err := enc.Encode(r); err != nil {
 			me.Log(err)
 		}

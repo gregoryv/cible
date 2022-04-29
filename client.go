@@ -39,6 +39,7 @@ func (me *Client) Connect(ctx context.Context) error {
 	return nil
 }
 
+// Send
 func Send[T any](c *Client, e *T) (T, error) {
 	if c.Conn == nil {
 		c.Log("send failed: no connection")
@@ -47,32 +48,30 @@ func Send[T any](c *Client, e *T) (T, error) {
 
 	var buf bytes.Buffer
 	gob.NewEncoder(&buf).Encode(*e)
-	r := Message{
+	msg := Message{
 		EventName: fmt.Sprintf("%T", *e),
 		Body:      buf.Bytes(),
 	}
-	if err := c.enc.Encode(&r); err != nil {
+	if err := c.enc.Encode(&msg); err != nil {
 		c.Log(err)
 		return *e, err
 	}
-	c.Logf("send %s, body %v bytes", r.EventName, len(r.Body))
 
-	if err := c.dec.Decode(&r); err != nil {
+	if err := c.dec.Decode(&msg); err != nil {
 		c.Log(err)
 		return *e, err
 	}
-	if r.EventName == "error" {
-		err := fmt.Errorf("%s", string(r.Body))
+	if msg.EventName == "error" {
+		err := fmt.Errorf("%s", string(msg.Body))
 		c.Logf("recv %v", err)
 		return *e, err
 	}
 	var x T
-	dec := gob.NewDecoder(bytes.NewReader(r.Body))
+	dec := gob.NewDecoder(bytes.NewReader(msg.Body))
 	if err := dec.Decode(&x); err != nil {
 		c.Log(err)
 		return *e, err
 	}
-	c.Logf("recv %s, body %v bytes", r.EventName, len(r.Body))
 	return x, nil
 }
 
@@ -81,4 +80,10 @@ func Send[T any](c *Client, e *T) (T, error) {
 type Message struct {
 	EventName string
 	Body      []byte
+}
+
+func (m *Message) String() string {
+	return fmt.Sprintf(
+		"message %s, body %v bytes", m.EventName, len(m.Body),
+	)
 }
