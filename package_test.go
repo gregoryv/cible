@@ -46,8 +46,8 @@ func TestServer(t *testing.T) {
 	// join
 	p := Player{Name: "test"}
 	j, err := Send(client, &EventJoin{Player: p})
-	if j.Ident == "" {
-		t.Error("join failed, missing ident", err)
+	if err != nil {
+		t.Fatal("join failed, missing ident", err)
 	}
 
 	// move

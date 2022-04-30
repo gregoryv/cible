@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/google/uuid"
 	"github.com/gregoryv/logger"
 	"github.com/gregoryv/nexus"
 )
@@ -81,6 +82,7 @@ func NewMessage[T any](v *T) Message {
 	var buf bytes.Buffer
 	gob.NewEncoder(&buf).Encode(*v)
 	return Message{
+		Id:        uuid.NewString(),
 		EventName: fmt.Sprintf("%T", *v),
 		Body:      buf.Bytes(),
 	}
@@ -89,6 +91,7 @@ func NewMessage[T any](v *T) Message {
 // Message is for transferring events between client and server using
 // encoding/gob
 type Message struct {
+	Id        string
 	EventName string
 	Body      []byte
 }
