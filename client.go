@@ -21,27 +21,35 @@ type Client struct {
 	logger.Logger
 	Host string
 
-	net.Conn
+	Up   net.Conn // client to server
+	Down net.Conn // server to client
 
 	enc *gob.Encoder
 	dec *gob.Decoder
 }
 
 func (me *Client) Connect(ctx context.Context) error {
-	conn, err := net.Dial("tcp", me.Host)
+	up, err := net.Dial("tcp", me.Host)
 	if err != nil {
 		return err
 	}
-	me.Conn = conn
+	me.Up = up
 	me.Log("connected to", me.Host)
-	me.enc = gob.NewEncoder(conn)
-	me.dec = gob.NewDecoder(conn)
+	me.enc = gob.NewEncoder(up)
+	me.dec = gob.NewDecoder(up)
 
-	return nil
+	down, err := net.Dial("tcp", me.Host)
+	me.Down = down
+	return err
+}
+
+func (me *Client) Close() {
+	me.Up.Close()
+	me.Down.Close()
 }
 
 func (c *Client) CheckState() error {
-	if c.Conn == nil {
+	if c.Up == nil {
 		return fmt.Errorf("client is disconnected")
 	}
 	return nil

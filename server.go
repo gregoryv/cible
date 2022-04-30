@@ -24,7 +24,7 @@ func NewServer() *Server {
 type Server struct {
 	logger.Logger
 	Bind            string
-	MaxConnections  int
+	MaxConnections  int // not really max allowed players, more like DOS throttling
 	MaxAcceptErrors int
 
 	net.Listener
@@ -58,7 +58,7 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 				}
 				backoff *= 2
 				<-time.After(backoff)
-				continue // todo this may spin out of control
+				continue
 			}
 			backoff = time.Millisecond
 			c <- conn
