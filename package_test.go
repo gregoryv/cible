@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"net"
 	"testing"
 	"time"
 
@@ -57,6 +58,18 @@ func TestServer(t *testing.T) {
 	}
 
 	client.Close()
+}
+
+func TestServer_Run(t *testing.T) {
+	srv := NewServer()
+	srv.Listener = &brokenListener{}
+
+	t.Run("bad Accept", func(t *testing.T) {
+		ctx, _ := context.WithTimeout(context.Background(), 10*time.Millisecond)
+		if err := srv.Run(ctx, nil); err != nil {
+			t.Fatal(err)
+		}
+	})
 }
 
 func TestGame_play(t *testing.T) {
@@ -224,6 +237,14 @@ func pause(v string) {
 	}
 	<-time.After(dur)
 }
+
+type brokenListener struct{}
+
+func (me *brokenListener) Accept() (net.Conn, error) { return nil, broken }
+func (me *brokenListener) Addr() net.Addr            { return nil }
+func (me *brokenListener) Close() error              { return broken }
+
+var broken = fmt.Errorf("broken")
 
 // ----------------------------------------
 
