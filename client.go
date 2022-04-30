@@ -21,35 +21,27 @@ type Client struct {
 	logger.Logger
 	Host string
 
-	Up   net.Conn // client to server
-	Down net.Conn // server to client
+	net.Conn
 
 	enc *gob.Encoder
 	dec *gob.Decoder
 }
 
 func (me *Client) Connect(ctx context.Context) error {
-	up, err := net.Dial("tcp", me.Host)
+	conn, err := net.Dial("tcp", me.Host)
 	if err != nil {
 		return err
 	}
-	me.Up = up
+	me.Conn = conn
 	me.Log("connected to", me.Host)
-	me.enc = gob.NewEncoder(up)
-	me.dec = gob.NewDecoder(up)
+	me.enc = gob.NewEncoder(conn)
+	me.dec = gob.NewDecoder(conn)
 
-	down, err := net.Dial("tcp", me.Host)
-	me.Down = down
-	return err
-}
-
-func (me *Client) Close() {
-	me.Up.Close()
-	me.Down.Close()
+	return nil
 }
 
 func (c *Client) CheckState() error {
-	if c.Up == nil {
+	if c.Conn == nil {
 		return fmt.Errorf("client is disconnected")
 	}
 	return nil
@@ -57,6 +49,9 @@ func (c *Client) CheckState() error {
 
 // Sends an event and waits for the response
 func Send[T any](c *Client, e *T) (x T, err error) {
+
+	// Make it easier to verify the flow with step functions, as any
+	// error results in a return.
 	next := nexus.NewStepper(&err)
 	next.Step(func() { err = c.CheckState() })
 
