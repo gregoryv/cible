@@ -18,13 +18,13 @@ func TestServer(t *testing.T) {
 	defer func() { srv.Logger = logger.Silent }()
 
 	// connect client
-	c := NewClient()
-	c.Logger = t
+	client := NewClient()
+	client.Logger = t
 
 	// connect if server is down, should not work
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	if err := c.Connect(ctx); err == nil {
+	if err := client.Connect(ctx); err == nil {
 		t.Error("connected to nothing?")
 	}
 
@@ -32,24 +32,25 @@ func TestServer(t *testing.T) {
 	go srv.Run(ctx, g)
 	pause("10ms")
 
-	c.Host = srv.Addr.String()
-	_ = c.Connect(ctx)
+	client.Host = srv.Addr.String()
+	_ = client.Connect(ctx)
 
 	// join
 	p := Player{Name: "test"}
-	j, err := Send(c, &EventJoin{Player: p})
+	j, err := Send(client, &EventJoin{Player: p})
 	if j.Ident == "" {
 		t.Error("join failed, missing ident", err)
 	}
 
 	// move
-	if _, err := Send(c, MoveCharacter(j.Ident, N)); err != nil {
+	if _, err := Send(client, MoveCharacter(j.Ident, N)); err != nil {
 		t.Fatal(err)
 	}
 	// speak
-	if _, err := Send(c, &EventSay{j.Ident, "HellOOO!!"}); err != nil {
+	if _, err := Send(client, &EventSay{j.Ident, "HellOOO!!"}); err != nil {
 		t.Fatal(err)
 	}
+	client.Close()
 }
 
 func TestGame_play(t *testing.T) {
