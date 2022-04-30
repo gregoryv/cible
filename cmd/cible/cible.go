@@ -25,15 +25,8 @@ func main() {
 
 	cli.Parse()
 	if srv {
-		w, err := os.OpenFile("server.log", os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Println(err)
-		} else {
-			log.SetOutput(w)
-		}
-		if debugFlag {
-			log.SetFlags(log.LstdFlags | log.Lshortfile)
-		}
+		defer configureLog(debugFlag)() // configure and defer cleanup
+
 		g := NewGame()
 		g.Logger = mlog
 
@@ -115,6 +108,19 @@ func main() {
 			fmt.Println(err)
 		}
 	}
+}
+
+func configureLog(debugFlag bool) (cleanup func()) {
+	w, err := os.OpenFile("server.log", os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.SetOutput(w)
+	}
+	if debugFlag {
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
+	}
+	return func() { _ = w.Close() }
 }
 
 var nav = map[string]Direction{
