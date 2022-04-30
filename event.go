@@ -11,6 +11,21 @@ type Event interface {
 	Affect(*Game) error // called in the event loop
 }
 
+// ----------------------------------------
+
+func init() { registerEvent(&EventSay{}) }
+
+type EventSay struct {
+	Ident   // character who is speaking
+	Message string
+}
+
+func (e *EventSay) Affect(g *Game) error { return nil }
+
+// ----------------------------------------
+
+func init() { registerEvent(&EventJoin{}) }
+
 type EventJoin struct {
 	Player
 	*Character
@@ -60,6 +75,8 @@ func MoveCharacter(id Ident, d Direction) *Movement {
 	}
 }
 
+func init() { registerEvent(&Movement{}) }
+
 type Movement struct {
 	Ident
 	Direction
@@ -108,6 +125,9 @@ func StopGame() *EventStopGame {
 	return &EventStopGame{}
 }
 
+// Do Not register this event as it would allow a client to stop the
+// server.
+
 type EventStopGame struct{}
 
 func (e *EventStopGame) Affect(g *Game) error {
@@ -129,12 +149,6 @@ func newNamedEvent(name string) (interface{}, bool) {
 	} else {
 		return fn(), true
 	}
-}
-
-func init() {
-	// register events that remote clients could send
-	registerEvent(&EventJoin{})
-	registerEvent(&Movement{})
 }
 
 // register pointer to events

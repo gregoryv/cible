@@ -35,18 +35,21 @@ func TestServer(t *testing.T) {
 	c.Host = srv.Addr.String()
 	_ = c.Connect(ctx)
 
+	// join
 	p := Player{Name: "test"}
 	j, err := Send(c, &EventJoin{Player: p})
 	if j.Ident == "" {
 		t.Error("join failed, missing ident", err)
 	}
-	t.Log(j)
-	m, err := Send(c, MoveCharacter(j.Ident, N))
-	if err != nil {
+
+	// move
+	if _, err := Send(c, MoveCharacter(j.Ident, N)); err != nil {
 		t.Fatal(err)
 	}
-	t.Log(m)
-
+	// speak
+	if _, err := Send(c, &EventSay{j.Ident, "HellOOO!!"}); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestGame_play(t *testing.T) {
