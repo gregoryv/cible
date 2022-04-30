@@ -43,6 +43,7 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 	}
 	c := make(chan net.Conn, me.MaxConnections)
 	acceptErr := make(chan error, 1)
+	max := me.MaxAcceptErrors
 
 	go func() {
 		backoff := 20 * time.Millisecond
@@ -50,8 +51,8 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 			conn, err := me.Listener.Accept()
 			if err != nil {
 				me.Log(err)
-				me.MaxAcceptErrors--
-				if me.MaxAcceptErrors < 0 {
+				max--
+				if max < 0 {
 					me.Log("to many accept errors")
 					acceptErr <- err // signal connect loop we are done
 				}

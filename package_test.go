@@ -63,22 +63,51 @@ func TestServer(t *testing.T) {
 }
 
 func TestServer_Run(t *testing.T) {
-	srv := NewServer()
-	srv.Listener = &brokenListener{}
 
-	var buf bytes.Buffer
-	srv.Logger = logger.Wrap(log.New(&buf, "", log.LstdFlags))
+	t.Run("backoff", func(t *testing.T) {
+		srv := NewServer()
+		srv.Listener = &brokenListener{}
 
-	dur := 10 * time.Millisecond
-	ctx, _ := context.WithTimeout(context.Background(), dur)
-	if err := srv.Run(ctx, nil); err != nil {
-		t.Fatal(err)
-	}
+		var buf bytes.Buffer
+		srv.Logger = logger.Wrap(log.New(&buf, "", log.LstdFlags))
 
-	errCount := bytes.Count(buf.Bytes(), []byte("broken"))
-	if errCount >= 2 {
-		t.Errorf("calm down, %v accept failures in %v", errCount, dur)
-	}
+		dur := 10 * time.Millisecond
+		ctx, _ := context.WithTimeout(context.Background(), dur)
+		if err := srv.Run(ctx, nil); err != nil {
+			t.Fatal(err)
+		}
+
+		errCount := bytes.Count(buf.Bytes(), []byte("broken"))
+		if errCount >= 2 {
+			t.Errorf("calm down, %v accept failures in %v", errCount, dur)
+		}
+	})
+
+	t.Run("respect MaxAcceptErrors", func(t *testing.T) {
+		srv := NewServer()
+		srv.Listener = &brokenListener{}
+		srv.MaxAcceptErrors = 1
+
+		var buf bytes.Buffer
+		srv.Logger = logger.Wrap(log.New(&buf, "", log.LstdFlags))
+
+		dur := 100 * time.Millisecond
+		ctx, _ := context.WithTimeout(context.Background(), dur)
+		if err := srv.Run(ctx, nil); err == nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("Bind", func(t *testing.T) {
+		srv := NewServer()
+		srv.Bind = "jibberish"
+
+		dur := 10 * time.Millisecond
+		ctx, _ := context.WithTimeout(context.Background(), dur)
+		if err := srv.Run(ctx, nil); err == nil {
+			t.Fatal(err)
+		}
+	})
 }
 
 func TestGame_play(t *testing.T) {
