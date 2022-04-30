@@ -50,6 +50,12 @@ func TestServer(t *testing.T) {
 	if _, err := Send(client, &EventSay{j.Ident, "HellOOO!!"}); err != nil {
 		t.Fatal(err)
 	}
+
+	// try to hack
+	if _, err := Send(client, &badEvent{}); err == nil {
+		t.Fatal(err)
+	}
+
 	client.Close()
 }
 
