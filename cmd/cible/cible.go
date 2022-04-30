@@ -13,6 +13,8 @@ import (
 	"github.com/gregoryv/logger"
 )
 
+var mlog = logger.Wrap(log.Default())
+
 func main() {
 	var (
 		cli       = cmdline.NewBasicParser()
@@ -22,21 +24,18 @@ func main() {
 	)
 
 	cli.Parse()
-	l := logger.Silent
 	if srv {
-		lgr := log.New(os.Stderr, "", log.LstdFlags)
-		w, err := os.Create("server.log")
+		w, err := os.OpenFile("server.log", os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
-			lgr.Println(err)
+			log.Println(err)
 		} else {
-			lgr.SetOutput(w)
+			log.SetOutput(w)
 		}
 		if debugFlag {
-			lgr.SetFlags(log.LstdFlags | log.Lshortfile)
+			log.SetFlags(log.LstdFlags | log.Lshortfile)
 		}
-		l = logger.Wrap(lgr)
 		g := NewGame()
-		g.Logger = l
+		g.Logger = mlog
 
 		ctx, cancel := context.WithCancel(context.Background())
 		go func() {
@@ -46,7 +45,7 @@ func main() {
 			cancel() // when game stops, stop the server
 		}()
 
-		srv := &Server{Logger: l, Bind: bind}
+		srv := &Server{Logger: mlog, Bind: bind}
 		if err := srv.Run(ctx, g); err != nil {
 			srv.Log(err)
 			os.Exit(1)
@@ -55,9 +54,9 @@ func main() {
 	}
 
 	os.Stdout.Write(logo)
+
 	// connect client
 	c := NewClient()
-	c.Logger = l
 	c.Host = bind
 	ctx := context.Background()
 	if err := c.Connect(ctx); err != nil {
@@ -85,7 +84,7 @@ func main() {
 		scanner.Scan()
 		err := scanner.Err()
 		if err != nil {
-			l.Log(err)
+			mlog.Log(err)
 			os.Exit(1)
 		}
 
