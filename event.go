@@ -16,8 +16,8 @@ type Event interface {
 func init() { registerEvent(&EventSay{}) }
 
 type EventSay struct {
-	Ident   // character who is speaking
-	Message string
+	Ident // character who is speaking
+	Text  string
 }
 
 func (e *EventSay) Affect(g *Game) error { return nil }

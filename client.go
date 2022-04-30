@@ -47,6 +47,7 @@ func (c *Client) CheckState() error {
 	return nil
 }
 
+// Sends an event and waits for the response
 func Send[T any](c *Client, e *T) (x T, err error) {
 	next := nexus.NewStepper(&err)
 	next.Step(func() { err = c.CheckState() })

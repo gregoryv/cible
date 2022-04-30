@@ -101,7 +101,9 @@ func main() {
 			fmt.Println("bye")
 			os.Exit(0)
 		default:
-			err = fmt.Errorf("?")
+			// todo speach should be async
+			_, err = Send(c, &EventSay{Ident: cid, Text: input})
+			// todo handle response
 		}
 		if err != nil {
 			fmt.Println(err)
