@@ -25,7 +25,9 @@ func NewGame() *Game {
 type Game struct {
 	World
 	Characters
-	MaxTasks int
+
+	MaxTasks     int
+	LogAllEvents bool
 
 	ch chan<- *Task
 	logger.Logger
@@ -48,9 +50,15 @@ eventLoop:
 			break eventLoop
 
 		case task := <-ch: // blocks
+			if g.LogAllEvents {
+				if e, ok := task.Event.(fmt.Stringer); ok {
+					g.Log(e.String())
+				} else {
+					g.Logf("%T", task.Event)
+				}
+			}
 			// One event affects the game
 			err := task.Event.Affect(g)
-
 			if err != nil {
 				if errors.Is(endEventLoop, err) {
 					task.setErr(nil)

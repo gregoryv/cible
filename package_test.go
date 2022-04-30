@@ -199,6 +199,7 @@ func (e *badEvent) Affect(*Game) error { return e.err }
 func startNewGame(t *testing.T) *Game {
 	g := NewGame()
 	g.Logger = t
+	g.LogAllEvents = true
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(func() {
 		g.Logger = logger.Silent

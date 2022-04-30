@@ -22,7 +22,6 @@ func main() {
 		debugFlag = cli.Flag("-d, --debug")
 		srv       = cli.Flag("-s, --server")
 	)
-
 	cli.Parse()
 	if srv {
 		defer configureLog(debugFlag)() // configure and defer cleanup
