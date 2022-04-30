@@ -7,22 +7,25 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"time"
 
 	"github.com/gregoryv/logger"
 )
 
 func NewServer() *Server {
 	return &Server{
-		Logger:         logger.Silent,
-		Bind:           "",
-		MaxConnections: 100,
+		Logger:          logger.Silent,
+		Bind:            "",
+		MaxConnections:  100,
+		MaxAcceptErrors: 100,
 	}
 }
 
 type Server struct {
 	logger.Logger
-	Bind           string
-	MaxConnections int
+	Bind            string
+	MaxConnections  int
+	MaxAcceptErrors int
 
 	net.Listener
 
@@ -39,29 +42,43 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 		me.Log("server listen on", ln.Addr())
 	}
 	c := make(chan net.Conn, me.MaxConnections)
+	acceptErr := make(chan error, 1)
+
 	go func() {
+		backoff := 20 * time.Millisecond
 		for {
 			conn, err := me.Listener.Accept()
 			if err != nil {
 				me.Log(err)
+				me.MaxAcceptErrors--
+				if me.MaxAcceptErrors < 0 {
+					me.Log("to many accept errors")
+					acceptErr <- err // signal connect loop we are done
+				}
+				backoff *= 2
+				<-time.After(backoff)
 				continue // todo this may spin out of control
 			}
+			backoff = time.Millisecond
 			c <- conn
 		}
 	}()
 
 	me.game = g
+
 connectLoop:
 	for {
 		select {
 		case <-ctx.Done():
+			me.Log("server interrupted")
 			break connectLoop
 		case conn := <-c:
 			go me.handleConnection(conn, g)
+		case err := <-acceptErr:
+			me.Log("server stopped")
+			return fmt.Errorf("exceeded max accept errors %v: %w", me.MaxAcceptErrors, err)
 		}
 	}
-
-	me.Log("server closed")
 	return nil
 }
 

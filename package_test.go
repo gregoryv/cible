@@ -1,8 +1,10 @@
 package cible
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"testing"
@@ -64,12 +66,19 @@ func TestServer_Run(t *testing.T) {
 	srv := NewServer()
 	srv.Listener = &brokenListener{}
 
-	t.Run("bad Accept", func(t *testing.T) {
-		ctx, _ := context.WithTimeout(context.Background(), 10*time.Millisecond)
-		if err := srv.Run(ctx, nil); err != nil {
-			t.Fatal(err)
-		}
-	})
+	var buf bytes.Buffer
+	srv.Logger = logger.Wrap(log.New(&buf, "", log.LstdFlags))
+
+	dur := 10 * time.Millisecond
+	ctx, _ := context.WithTimeout(context.Background(), dur)
+	if err := srv.Run(ctx, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	errCount := bytes.Count(buf.Bytes(), []byte("broken"))
+	if errCount >= 2 {
+		t.Errorf("calm down, %v accept failures in %v", errCount, dur)
+	}
 }
 
 func TestGame_play(t *testing.T) {
