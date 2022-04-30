@@ -32,7 +32,7 @@ func TestServer(t *testing.T) {
 	go srv.Run(ctx, g)
 	pause("10ms")
 
-	client.Host = srv.Addr.String()
+	client.Host = srv.Addr().String()
 	_ = client.Connect(ctx)
 
 	// join

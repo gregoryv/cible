@@ -24,23 +24,24 @@ type Server struct {
 	Bind           string
 	MaxConnections int
 
-	net.Addr // set after running
+	net.Listener
 
 	game *Game
 }
 
 func (me *Server) Run(ctx context.Context, g *Game) error {
-	ln, err := net.Listen("tcp", me.Bind)
-	if err != nil {
-		return err
+	if me.Listener == nil {
+		ln, err := net.Listen("tcp", me.Bind)
+		if err != nil {
+			return err
+		}
+		me.Listener = ln
+		me.Log("server listen on", ln.Addr())
 	}
-	me.Addr = ln.Addr()
-	me.Log("server listen on", ln.Addr())
-
 	c := make(chan net.Conn, me.MaxConnections)
 	go func() {
 		for {
-			conn, err := ln.Accept()
+			conn, err := me.Listener.Accept()
 			if err != nil {
 				me.Log(err)
 				continue // todo this may spin out of control
