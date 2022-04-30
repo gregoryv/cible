@@ -24,6 +24,11 @@ func TestServer(t *testing.T) {
 	client := NewClient()
 	client.Logger = t
 
+	// try to move
+	if _, err := Send(client, MoveCharacter("x", N)); err == nil {
+		t.Fatal("Send should fail if client is disconnected")
+	}
+
 	// connect if server is down, should not work
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)

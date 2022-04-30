@@ -8,6 +8,7 @@ import (
 	"net"
 
 	"github.com/gregoryv/logger"
+	"github.com/gregoryv/nexus"
 )
 
 func NewClient() *Client {
@@ -39,33 +40,35 @@ func (me *Client) Connect(ctx context.Context) error {
 	return nil
 }
 
-func Send[T any](c *Client, e *T) (T, error) {
+func (c *Client) CheckState() error {
 	if c.Conn == nil {
-		return *e, fmt.Errorf("no connection")
+		return fmt.Errorf("client is disconnected")
 	}
+	return nil
+}
 
-	// write message on the wire
+func Send[T any](c *Client, e *T) (x T, err error) {
+	next := nexus.NewStepper(&err)
+	next.Step(func() { err = c.CheckState() })
+
 	msg := NewMessage(e)
-	if err := c.enc.Encode(&msg); err != nil {
-		return *e, err
-	}
+	next.Stepf("write on wire: %w", func() {
+		err = c.enc.Encode(&msg)
+	})
 
-	// read response, reuse same message
-	if err := c.dec.Decode(&msg); err != nil {
-		return *e, err
-	}
-	if msg.EventName == "error" {
-		err := fmt.Errorf("%s", string(msg.Body))
-		return *e, err
-	}
+	next.Stepf("read response: %w", func() {
+		err = c.dec.Decode(&msg)
+	})
 
-	// decode the body and return the same type
-	var x T
-	dec := gob.NewDecoder(bytes.NewReader(msg.Body))
-	if err := dec.Decode(&x); err != nil {
-		return *e, err
-	}
-	return x, nil
+	next.Stepf("response: %w", func() {
+		err = msg.CheckError()
+	})
+
+	next.Stepf("decode body: %w", func() {
+		r := bytes.NewReader(msg.Body)
+		err = gob.NewDecoder(r).Decode(&x)
+	})
+	return
 }
 
 // ----------------------------------------
@@ -79,6 +82,8 @@ func NewMessage[T any](v *T) Message {
 	}
 }
 
+// Message is for transferring events between client and server using
+// encoding/gob
 type Message struct {
 	EventName string
 	Body      []byte
@@ -94,4 +99,11 @@ func (m *Message) Size() int {
 	var buf bytes.Buffer
 	gob.NewEncoder(&buf).Encode(*m)
 	return buf.Len()
+}
+
+func (m *Message) CheckError() error {
+	if m.EventName == "error" {
+		return fmt.Errorf("%s", string(m.Body))
+	}
+	return nil
 }
