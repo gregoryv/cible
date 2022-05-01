@@ -74,6 +74,13 @@ eventLoop:
 	return nil
 }
 
+// Do enques the task and waits for it to complete
+func (g *Game) Do(e Event) {
+	t := NewTask(e)
+	g.Enqueue(t)
+	t.Done()
+}
+
 func (g *Game) Enqueue(t *Task) {
 	defer func() {
 		// handle closed channel, ie. game stopped

@@ -119,15 +119,14 @@ func TestGame_play(t *testing.T) {
 	g := startNewGame(t)
 	g.Logger = t
 
-	p := Player{Name: "John"}
-	c, j := Trigger(g, Join(p))
-	if err := c.Done(); err != nil {
-		t.Fatal(err)
-	}
-	TriggerWait(g, MoveCharacter(j.Ident, N))
-	TriggerWait(g, MoveCharacter(j.Ident, E))
-	task, e := Trigger(g, MoveCharacter(j.Ident, W))
-	task.Done()
+	j := Join(Player{Name: "John"})
+	g.Do(j)
+
+	g.Do(MoveCharacter(j.Ident, N))
+	g.Do(MoveCharacter(j.Ident, E))
+
+	e := MoveCharacter(j.Ident, W)
+	g.Do(e)
 	pos := e.Position
 	if pos.Tile != "02" {
 		t.Error("got", pos.Tile, "exp", "02")
@@ -136,10 +135,7 @@ func TestGame_play(t *testing.T) {
 	if err != nil {
 		t.Fatal(tile, err)
 	}
-	task, _ = Trigger(g, Leave(j.Ident))
-	if err := task.Done(); err != nil {
-		t.Error(err)
-	}
+	g.Do(Leave(j.Ident))
 }
 
 func Test_badEvents(t *testing.T) {
