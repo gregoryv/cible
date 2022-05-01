@@ -76,7 +76,7 @@ connectLoop:
 		case conn := <-c:
 			go func() {
 				me.Log("connect ", conn.RemoteAddr())
-				me.handleConnection(conn, g)
+				me.handleConnection(conn)
 				conn.Close()
 			}()
 		case err := <-acceptErr:
@@ -87,14 +87,14 @@ connectLoop:
 	return nil
 }
 
-func (me *Server) handleConnection(conn io.ReadWriter, g *Game) {
+func (me *Server) handleConnection(conn io.ReadWriter) {
 	var cid Ident // set on first EventJoin
 	defer func() {
 		// graceful panic handling
 		if e := recover(); e != nil {
 			me.Log(e)
 		}
-		g.Do(Leave(cid))
+		me.game.Do(Leave(cid))
 		me.Log(cid, " disconnected")
 	}()
 
@@ -123,7 +123,7 @@ func (me *Server) handleConnection(conn io.ReadWriter, g *Game) {
 				me.Log(err)
 			}
 
-			if err := g.Do((x).(Event)); err != nil {
+			if err := me.game.Do((x).(Event)); err != nil {
 				me.Log(err)
 				continue
 			}
