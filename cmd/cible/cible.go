@@ -71,7 +71,7 @@ func main() {
 	m, _ = Transmit(c, MoveCharacter(cid, S))
 
 	for {
-		fmt.Printf("%s> ", p.Name)
+		fmt.Printf("%s> ", cid)
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Scan()
 		err := scanner.Err()

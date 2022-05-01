@@ -130,6 +130,9 @@ func (me *Server) communicate(tr *Transceiver) error {
 			} else {
 				if msg.EventName == "cible.EventJoin" {
 					cid = x.(*EventJoin).Ident
+
+					c, _ := me.game.Characters.Character(cid)
+					c.SetTransmitter(tr)
 				}
 				var buf bytes.Buffer
 				if err := gob.NewEncoder(&buf).Encode(x); err != nil {

@@ -113,6 +113,7 @@ type Characters interface {
 	Add(*Character)
 	Remove(Ident)
 	Len() int
+	At(Position) []*Character
 }
 
 func NewCharactersMap() *CharactersMap {
@@ -146,17 +147,31 @@ func (me *CharactersMap) Len() int {
 	return len(me.Index)
 }
 
+func (me *CharactersMap) At(p Position) []*Character {
+	res := make([]*Character, 0)
+	for _, c := range me.Index {
+		if c.Position.Equal(p) {
+			res = append(res, c)
+		}
+	}
+	return res
+}
+
 type Character struct {
 	Ident
 	Name
 	Position
 	IsBot
 
-	Transmitter //
+	tr Transmitter //
 }
 
 func (me *Character) Notify(e Event) {
-	me.Transmit(e)
+	me.tr.Transmit(e)
+}
+
+func (me *Character) SetTransmitter(v Transmitter) {
+	me.tr = v
 }
 
 type IsBot bool
@@ -170,6 +185,10 @@ type Bot struct{}
 type Position struct {
 	Area Ident
 	Tile Ident
+}
+
+func (p *Position) Equal(v Position) bool {
+	return p.Area == v.Area && p.Tile == v.Tile
 }
 
 type Ident string

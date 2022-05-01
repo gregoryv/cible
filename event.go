@@ -20,7 +20,20 @@ type EventSay struct {
 	Text  string
 }
 
-func (e *EventSay) Affect(g *Game) error { return nil }
+func (e *EventSay) Affect(g *Game) error {
+	me, err := g.Characters.Character(e.Ident)
+	if err != nil {
+		return err
+	}
+	nearby := g.Characters.At(me.Position)
+	for _, c := range nearby {
+		if c.Ident == me.Ident {
+			continue
+		}
+		go c.Notify(e)
+	}
+	return nil
+}
 
 // ----------------------------------------
 
