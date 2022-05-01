@@ -140,63 +140,24 @@ func TestGame_play(t *testing.T) {
 
 func Test_badEvents(t *testing.T) {
 	g := startNewGame(t)
+	c := Join(Player{Name: "John"})
 
-	p := Player{Name: "John"}
-	task, c := Trigger(g, Join(p))
-	if err := task.Done(); err != nil {
+	if err := g.Do(c); err != nil {
 		t.Fatal(err)
 	}
-	cid := c.Ident
-	Trigger(g, MoveCharacter("Eve", N)) // no such playe)
-	Trigger(g, MoveCharacter("god", N)) // cannot be move)
-	Trigger(g, MoveCharacter(cid, Direction(-1)))
-	Trigger(g, &badEvent{})
-	TriggerWait(g, MoveCharacter(cid, W))
-	task, _ = Trigger(g, Leave("no such"))
-	if err := task.Done(); err == nil {
-		t.Error("Leave unknown cid should fail")
+	cases := []Event{
+		MoveCharacter("Eve", N), // no such playe)
+		MoveCharacter("god", N), // cannot be move)
+		MoveCharacter(c.Ident, Direction(-1)),
+		&badEvent{err: broken},
 	}
-}
-
-func TestEvent_Done(t *testing.T) {
-	// can't use startNewGame here as
-	g := NewGame()
-	ctx, cancel := context.WithCancel(context.Background())
-	go g.Run(ctx)
-	t.Cleanup(cancel)
-
-	pause("10ms")
-	// stopped in last subtest
-	t.Run("Join", func(t *testing.T) {
-		e := TriggerWait(g, Join(Player{Name: "John"}))
-		first := e.Ident
-		if first != e.Ident {
-			t.Error("multiple calls to Done gave different values")
-		}
-	})
-
-	t.Run("MoveCharacter", func(t *testing.T) {
-		task, e := Trigger(g, MoveCharacter("John", N))
-		task.Done()
-		first := e.Position
-		task.Done()
-		if !first.Equal(e.Position) {
-			t.Error("multiple calls to Done gave different values")
-		}
-	})
-
-	t.Run("Leave", func(t *testing.T) {
-		task, _ := Trigger(g, Leave("no such"))
-		task.Done()
-		task.Done()
-	})
-
-	// keep last as it stops game
-	t.Run("StopGame", func(t *testing.T) {
-		task, _ := Trigger(g, StopGame())
-		task.Done()
-		task.Done()
-	})
+	for _, c := range cases {
+		t.Run("", func(t *testing.T) {
+			if err := g.Do(c); err == nil {
+				t.Errorf("%v worked?!", c)
+			}
+		})
+	}
 }
 
 func Test_cancelGame(t *testing.T) {
@@ -223,47 +184,30 @@ func TestDirection(t *testing.T) {
 	_ = Direction(-1).String() // should work
 }
 
-func TestTrigger(t *testing.T) {
-	g := startNewGame(t) // not running
-	events := []Event{
-		Join(Player{Name: "John"}),
-		MoveCharacter("John", N),
-		Leave("John"),
-		StopGame(),
-	}
-	TriggerWait(g, StopGame())
-
-	for _, e := range events {
-		t.Run(fmt.Sprintf("%T", e), func(t *testing.T) {
-			TriggerWait(g, e)
-		})
-	}
-}
-
 // ----------------------------------------
 
 func BenchmarkMoveCharacter_1_player(b *testing.B) {
 	g := startNewGame(b)
-	defer Trigger(g, StopGame())
+	defer g.Do(StopGame())
 
-	p := Player{Name: "John"}
-	e := TriggerWait(g, Join(p))
+	e := Join(Player{Name: "John"})
+	g.Do(e)
 	cid := e.Ident
 	for i := 0; i < b.N; i++ {
-		TriggerWait(g, MoveCharacter(cid, N))
-		TriggerWait(g, MoveCharacter(cid, S))
+		g.Do(MoveCharacter(cid, N))
+		g.Do(MoveCharacter(cid, S))
 	}
 }
 
 func BenchmarkMoveCharacter_1000_player(b *testing.B) {
 	g := startNewGame(b)
-	defer Trigger(g, StopGame())
+	defer g.Do(StopGame())
 
 	// Join all players first
 	for i := 0; i < 1000; i++ {
 		p := Player{Name: Name(fmt.Sprintf("John%v", i))}
-		task, _ := Trigger(g, Join(p))
-		if err := task.Done(); err != nil {
+		e := Join(p)
+		if err := g.Do(e); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -271,8 +215,8 @@ func BenchmarkMoveCharacter_1000_player(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		cid := Ident(fmt.Sprintf("John%v", rand.Intn(1000)))
-		TriggerWait(g, MoveCharacter(cid, N))
-		TriggerWait(g, MoveCharacter(cid, S))
+		g.Do(MoveCharacter(cid, N))
+		g.Do(MoveCharacter(cid, S))
 	}
 }
 

@@ -75,10 +75,11 @@ eventLoop:
 }
 
 // Do enques the task and waits for it to complete
-func (g *Game) Do(e Event) {
+func (g *Game) Do(e Event) error {
 	t := NewTask(e)
 	g.Enqueue(t)
 	t.Done()
+	return t.err
 }
 
 func (g *Game) Enqueue(t *Task) {

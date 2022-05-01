@@ -91,7 +91,7 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 		if e != nil {
 			me.Log(e)
 		}
-		Trigger(g, Leave(cid))
+		g.Do(Leave(cid))
 		me.Log(cid, " disconnected")
 		conn.Close()
 	}()
@@ -122,8 +122,7 @@ func (me *Server) handleConnection(conn net.Conn, g *Game) {
 				me.Log(err)
 			}
 
-			task, x := Trigger(g, (x).(Event))
-			if err := task.Done(); err != nil {
+			if err := g.Do((x).(Event)); err != nil {
 				me.Log(err)
 				continue
 			}

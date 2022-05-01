@@ -1,30 +1,8 @@
 package cible
 
 import (
-	"fmt"
 	"sync"
 )
-
-func TriggerWait[T Event](g *Game, e T) (r T) {
-	task, r := Trigger(g, e)
-	task.Done()
-	return
-}
-
-// Trigger an event which affects the game. Callers should call Done
-// to wait for the event.
-func Trigger[T Event](g *Game, e T) (task *Task, r T) {
-	r = e // during panic t, would be nil
-	defer func() {
-		if err := recover(); err != nil {
-			task.setErr(fmt.Errorf("game stopped, event dropped"))
-		}
-	}()
-
-	task = NewTask(e)
-	g.Enqueue(task)
-	return
-}
 
 func NewTask(e Event) *Task {
 	return &Task{
