@@ -112,20 +112,20 @@ func (me *Server) communicate(tr *Transceiver) error {
 		}
 		me.Logf("recv %s", msg.String())
 
-		x, found := newNamedEvent(msg.EventName)
-		if !found {
-			// unknown event
+		x, known := newNamedEvent(msg.EventName)
+		if !known {
 			msg.EventName = "error"
 			msg.Body = []byte("unknown event " + msg.EventName)
+
 		} else {
-			// known event
+
 			dec := gob.NewDecoder(bytes.NewReader(msg.Body))
 			if err := dec.Decode(x); err != nil {
 				me.Log(err)
 			}
 
 			if err := me.game.Do((x).(Event)); err != nil {
-				msg.Body = []byte("unknown event " + err.Error())
+				msg.Body = []byte(err.Error())
 
 			} else {
 				if msg.EventName == "cible.EventJoin" {

@@ -16,3 +16,7 @@ type Transceiver struct {
 
 func (me *Transceiver) Send(v any) error    { return me.Encode(v) }
 func (me *Transceiver) Receive(v any) error { return me.Decode(v) }
+
+type Transmitter interface {
+	Send(any) error
+}
