@@ -5,16 +5,24 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
+	"io"
 	"net"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gregoryv/logger"
-	"github.com/gregoryv/nexus"
 )
 
 func NewClient() *Client {
+	out := make(chan Message, 1)
+	in := make(chan Message, 1)
 	return &Client{
 		Logger: logger.Silent,
+		out:    out,
+		Out:    out,
+
+		in: in,
+		In: in,
 	}
 }
 
@@ -24,7 +32,11 @@ type Client struct {
 
 	net.Conn
 
-	*Transceiver
+	out chan Message
+	Out chan<- Message
+
+	in chan Message
+	In <-chan Message
 }
 
 func (me *Client) Connect(ctx context.Context) error {
@@ -34,44 +46,44 @@ func (me *Client) Connect(ctx context.Context) error {
 	}
 	me.Conn = conn
 	me.Log("connected to", me.Host)
-	me.Transceiver = NewTransceiver(conn, &GobProtocol{})
+	tr := NewTransceiver(conn, &GobProtocol{})
 
+	// transmit outgoing messages
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+			case m := <-me.out:
+				if err := tr.Transmit(m); err != nil {
+					me.Log(err)
+					return
+				}
+			}
+		}
+	}()
+
+	// receive incoming messages
+	go func() {
+		for {
+			var msg Message
+			if err := tr.Receive(&msg); err != nil {
+				me.Log(err)
+				return
+			}
+			me.Log("in:", msg.String())
+			me.in <- msg
+		}
+	}()
+
+	<-time.After(20 * time.Millisecond)
 	return nil
 }
 
 func (c *Client) CheckState() error {
 	if c.Conn == nil {
-		return fmt.Errorf("client is disconnected")
+		return fmt.Errorf("client disconnected")
 	}
 	return nil
-}
-
-// Sends an event and waits for the response
-func Transmit[T any](c *Client, e *T) (x T, err error) {
-
-	// Make it easier to verify the flow with step functions, as any
-	// error results in a return.
-	next := nexus.NewStepper(&err)
-	next.Step(func() { err = c.CheckState() })
-
-	msg := NewMessage(e)
-	next.Stepf("write on wire: %w", func() {
-		err = c.Transmit(&msg)
-	})
-
-	next.Stepf("read response: %w", func() {
-		err = c.Receive(&msg)
-	})
-
-	next.Stepf("response: %w", func() {
-		err = msg.CheckError()
-	})
-
-	next.Stepf("decode body: %w", func() {
-		r := bytes.NewReader(msg.Body)
-		err = gob.NewDecoder(r).Decode(&x)
-	})
-	return
 }
 
 // ----------------------------------------
@@ -95,8 +107,9 @@ type Message struct {
 }
 
 func (m *Message) String() string {
+	id, _ := uuid.Parse(m.Id)
 	return fmt.Sprintf(
-		"%s[%v] %v bytes", m.EventName, uuid.MustParse(m.Id).ID(), m.Size(),
+		"%s[%v] %v bytes", m.EventName, id.ID(), m.Size(),
 	)
 }
 
@@ -109,6 +122,16 @@ func (m *Message) Size() int {
 func (m *Message) CheckError() error {
 	if m.EventName == "error" {
 		return fmt.Errorf("%s", string(m.Body))
+	}
+	return nil
+}
+
+func Decode(v interface{}, m *Message) error {
+	dec := gob.NewDecoder(bytes.NewReader(m.Body))
+	if err := dec.Decode(v); err != nil {
+		if err != io.EOF {
+			return err
+		}
 	}
 	return nil
 }

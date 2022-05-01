@@ -112,40 +112,28 @@ func (me *Server) communicate(tr *Transceiver) error {
 		}
 		me.Logf("recv %s", msg.String())
 
-		x, known := newNamedEvent(msg.EventName)
+		x, known := NewNamedEvent(msg.EventName)
 		if !known {
-			msg.EventName = "error"
-			msg.Body = []byte("unknown event " + msg.EventName)
+			continue
 
-		} else {
-
-			dec := gob.NewDecoder(bytes.NewReader(msg.Body))
-			if err := dec.Decode(x); err != nil {
-				me.Log(err)
-			}
-
-			if err := me.game.Do((x).(Event)); err != nil {
-				msg.Body = []byte(err.Error())
-
-			} else {
-				if msg.EventName == "cible.EventJoin" {
-					cid = x.(*EventJoin).Ident
-
-					c, _ := me.game.Characters.Character(cid)
-					c.SetTransmitter(tr)
-				}
-				var buf bytes.Buffer
-				if err := gob.NewEncoder(&buf).Encode(x); err != nil {
-					me.Log(err)
-				}
-				msg.Body = buf.Bytes()
-			}
 		}
 
-		// Always send a response for each message
-		me.Logf("send %v", msg.String())
-		if err := tr.Transmit(msg); err != nil {
+		dec := gob.NewDecoder(bytes.NewReader(msg.Body))
+		if err := dec.Decode(x); err != nil {
 			me.Log(err)
 		}
+
+		if e, ok := x.(*EventJoin); ok {
+			e.tr = tr
+		}
+
+		if err := me.game.Do((x).(Event)); err != nil {
+			msg.Body = []byte(err.Error())
+		}
+
 	}
+}
+
+type needsTransmitter interface {
+	setTransmitter(Transmitter)
 }

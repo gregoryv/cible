@@ -13,6 +13,31 @@ type Event interface {
 
 // ----------------------------------------
 
+func init() { registerEvent(&EventJoin{}) }
+
+type EventJoin struct {
+	Player
+	*Character
+
+	tr Transmitter
+}
+
+func (e *EventJoin) Affect(g *Game) error {
+	c := &Character{
+		Name: e.Player.Name,
+		Position: Position{
+			Area: "a1", Tile: "01",
+		},
+		tr: e.tr,
+	}
+	g.Characters.Add(c)
+	g.Logf("%s joined game as %s", c.Name, c.Ident)
+	e.Character = c
+	return c.Transmit(NewMessage(e))
+}
+
+// ----------------------------------------
+
 func init() { registerEvent(&EventSay{}) }
 
 type EventSay struct {
@@ -30,31 +55,8 @@ func (e *EventSay) Affect(g *Game) error {
 		if c.Ident == me.Ident {
 			continue
 		}
-		go c.Notify(e)
+		go c.Transmit(NewMessage(e))
 	}
-	return nil
-}
-
-// ----------------------------------------
-
-func init() { registerEvent(&EventJoin{}) }
-
-type EventJoin struct {
-	Player
-	*Character
-}
-
-func (e *EventJoin) Affect(g *Game) error {
-	p := Position{
-		Area: "a1", Tile: "01",
-	}
-	c := &Character{
-		Name:     e.Player.Name,
-		Position: p,
-	}
-	g.Characters.Add(c)
-	e.Character = c
-	g.Logf("%s joined game as %s", e.Player.Name, c.Ident)
 	return nil
 }
 
@@ -157,7 +159,7 @@ func (e *EventStopGame) Affect(g *Game) error {
 var endEventLoop = fmt.Errorf("end event loop")
 
 // value must be interface{}, but also implement Event
-func newNamedEvent(name string) (interface{}, bool) {
+func NewNamedEvent(name string) (interface{}, bool) {
 	if fn, found := eventConstructors[name]; !found {
 		return nil, false
 	} else {

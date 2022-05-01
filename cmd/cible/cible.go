@@ -58,17 +58,35 @@ func main() {
 
 	// create player and join game
 	p := Player{Name: Name(os.Getenv("USER"))}
-	j, err := Transmit(c, &EventJoin{Player: p})
-	if err != nil {
-		fmt.Println(err)
+	j := &EventJoin{Player: p}
+	c.Out <- NewMessage(j)
+
+	msg := <-c.In
+	if err := Decode(j, &msg); err != nil {
+		mlog.Log(err)
 		os.Exit(1)
 	}
-	cid := j.Ident
 
-	var m Movement
+	cid := j.Ident
 	// uggly way to set current pos, todo fix it
-	m, _ = Transmit(c, MoveCharacter(cid, N))
-	m, _ = Transmit(c, MoveCharacter(cid, S))
+	m := MoveCharacter(cid, N)
+	c.Out <- NewMessage(m)
+	m.Direction = S
+	c.Out <- NewMessage(m)
+
+	go func() {
+		for {
+			select {
+			case m := <-c.In:
+				e, known := NewNamedEvent(m.EventName)
+				if !known {
+					continue
+				}
+				Decode(e, &m)
+				mlog.Log("got ", e)
+			}
+		}
+	}()
 
 	for {
 		fmt.Printf("%s> ", cid)
@@ -83,10 +101,8 @@ func main() {
 		input := scanner.Text()
 		switch input {
 		case "n", "w", "s", "e":
-			m, err = Transmit(c, MoveCharacter(cid, nav[input]))
-			if err == nil {
-				fmt.Println(m.Direction, " => ", m.Tile.Short)
-			}
+			mv := MoveCharacter(cid, nav[input])
+			c.Out <- NewMessage(mv)
 
 		case "l":
 			// todo first position
@@ -101,9 +117,8 @@ func main() {
 			fmt.Println("bye")
 			os.Exit(0)
 		default:
-			// todo speach should be async
-			_, err = Transmit(c, &EventSay{Ident: cid, Text: input})
-			// todo handle response
+			e := &EventSay{Ident: cid, Text: input}
+			c.Out <- NewMessage(e)
 		}
 		if err != nil {
 			fmt.Println(err)

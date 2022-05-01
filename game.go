@@ -166,12 +166,8 @@ type Character struct {
 	tr Transmitter //
 }
 
-func (me *Character) Notify(e Event) {
-	me.tr.Transmit(e)
-}
-
-func (me *Character) SetTransmitter(v Transmitter) {
-	me.tr = v
+func (me *Character) Transmit(m Message) error {
+	return me.tr.Transmit(m)
 }
 
 type IsBot bool
