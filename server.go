@@ -74,7 +74,11 @@ connectLoop:
 			me.Log("server interrupted")
 			break connectLoop
 		case conn := <-c:
-			go me.handleConnection(conn, g)
+			go func() {
+				me.Log("connect ", conn.RemoteAddr())
+				me.handleConnection(conn, g)
+				conn.Close()
+			}()
 		case err := <-acceptErr:
 			me.Log("server stopped")
 			return fmt.Errorf("exceeded max accept errors %v: %w", me.MaxAcceptErrors, err)
@@ -83,19 +87,16 @@ connectLoop:
 	return nil
 }
 
-func (me *Server) handleConnection(conn net.Conn, g *Game) {
+func (me *Server) handleConnection(conn io.ReadWriter, g *Game) {
 	var cid Ident // set on first EventJoin
 	defer func() {
-		// graceful connection handling
-		e := recover()
-		if e != nil {
+		// graceful panic handling
+		if e := recover(); e != nil {
 			me.Log(e)
 		}
 		g.Do(Leave(cid))
 		me.Log(cid, " disconnected")
-		conn.Close()
 	}()
-	me.Log("connect ", conn.RemoteAddr())
 
 	enc := gob.NewEncoder(conn)
 	dec := gob.NewDecoder(conn)
