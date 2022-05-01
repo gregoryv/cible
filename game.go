@@ -140,8 +140,4 @@ type Position struct {
 	Tile Ident
 }
 
-func (p *Position) Equal(v Position) bool {
-	return p.Area == v.Area && p.Tile == v.Tile
-}
-
 type Ident string

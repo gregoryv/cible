@@ -147,6 +147,7 @@ func Test_badEvents(t *testing.T) {
 	}
 	cases := []Event{
 		MoveCharacter("Eve", N), // no such playe)
+		Leave("Eve"),            // no such playe)
 		MoveCharacter("god", N), // cannot be move)
 		MoveCharacter(c.Ident, Direction(-1)),
 		&badEvent{err: broken},
@@ -158,6 +159,11 @@ func Test_badEvents(t *testing.T) {
 			}
 		})
 	}
+	g.Do(StopGame())
+	if err := g.Do(MoveCharacter(c.Ident, N)); err == nil {
+		t.Error("games is stopped but event was done")
+	}
+
 }
 
 func Test_cancelGame(t *testing.T) {
