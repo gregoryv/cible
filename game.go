@@ -151,6 +151,12 @@ type Character struct {
 	Name
 	Position
 	IsBot
+
+	Transmitter //
+}
+
+func (me *Character) Notify(e Event) {
+	me.Send(e)
 }
 
 type IsBot bool
