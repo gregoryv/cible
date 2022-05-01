@@ -62,7 +62,8 @@ func (e *EventLeave) Affect(g *Game) error {
 	if err != nil {
 		return err
 	}
-	g.Logf("%s left", c.Name)
+	g.Characters.Remove(c.Ident)
+	g.Logf("%s left, %v remaining", c.Name, g.Characters.Len())
 	return nil
 }
 

@@ -9,16 +9,16 @@ import (
 )
 
 func NewGame() *Game {
+	c := NewCharactersMap()
+	c.Add(&Character{
+		Ident: "god",
+		IsBot: true,
+	})
 	return &Game{
-		World:    Earth(),
-		MaxTasks: 10,
-		Logger:   logger.Silent,
-		Characters: Characters{
-			{
-				Ident: "god",
-				IsBot: true,
-			},
-		},
+		World:      Earth(),
+		MaxTasks:   10,
+		Logger:     logger.Silent,
+		Characters: c,
 	}
 }
 
@@ -103,21 +103,47 @@ func (g *Game) Place(p Position) (a *Area, t *Tile, err error) {
 
 // Character returns a character in the game by id.
 func (g *Game) Character(id Ident) (*Character, error) {
-	for _, c := range g.Characters {
-		if c.Ident == id {
-			return c, nil
-		}
-	}
-	return nil, fmt.Errorf("character %q not found", id)
+	return g.Characters.Character(id)
 }
 
 // ----------------------------------------
 
-type Characters []*Character
+type Characters interface {
+	Character(Ident) (*Character, error)
+	Add(*Character)
+	Remove(Ident)
+	Len() int
+}
 
-func (me *Characters) Add(c *Character) {
-	*me = append(*me, c)
-	c.Ident = Ident(fmt.Sprintf("char%02v", len(*me)))
+func NewCharactersMap() *CharactersMap {
+	return &CharactersMap{
+		Index: make(map[Ident]*Character),
+	}
+}
+
+type CharactersMap struct {
+	Index map[Ident]*Character
+}
+
+func (me *CharactersMap) Character(id Ident) (*Character, error) {
+	c, found := me.Index[id]
+	if !found {
+		return nil, fmt.Errorf("character %q not found", id)
+	}
+	return c, nil
+}
+
+func (me *CharactersMap) Add(c *Character) {
+	c.Ident = Ident(fmt.Sprintf("char%02v", len(me.Index)))
+	me.Index[c.Ident] = c
+}
+
+func (me *CharactersMap) Remove(id Ident) {
+	delete(me.Index, id)
+}
+
+func (me *CharactersMap) Len() int {
+	return len(me.Index)
 }
 
 type Character struct {
