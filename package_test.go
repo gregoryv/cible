@@ -203,13 +203,6 @@ func TestEvent_Done(t *testing.T) {
 	})
 }
 
-func catchPanic(t *testing.T) {
-	if err := recover(); err != nil {
-		t.Helper()
-		t.Fatal(err)
-	}
-}
-
 func Test_cancelGame(t *testing.T) {
 	g := NewGame()
 	ctx, cancel := context.WithCancel(context.Background())
@@ -251,6 +244,45 @@ func TestTrigger(t *testing.T) {
 	}
 }
 
+// ----------------------------------------
+
+func BenchmarkMoveCharacter_1_player(b *testing.B) {
+	g := startNewGame(b)
+	defer Trigger(g, StopGame())
+
+	p := Player{Name: "John"}
+	e := TriggerWait(g, Join(p))
+	cid := e.Ident
+	for i := 0; i < b.N; i++ {
+		TriggerWait(g, MoveCharacter(cid, N))
+		TriggerWait(g, MoveCharacter(cid, S))
+	}
+}
+
+func BenchmarkMoveCharacter_1000_player(b *testing.B) {
+	g := startNewGame(b)
+	go g.Run(context.Background())
+	defer Trigger(g, StopGame())
+
+	// Join all players first
+	for i := 0; i < 1000; i++ {
+		p := Player{Name: Name(fmt.Sprintf("John%v", i))}
+		task, _ := Trigger(g, Join(p))
+		if err := task.Done(); err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		cid := Ident(fmt.Sprintf("John%v", rand.Intn(1000)))
+		TriggerWait(g, MoveCharacter(cid, N))
+		TriggerWait(g, MoveCharacter(cid, S))
+	}
+}
+
+// ----------------------------------------
+
 type badEvent struct {
 	err error
 }
@@ -259,7 +291,7 @@ func (e *badEvent) Event() string      { return "badEvent" }
 func (e *badEvent) Done() error        { return e.err }
 func (e *badEvent) Affect(*Game) error { return e.err }
 
-func startNewGame(t *testing.T) *Game {
+func startNewGame(t testing.TB) *Game {
 	g := NewGame()
 	g.Logger = t
 	g.LogAllEvents = true
@@ -288,42 +320,3 @@ func (me *brokenListener) Addr() net.Addr            { return nil }
 func (me *brokenListener) Close() error              { return broken }
 
 var broken = fmt.Errorf("broken")
-
-// ----------------------------------------
-
-func BenchmarkMoveCharacter_1_player(b *testing.B) {
-	g := NewGame()
-	go g.Run(context.Background())
-	defer Trigger(g, StopGame())
-
-	p := Player{Name: "John"}
-	task, e := Trigger(g, Join(p))
-	if err := task.Done(); err != nil {
-		b.Fatal(err)
-	}
-	cid := e.Ident
-	for i := 0; i < b.N; i++ {
-		TriggerWait(g, MoveCharacter(cid, N))
-		TriggerWait(g, MoveCharacter(cid, S))
-	}
-}
-
-func BenchmarkMoveCharacter_1000_player(b *testing.B) {
-	g := NewGame()
-	go g.Run(context.Background())
-	defer Trigger(g, StopGame())
-
-	for i := 0; i < 1000; i++ {
-		p := Player{Name: Name(fmt.Sprintf("John%v", i))}
-		task, _ := Trigger(g, Join(p))
-		if err := task.Done(); err != nil {
-			b.Fatal(err)
-		}
-	}
-
-	for i := 0; i < b.N; i++ {
-		cid := Ident(fmt.Sprintf("John%v", rand.Intn(1000)))
-		TriggerWait(g, MoveCharacter(cid, N))
-		TriggerWait(g, MoveCharacter(cid, S))
-	}
-}
