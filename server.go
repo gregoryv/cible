@@ -78,7 +78,9 @@ connectLoop:
 			go func() {
 				me.Log("connect ", conn.RemoteAddr())
 				tr := NewTransceiver(conn, gobish)
-				me.communicate(tr)
+				if err := me.communicate(tr); err != nil {
+					me.Log(err)
+				}
 				conn.Close()
 			}()
 		case err := <-acceptErr:
@@ -89,7 +91,7 @@ connectLoop:
 	return nil
 }
 
-func (me *Server) communicate(tr *Transceiver) {
+func (me *Server) communicate(tr *Transceiver) error {
 	var cid Ident // set on first EventJoin
 	defer func() {
 		// graceful panic handling
@@ -104,9 +106,9 @@ func (me *Server) communicate(tr *Transceiver) {
 		var msg Message
 		if err := tr.Receive(&msg); err != nil {
 			if err != io.EOF {
-				me.Log(err)
+				return err
 			}
-			return
+			return nil
 		}
 		me.Logf("recv %s", msg.String())
 
