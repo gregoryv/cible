@@ -76,7 +76,7 @@ connectLoop:
 		case conn := <-c:
 			go func() {
 				me.Log("connect ", conn.RemoteAddr())
-				me.handleConnection(conn)
+				me.communicate(conn)
 				conn.Close()
 			}()
 		case err := <-acceptErr:
@@ -87,7 +87,7 @@ connectLoop:
 	return nil
 }
 
-func (me *Server) handleConnection(conn io.ReadWriter) {
+func (me *Server) communicate(conn io.ReadWriter) {
 	var cid Ident // set on first EventJoin
 	defer func() {
 		// graceful panic handling
