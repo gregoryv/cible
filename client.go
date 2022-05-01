@@ -98,7 +98,7 @@ type Message struct {
 
 func (m *Message) String() string {
 	return fmt.Sprintf(
-		"message %s %v bytes", m.EventName, m.Size(),
+		"%s[%v] %v bytes", m.EventName, uuid.MustParse(m.Id).ID(), m.Size(),
 	)
 }
 
