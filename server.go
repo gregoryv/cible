@@ -141,7 +141,7 @@ func (me *Server) communicate(tr *Transceiver) error {
 
 		// Always send a response for each message
 		me.Logf("send %v", msg.String())
-		if err := tr.Send(msg); err != nil {
+		if err := tr.Transmit(msg); err != nil {
 			me.Log(err)
 		}
 	}

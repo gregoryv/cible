@@ -156,7 +156,7 @@ type Character struct {
 }
 
 func (me *Character) Notify(e Event) {
-	me.Send(e)
+	me.Transmit(e)
 }
 
 type IsBot bool

@@ -25,7 +25,7 @@ func TestServer(t *testing.T) {
 	client.Logger = t
 
 	// try to move
-	if _, err := Send(client, MoveCharacter("x", N)); err == nil {
+	if _, err := Transmit(client, MoveCharacter("x", N)); err == nil {
 		t.Fatal("Send should fail if client is disconnected")
 	}
 
@@ -45,22 +45,22 @@ func TestServer(t *testing.T) {
 
 	// join
 	p := Player{Name: "test"}
-	j, err := Send(client, &EventJoin{Player: p})
+	j, err := Transmit(client, &EventJoin{Player: p})
 	if err != nil {
 		t.Fatal("join failed, missing ident", err)
 	}
 
 	// move
-	if _, err := Send(client, MoveCharacter(j.Ident, N)); err != nil {
+	if _, err := Transmit(client, MoveCharacter(j.Ident, N)); err != nil {
 		t.Fatal(err)
 	}
 	// speak
-	if _, err := Send(client, &EventSay{j.Ident, "HellOOO!!"}); err != nil {
+	if _, err := Transmit(client, &EventSay{j.Ident, "HellOOO!!"}); err != nil {
 		t.Fatal(err)
 	}
 
 	// try to hack
-	if _, err := Send(client, &badEvent{}); err == nil {
+	if _, err := Transmit(client, &badEvent{}); err == nil {
 		t.Fatal(err)
 	}
 

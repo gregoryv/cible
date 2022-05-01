@@ -58,7 +58,7 @@ func main() {
 
 	// create player and join game
 	p := Player{Name: Name(os.Getenv("USER"))}
-	j, err := Send(c, &EventJoin{Player: p})
+	j, err := Transmit(c, &EventJoin{Player: p})
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -67,8 +67,8 @@ func main() {
 
 	var m Movement
 	// uggly way to set current pos, todo fix it
-	m, _ = Send(c, MoveCharacter(cid, N))
-	m, _ = Send(c, MoveCharacter(cid, S))
+	m, _ = Transmit(c, MoveCharacter(cid, N))
+	m, _ = Transmit(c, MoveCharacter(cid, S))
 
 	for {
 		fmt.Printf("%s> ", p.Name)
@@ -83,7 +83,7 @@ func main() {
 		input := scanner.Text()
 		switch input {
 		case "n", "w", "s", "e":
-			m, err = Send(c, MoveCharacter(cid, nav[input]))
+			m, err = Transmit(c, MoveCharacter(cid, nav[input]))
 			if err == nil {
 				fmt.Println(m.Direction, " => ", m.Tile.Short)
 			}
@@ -102,7 +102,7 @@ func main() {
 			os.Exit(0)
 		default:
 			// todo speach should be async
-			_, err = Send(c, &EventSay{Ident: cid, Text: input})
+			_, err = Transmit(c, &EventSay{Ident: cid, Text: input})
 			// todo handle response
 		}
 		if err != nil {
