@@ -22,7 +22,7 @@ func Trigger[T Event](g *Game, e T) (task *Task, r T) {
 	}()
 
 	task = NewTask(e)
-	g.ch <- task
+	g.Enqueue(task)
 	return
 }
 

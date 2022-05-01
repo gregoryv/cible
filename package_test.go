@@ -261,7 +261,6 @@ func BenchmarkMoveCharacter_1_player(b *testing.B) {
 
 func BenchmarkMoveCharacter_1000_player(b *testing.B) {
 	g := startNewGame(b)
-	go g.Run(context.Background())
 	defer Trigger(g, StopGame())
 
 	// Join all players first

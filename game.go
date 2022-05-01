@@ -29,19 +29,13 @@ type Game struct {
 	MaxTasks     int
 	LogAllEvents bool
 
-	ch chan<- *Task
+	ch chan *Task
 	logger.Logger
 }
 
 func (g *Game) Run(ctx context.Context) error {
 	g.Log("start game")
-
-	ch := make(chan *Task, g.MaxTasks)
-	defer func() {
-		close(ch)
-		g.Log("game stopped")
-	}()
-	g.ch = ch
+	g.ch = make(chan *Task, g.MaxTasks)
 
 eventLoop:
 	for {
@@ -49,7 +43,7 @@ eventLoop:
 		case <-ctx.Done(): // ie. interrupted from the outside
 			break eventLoop
 
-		case task := <-ch: // blocks
+		case task := <-g.ch: // blocks
 			if g.LogAllEvents {
 				if e, ok := task.Event.(fmt.Stringer); ok {
 					g.Log(e.String())
@@ -75,7 +69,19 @@ eventLoop:
 			task.setErr(err)
 		}
 	}
+	close(g.ch)
+	g.Log("game stopped")
 	return nil
+}
+
+func (g *Game) Enqueue(t *Task) {
+	defer func() {
+		// handle closed channel, ie. game stopped
+		if err := recover(); err != nil {
+			t.setErr(fmt.Errorf("game stopped, event dropped"))
+		}
+	}()
+	g.ch <- t
 }
 
 // Place returns the position as area and tile.
