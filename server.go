@@ -109,32 +109,35 @@ func (me *Server) communicate(tr *Transceiver) {
 			return
 		}
 		me.Logf("recv %s", msg.String())
+
 		x, found := newNamedEvent(msg.EventName)
 		if !found {
-			err := fmt.Errorf("missing named event %s", msg.EventName)
-			msg.Body = []byte(err.Error())
-			me.Log(err)
+			// unknown event
 			msg.EventName = "error"
+			msg.Body = []byte("unknown event " + msg.EventName)
 		} else {
-
+			// known event
 			dec := gob.NewDecoder(bytes.NewReader(msg.Body))
 			if err := dec.Decode(x); err != nil {
 				me.Log(err)
 			}
 
 			if err := me.game.Do((x).(Event)); err != nil {
-				me.Log(err)
-				continue
+				msg.Body = []byte("unknown event " + err.Error())
+
+			} else {
+				if msg.EventName == "cible.EventJoin" {
+					cid = x.(*EventJoin).Ident
+				}
+				var buf bytes.Buffer
+				if err := gob.NewEncoder(&buf).Encode(x); err != nil {
+					me.Log(err)
+				}
+				msg.Body = buf.Bytes()
 			}
-			if msg.EventName == "cible.EventJoin" {
-				cid = x.(*EventJoin).Ident
-			}
-			var buf bytes.Buffer
-			if err := gob.NewEncoder(&buf).Encode(x); err != nil {
-				me.Log(err)
-			}
-			msg.Body = buf.Bytes()
 		}
+
+		// Always send a response for each message
 		me.Logf("send %v", msg.String())
 		if err := tr.Send(msg); err != nil {
 			me.Log(err)
