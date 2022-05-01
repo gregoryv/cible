@@ -67,6 +67,7 @@ func (me *Server) Run(ctx context.Context, g *Game) error {
 
 	me.game = g
 
+	gobish := &GobProtocol{}
 connectLoop:
 	for {
 		select {
@@ -76,7 +77,8 @@ connectLoop:
 		case conn := <-c:
 			go func() {
 				me.Log("connect ", conn.RemoteAddr())
-				me.communicate(conn)
+				tr := NewTransceiver(conn, gobish)
+				me.communicate(tr)
 				conn.Close()
 			}()
 		case err := <-acceptErr:
@@ -87,7 +89,7 @@ connectLoop:
 	return nil
 }
 
-func (me *Server) communicate(conn io.ReadWriter) {
+func (me *Server) communicate(tr *Transceiver) {
 	var cid Ident // set on first EventJoin
 	defer func() {
 		// graceful panic handling
@@ -98,12 +100,9 @@ func (me *Server) communicate(conn io.ReadWriter) {
 		me.Log(cid, " disconnected")
 	}()
 
-	enc := gob.NewEncoder(conn)
-	dec := gob.NewDecoder(conn)
-
 	for {
 		var msg Message
-		if err := dec.Decode(&msg); err != nil {
+		if err := tr.Receive(&msg); err != nil {
 			if err != io.EOF {
 				me.Log(err)
 			}
@@ -137,7 +136,7 @@ func (me *Server) communicate(conn io.ReadWriter) {
 			msg.Body = buf.Bytes()
 		}
 		me.Logf("send %v", msg.String())
-		if err := enc.Encode(msg); err != nil {
+		if err := tr.Send(msg); err != nil {
 			me.Log(err)
 		}
 	}
