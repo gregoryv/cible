@@ -24,8 +24,7 @@ type Client struct {
 
 	net.Conn
 
-	enc *gob.Encoder
-	dec *gob.Decoder
+	*Transceiver
 }
 
 func (me *Client) Connect(ctx context.Context) error {
@@ -35,8 +34,7 @@ func (me *Client) Connect(ctx context.Context) error {
 	}
 	me.Conn = conn
 	me.Log("connected to", me.Host)
-	me.enc = gob.NewEncoder(conn)
-	me.dec = gob.NewDecoder(conn)
+	me.Transceiver = NewTransceiver(conn, &GobProtocol{})
 
 	return nil
 }
@@ -58,11 +56,11 @@ func Transmit[T any](c *Client, e *T) (x T, err error) {
 
 	msg := NewMessage(e)
 	next.Stepf("write on wire: %w", func() {
-		err = c.enc.Encode(&msg)
+		err = c.Transmit(&msg)
 	})
 
 	next.Stepf("read response: %w", func() {
-		err = c.dec.Decode(&msg)
+		err = c.Receive(&msg)
 	})
 
 	next.Stepf("response: %w", func() {
