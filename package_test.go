@@ -21,14 +21,14 @@ func TestServer(t *testing.T) {
 	// so we don't log After test is done
 	defer func() { srv.Logger = logger.Silent }()
 
-	// connect client
-	client := NewClient()
-	client.Logger = t
+	// red bot
+	red := NewClient()
+	red.Logger = t
 
 	// connect if server is down, should not work
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	if err := client.Connect(ctx); err == nil {
+	if err := red.Connect(ctx); err == nil {
 		t.Error("connected to nothing?")
 	}
 
@@ -36,13 +36,25 @@ func TestServer(t *testing.T) {
 	go srv.Run(ctx, g)
 	pause("10ms")
 
-	client.Host = srv.Addr().String()
-	_ = client.Connect(ctx)
+	red.Host = srv.Addr().String()
+	var rbuf bytes.Buffer
+	redui := NewUI()
+	redui.out = &rbuf
+	go redui.Run(ctx, red)
+
+	// blue bot
+	blue := NewClient()
+	blue.Logger = t
+	blue.Host = srv.Addr().String()
+	var bbuf bytes.Buffer
+	blueui := NewUI()
+	blueui.out = &bbuf
+	go blueui.Run(ctx, blue)
 
 	// join
 	j := EventJoin{Player: Player{Name: "test"}}
-	client.Out <- NewMessage(&j)
-	m := <-client.In // expect the same response with a character Ident
+	red.Out <- NewMessage(&j)
+	m := <-red.In // expect the same response with a character Ident
 	dec := gob.NewDecoder(bytes.NewReader(m.Body))
 	t.Log(string(m.Body))
 	if err := dec.Decode(&j); err != nil {
@@ -51,17 +63,17 @@ func TestServer(t *testing.T) {
 	cid := j.Ident
 
 	// move
-	client.Out <- NewMessage(MoveCharacter(cid, N))
+	red.Out <- NewMessage(MoveCharacter(cid, N))
 
 	// speak
-	client.Out <- NewMessage(&EventSay{j.Ident, "HellOOO!!"})
+	red.Out <- NewMessage(&EventSay{j.Ident, "HellOOO!!"})
 
 	// try to hack
-	client.Out <- NewMessage(&badEvent{})
+	red.Out <- NewMessage(&badEvent{})
 
 	// todo wait for all messages
 	<-time.After(10 * time.Millisecond)
-	client.Close()
+	red.Close()
 }
 
 func TestServer_Run(t *testing.T) {

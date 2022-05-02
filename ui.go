@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"time"
 
@@ -14,17 +15,20 @@ import (
 func NewUI() *UI {
 	return &UI{
 		Logger: logger.Silent,
+		out:    os.Stdout,
 	}
 }
 
 type UI struct {
 	logger.Logger
 	*Client
+	out io.Writer
 }
 
 func (me *UI) Run(ctx context.Context, c *Client) error {
-	os.Stdout.Write([]byte("\033c"))
-	os.Stdout.Write(logo)
+	out := me.out
+	out.Write([]byte("\033c"))
+	out.Write(logo)
 
 	// connect client
 	if err := c.Connect(ctx); err != nil {
@@ -48,7 +52,7 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 	m.Direction = S
 	c.Out <- NewMessage(m)
 
-	writePrompt := func() { fmt.Printf("%s> ", cid) }
+	writePrompt := func() { fmt.Fprintf(out, "%s> ", cid) }
 	playerInput := make(chan string, 1)
 	go func() {
 		for {
@@ -75,7 +79,7 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 			if e, ok := e.(interface{ AffectUI(*UI) }); ok {
 				e.AffectUI(me)
 			} else {
-				fmt.Printf("\n%s%v%s\n", yellow, e, reset)
+				fmt.Fprintf(out, "\n%s%v%s\n", yellow, e, reset)
 			}
 			writePrompt()
 
@@ -98,13 +102,12 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 				c.Out <- NewMessage(Leave(cid))
 				<-time.After(40 * time.Millisecond)
 				c.Close()
-				fmt.Println("\nBye!")
+				fmt.Fprintln(out, "\nBye!")
 				os.Exit(0)
 			default:
 				e := &EventSay{Ident: cid, Text: input}
 				c.Out <- NewMessage(e)
 			}
-
 		}
 	}
 }
