@@ -8,3 +8,5 @@ require (
 	github.com/gregoryv/logger v0.2.0
 	github.com/gregoryv/nexus v0.5.1
 )
+
+require github.com/gregoryv/vt100 v0.2.0 // indirect
