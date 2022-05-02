@@ -1,4 +1,4 @@
-package main
+package cible
 
 import (
 	"bufio"
@@ -6,15 +6,18 @@ import (
 	"fmt"
 	"os"
 
-	. "github.com/gregoryv/cible"
+	"github.com/gregoryv/logger"
 	"github.com/gregoryv/vt100"
 )
 
 func NewUI() *UI {
-	return &UI{}
+	return &UI{
+		Logger: logger.Silent,
+	}
 }
 
 type UI struct {
+	logger.Logger
 	*Client
 }
 
@@ -52,21 +55,12 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 			scanner := bufio.NewScanner(os.Stdin)
 			scanner.Scan()
 			if err := scanner.Err(); err != nil {
-				mlog.Log(err)
+				me.Log(err)
 				os.Exit(1)
 			}
 			playerInput <- scanner.Text()
 		}
 	}()
-
-	var (
-		fg     = vt100.ForegroundColors()
-		yellow = fg.Yellow.Bytes()
-		cyan   = fg.Cyan.Bytes()
-
-		vt    = vt100.Attributes()
-		reset = vt.Reset.Bytes()
-	)
 
 	// handle incoming messages
 	for {
@@ -77,10 +71,9 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 				continue
 			}
 			Decode(e, &m)
-			switch e := e.(type) {
-			case *EventSay:
-				fmt.Printf("\n%s%s: %s%s\n", cyan, e.Ident, e.Text, reset)
-			default:
+			if e, ok := e.(interface{ AffectUI(*UI) }); ok {
+				e.AffectUI(me)
+			} else {
 				fmt.Printf("\n%s%v%s\n", yellow, e, reset)
 			}
 			writePrompt()
@@ -111,3 +104,45 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 		}
 	}
 }
+
+func (me *UI) OtherPlayerSays(id Ident, text string) {
+	fmt.Printf("\n%s%s: %s%s\n", cyan, id, text, reset)
+}
+
+var (
+	fg     = vt100.ForegroundColors()
+	yellow = fg.Yellow.Bytes()
+	cyan   = fg.Cyan.Bytes()
+
+	vt    = vt100.Attributes()
+	reset = vt.Reset.Bytes()
+)
+
+var nav = map[string]Direction{
+	"n": N,
+	"e": E,
+	"s": S,
+	"w": W,
+}
+
+var usage = []byte(`
+Navigation
+
+n - north
+e - east
+s - south
+w - west
+
+l - look around
+q - quit
+h, help - for this help
+`)
+
+var logo = []byte(`
+  ____ ___ ____  _     _____ 
+ / ___|_ _| __ )| |   | ____|
+| |    | ||  _ \| |   |  _|  
+| |___ | || |_) | |___| |___ 
+ \____|___|____/|_____|_____|
+                             
+`)

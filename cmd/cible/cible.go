@@ -66,32 +66,3 @@ func configureLog(debugFlag bool) (cleanup func()) {
 	}
 	return func() { _ = w.Close() }
 }
-
-var nav = map[string]Direction{
-	"n": N,
-	"e": E,
-	"s": S,
-	"w": W,
-}
-
-var usage = []byte(`
-Navigation
-
-n - north
-e - east
-s - south
-w - west
-
-l - look around
-q - quit
-h, help - for this help
-`)
-
-var logo = []byte(`
-  ____ ___ ____  _     _____ 
- / ___|_ _| __ )| |   | ____|
-| |    | ||  _ \| |   |  _|  
-| |___ | || |_) | |___| |___ 
- \____|___|____/|_____|_____|
-                             
-`)
