@@ -45,14 +45,14 @@ eventLoop:
 
 		case task := <-g.ch: // blocks
 			if g.LogAllEvents {
-				if e, ok := task.Event.(fmt.Stringer); ok {
+				if e, ok := task.GameEvent.(fmt.Stringer); ok {
 					g.Log(e.String())
 				} else {
-					g.Logf("%T", task.Event)
+					g.Logf("%T", task.GameEvent)
 				}
 			}
 			// One event affects the game
-			err := task.Event.AffectGame(g)
+			err := task.GameEvent.AffectGame(g)
 			if err != nil {
 				if errors.Is(endEventLoop, err) {
 					task.setErr(nil)
@@ -75,7 +75,7 @@ eventLoop:
 }
 
 // Do enques the task and waits for it to complete
-func (g *Game) Do(e Event) error {
+func (g *Game) Do(e GameEvent) error {
 	t := NewTask(e)
 	g.Enqueue(t)
 	t.Done()

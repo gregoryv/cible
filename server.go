@@ -127,7 +127,7 @@ func (me *Server) communicate(tr *Transceiver) error {
 			e.tr = tr
 		}
 
-		if err := me.game.Do((x).(Event)); err != nil {
+		if err := me.game.Do((x).(GameEvent)); err != nil {
 			msg.Body = []byte(err.Error())
 		}
 

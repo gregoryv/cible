@@ -3,12 +3,19 @@ package cible
 import (
 	"encoding/gob"
 	"fmt"
+	"log"
 )
 
 // Events follow a command pattern so we can send events accross the
 // wire using some encoding.
-type Event interface {
-	AffectGame(*Game) error // called in the event loop
+type Event interface{}
+
+type GameEvent interface {
+	AffectGame(*Game) error
+}
+
+type UIEvent interface {
+	AffectUI(*UI)
 }
 
 // ----------------------------------------
@@ -75,13 +82,13 @@ func (e *EventSay) AffectUI(ui *UI) {
 
 // ----------------------------------------
 
-func init() { registerEvent(&EventLeave{}) }
-
 func Leave(cid Ident) *EventLeave {
 	return &EventLeave{
 		Ident: cid,
 	}
 }
+
+func init() { registerEvent(&EventLeave{}) }
 
 type EventLeave struct {
 	Ident
@@ -181,6 +188,7 @@ var endEventLoop = fmt.Errorf("end event loop")
 // value must be interface{}, but also implement Event
 func NewNamedEvent(name string) (interface{}, bool) {
 	if fn, found := eventConstructors[name]; !found {
+		log.Println(name, "NOT REGISTERED")
 		return nil, false
 	} else {
 		return fn(), true

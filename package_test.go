@@ -119,7 +119,7 @@ func xTest_badEvents(t *testing.T) {
 	if err := g.Do(c); err != nil {
 		t.Fatal(err)
 	}
-	cases := []Event{
+	cases := []GameEvent{
 		MoveCharacter("Eve", N), // no such playe)
 		Leave("Eve"),            // no such playe)
 		MoveCharacter("god", N), // cannot be move)

@@ -4,15 +4,15 @@ import (
 	"sync"
 )
 
-func NewTask(e Event) *Task {
+func NewTask(e GameEvent) *Task {
 	return &Task{
-		Event:  e,
-		failed: make(chan error, 1),
+		GameEvent: e,
+		failed:    make(chan error, 1),
 	}
 }
 
 type Task struct {
-	Event
+	GameEvent
 
 	err error
 
