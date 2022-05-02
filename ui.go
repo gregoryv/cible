@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/gregoryv/logger"
 	"github.com/gregoryv/vt100"
@@ -93,8 +94,10 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 			case "h", "help":
 				os.Stdout.Write(usage)
 			case "q":
+				c.Out <- NewMessage(Leave(cid))
+				<-time.After(40 * time.Millisecond)
 				c.Close()
-				fmt.Println("bye")
+				fmt.Println("\nBye, welcome back!")
 				os.Exit(0)
 			default:
 				e := &EventSay{Ident: cid, Text: input}

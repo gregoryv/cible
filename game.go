@@ -123,7 +123,8 @@ func NewCharactersMap() *CharactersMap {
 }
 
 type CharactersMap struct {
-	Index map[Ident]*Character
+	Index   map[Ident]*Character
+	idCount int
 }
 
 func (me *CharactersMap) Character(id Ident) (*Character, error) {
@@ -135,7 +136,8 @@ func (me *CharactersMap) Character(id Ident) (*Character, error) {
 }
 
 func (me *CharactersMap) Add(c *Character) {
-	c.Ident = Ident(fmt.Sprintf("char%02v", len(me.Index)))
+	me.idCount++
+	c.Ident = Ident(fmt.Sprintf("char%02v", me.idCount))
 	me.Index[c.Ident] = c
 }
 

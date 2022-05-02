@@ -14,15 +14,10 @@ import (
 )
 
 func NewClient() *Client {
-	out := make(chan Message, 1)
-	in := make(chan Message, 1)
 	return &Client{
 		Logger: logger.Silent,
-		out:    out,
-		Out:    out,
-
-		in: in,
-		In: in,
+		Out:    make(chan Message, 1),
+		In:     make(chan Message, 1),
 	}
 }
 
@@ -32,11 +27,8 @@ type Client struct {
 
 	net.Conn
 
-	out chan Message
-	Out chan<- Message
-
-	in chan Message
-	In <-chan Message
+	Out chan Message
+	In  chan Message
 }
 
 func (me *Client) Connect(ctx context.Context) error {
@@ -53,7 +45,7 @@ func (me *Client) Connect(ctx context.Context) error {
 		for {
 			select {
 			case <-ctx.Done():
-			case m := <-me.out:
+			case m := <-me.Out:
 				if err := tr.Transmit(m); err != nil {
 					me.Log(err)
 					return
@@ -71,7 +63,7 @@ func (me *Client) Connect(ctx context.Context) error {
 				return
 			}
 			me.Log("in:", msg.String())
-			me.in <- msg
+			me.In <- msg
 		}
 	}()
 

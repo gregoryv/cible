@@ -75,6 +75,8 @@ func (e *EventSay) AffectUI(ui *UI) {
 
 // ----------------------------------------
 
+func init() { registerEvent(&EventLeave{}) }
+
 func Leave(cid Ident) *EventLeave {
 	return &EventLeave{
 		Ident: cid,
@@ -86,13 +88,18 @@ type EventLeave struct {
 }
 
 func (e *EventLeave) AffectGame(g *Game) error {
-	c, err := g.Character(e.Ident)
+	c, err := g.Characters.Character(e.Ident)
 	if err != nil {
 		return err
 	}
 	g.Characters.Remove(c.Ident)
 	g.Logf("%s left, %v remaining", c.Name, g.Characters.Len())
+	go c.TransmitOthers(g, NewMessage(e))
 	return nil
+}
+
+func (e *EventLeave) AffectUI(ui *UI) {
+	ui.OtherPlayer(e.Ident, "left game")
 }
 
 // ----------------------------------------
