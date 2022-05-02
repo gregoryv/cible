@@ -81,6 +81,7 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 
 		case input := <-playerInput:
 			switch input {
+			case "": // ignore
 			case "n", "w", "s", "e":
 				mv := MoveCharacter(cid, nav[input])
 				c.Out <- NewMessage(mv)
@@ -97,7 +98,7 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 				c.Out <- NewMessage(Leave(cid))
 				<-time.After(40 * time.Millisecond)
 				c.Close()
-				fmt.Println("\nBye, welcome back!")
+				fmt.Println("\nBye!")
 				os.Exit(0)
 			default:
 				e := &EventSay{Ident: cid, Text: input}
