@@ -169,6 +169,9 @@ type Character struct {
 }
 
 func (me *Character) Transmit(m Message) error {
+	if me.tr == nil { // ie. if bot
+		return nil
+	}
 	return me.tr.Transmit(m)
 }
 

@@ -112,7 +112,7 @@ func TestServer_Run(t *testing.T) {
 	})
 }
 
-func xTest_badEvents(t *testing.T) {
+func Test_badEvents(t *testing.T) {
 	g := startNewGame(t)
 	c := Join(Player{Name: "John"})
 
