@@ -52,7 +52,7 @@ eventLoop:
 				}
 			}
 			// One event affects the game
-			err := task.Event.Affect(g)
+			err := task.Event.AffectGame(g)
 			if err != nil {
 				if errors.Is(endEventLoop, err) {
 					task.setErr(nil)

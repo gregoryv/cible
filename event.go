@@ -8,7 +8,7 @@ import (
 // Events follow a command pattern so we can send events accross the
 // wire using some encoding.
 type Event interface {
-	Affect(*Game) error // called in the event loop
+	AffectGame(*Game) error // called in the event loop
 }
 
 // ----------------------------------------
@@ -22,7 +22,7 @@ type EventJoin struct {
 	tr Transmitter
 }
 
-func (e *EventJoin) Affect(g *Game) error {
+func (e *EventJoin) AffectGame(g *Game) error {
 	c := &Character{
 		Name: e.Player.Name,
 		Position: Position{
@@ -45,7 +45,7 @@ type EventSay struct {
 	Text  string
 }
 
-func (e *EventSay) Affect(g *Game) error {
+func (e *EventSay) AffectGame(g *Game) error {
 	me, err := g.Characters.Character(e.Ident)
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ type EventLeave struct {
 	Ident
 }
 
-func (e *EventLeave) Affect(g *Game) error {
+func (e *EventLeave) AffectGame(g *Game) error {
 	c, err := g.Character(e.Ident)
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ type Movement struct {
 	*Tile
 }
 
-func (e *Movement) Affect(g *Game) (err error) {
+func (e *Movement) AffectGame(g *Game) (err error) {
 	g.Logf("%s move %s", e.Ident, e.Direction)
 	c, err := g.Character(e.Ident)
 	if err != nil {
@@ -146,7 +146,7 @@ func StopGame() *EventStopGame {
 
 type EventStopGame struct{}
 
-func (e *EventStopGame) Affect(g *Game) error {
+func (e *EventStopGame) AffectGame(g *Game) error {
 	// special event that ends the loop, thus we do things here as
 	// no other events should be affecting the game
 	g.Log("shutting down...")
