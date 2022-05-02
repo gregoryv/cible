@@ -105,8 +105,14 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 	}
 }
 
+// only for speach
 func (me *UI) OtherPlayerSays(id Ident, text string) {
 	fmt.Printf("\n%s%s: %s%s\n", cyan, id, text, reset)
+}
+
+// for notifications
+func (me *UI) OtherPlayer(id Ident, text string) {
+	fmt.Printf("\n%s%s: %s%s\n", yellow, id, text, reset)
 }
 
 var (

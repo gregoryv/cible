@@ -33,7 +33,22 @@ func (e *EventJoin) AffectGame(g *Game) error {
 	g.Characters.Add(c)
 	g.Logf("%s joined game as %s", c.Name, c.Ident)
 	e.Character = c
-	return c.Transmit(NewMessage(e))
+
+	// notify others of the new character
+	go c.TransmitOthers(g,
+		NewMessage(&CharacterJoined{Ident: c.Ident}),
+	)
+	return c.Transmit(NewMessage(e)) // back to player
+}
+
+func init() { registerEvent(&CharacterJoined{}) }
+
+type CharacterJoined struct {
+	Ident
+}
+
+func (e *CharacterJoined) AffectUI(ui *UI) {
+	ui.OtherPlayer(e.Ident, "joined")
 }
 
 // ----------------------------------------
@@ -46,17 +61,11 @@ type EventSay struct {
 }
 
 func (e *EventSay) AffectGame(g *Game) error {
-	me, err := g.Characters.Character(e.Ident)
+	c, err := g.Characters.Character(e.Ident)
 	if err != nil {
 		return err
 	}
-	nearby := g.Characters.At(me.Position)
-	for _, c := range nearby {
-		if c.Ident == me.Ident {
-			continue
-		}
-		go c.Transmit(NewMessage(e))
-	}
+	go c.TransmitOthers(g, NewMessage(e))
 	return nil
 }
 

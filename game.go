@@ -170,6 +170,17 @@ func (me *Character) Transmit(m Message) error {
 	return me.tr.Transmit(m)
 }
 
+func (me *Character) TransmitOthers(g *Game, m Message) error {
+	nearby := g.Characters.At(me.Position)
+	for _, c := range nearby {
+		if c.Ident == me.Ident {
+			continue
+		}
+		c.Transmit(m)
+	}
+	return nil
+}
+
 type IsBot bool
 
 type Player struct {
