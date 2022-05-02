@@ -15,18 +15,20 @@ import (
 func NewUI() *UI {
 	return &UI{
 		Logger: logger.Silent,
-		out:    os.Stdout,
+		stdout: os.Stdout,
+		stdin:  os.Stdin,
 	}
 }
 
 type UI struct {
 	logger.Logger
 	*Client
-	out io.Writer
+	stdout io.Writer
+	stdin  io.ReadWriter // readwriter so we can test
 }
 
 func (me *UI) Run(ctx context.Context, c *Client) error {
-	out := me.out
+	out := me.stdout
 	out.Write([]byte("\033c"))
 	out.Write(logo)
 
@@ -57,7 +59,7 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 	go func() {
 		for {
 			writePrompt()
-			scanner := bufio.NewScanner(os.Stdin)
+			scanner := bufio.NewScanner(me.stdin)
 			scanner.Scan()
 			if err := scanner.Err(); err != nil {
 				me.Log(err)
@@ -70,6 +72,8 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 	// handle incoming messages
 	for {
 		select {
+		case <-ctx.Done():
+			return nil
 		case m := <-c.In:
 			e, known := NewNamedEvent(m.EventName)
 			if !known {
@@ -85,7 +89,8 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 
 		case input := <-playerInput:
 			switch input {
-			case "": // ignore
+			case "":
+				// ignore
 			case "n", "w", "s", "e":
 				mv := MoveCharacter(cid, nav[input])
 				c.Out <- NewMessage(mv)
@@ -93,7 +98,7 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 			case "l":
 				// todo first position
 				if m.Tile != nil {
-					os.Stdout.Write([]byte(m.Tile.Long))
+					me.stdout.Write([]byte(m.Tile.Long))
 					fmt.Println()
 				}
 			case "h", "help":
@@ -103,13 +108,27 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 				<-time.After(40 * time.Millisecond)
 				c.Close()
 				fmt.Fprintln(out, "\nBye!")
-				os.Exit(0)
+				return nil
 			default:
 				e := &EventSay{Ident: cid, Text: input}
 				c.Out <- NewMessage(e)
 			}
 		}
 	}
+}
+
+func (me *UI) Do(v string) {
+	me.DoWait(v, "")
+}
+
+func (me *UI) DoWait(v, duration string) {
+	me.stdin.Write([]byte(v))
+	me.stdin.Write([]byte("\n"))
+	dur, err := time.ParseDuration(duration)
+	if err != nil {
+		dur = 20 * time.Millisecond
+	}
+	<-time.After(dur)
 }
 
 // only for speach

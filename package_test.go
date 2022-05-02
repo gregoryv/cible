@@ -3,7 +3,6 @@ package cible
 import (
 	"bytes"
 	"context"
-	"encoding/gob"
 	"fmt"
 	"log"
 	"math/rand"
@@ -20,14 +19,14 @@ func TestServer(t *testing.T) {
 	srv.Logger = t
 	// so we don't log After test is done
 	defer func() { srv.Logger = logger.Silent }()
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
 
 	// red bot
 	red := NewClient()
 	red.Logger = t
 
 	// connect if server is down, should not work
-	ctx, cancel := context.WithCancel(context.Background())
-	t.Cleanup(cancel)
 	if err := red.Connect(ctx); err == nil {
 		t.Error("connected to nothing?")
 	}
@@ -37,43 +36,35 @@ func TestServer(t *testing.T) {
 	pause("10ms")
 
 	red.Host = srv.Addr().String()
-	var rbuf bytes.Buffer
 	redui := NewUI()
-	redui.out = &rbuf
+	redui.stdout = &bytes.Buffer{}
+	redui.stdin = &bytes.Buffer{}
 	go redui.Run(ctx, red)
 
 	// blue bot
 	blue := NewClient()
 	blue.Logger = t
 	blue.Host = srv.Addr().String()
-	var bbuf bytes.Buffer
 	blueui := NewUI()
-	blueui.out = &bbuf
+	blueui.stdout = &bytes.Buffer{}
+	blueui.stdin = &bytes.Buffer{}
 	go blueui.Run(ctx, blue)
 
-	// join
-	j := EventJoin{Player: Player{Name: "test"}}
-	red.Out <- NewMessage(&j)
-	m := <-red.In // expect the same response with a character Ident
-	dec := gob.NewDecoder(bytes.NewReader(m.Body))
-	t.Log(string(m.Body))
-	if err := dec.Decode(&j); err != nil {
-		t.Fatalf("decode %v: %v", m.String(), err)
-	}
-	cid := j.Ident
-
+	// let them connect
+	<-time.After(200 * time.Millisecond)
 	// move
-	red.Out <- NewMessage(MoveCharacter(cid, N))
+	redui.Do("n")
 
-	// speak
-	red.Out <- NewMessage(&EventSay{j.Ident, "HellOOO!!"})
-
+	redui.Do("")          // say nothing
+	redui.Do("HellOOO!!") // speak
+	redui.Do("l")         // look around
 	// try to hack
 	red.Out <- NewMessage(&badEvent{})
 
-	// todo wait for all messages
-	<-time.After(10 * time.Millisecond)
-	red.Close()
+	redui.Do("h") // help
+	redui.Do("q") // leave game
+	//blueui.DoWait("q", "200ms")
+
 }
 
 func TestServer_Run(t *testing.T) {
