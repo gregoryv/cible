@@ -49,16 +49,16 @@ type World struct {
 	Areas
 }
 
-func (w *World) Area(id Ident) (*Area, error) {
-	for _, a := range w.Areas {
+type Areas []*Area
+
+func (me Areas) Area(id Ident) (*Area, error) {
+	for _, a := range me {
 		if a.Ident == id {
 			return a, nil
 		}
 	}
 	return nil, fmt.Errorf("area %q not found", id)
 }
-
-type Areas []*Area
 
 type Area struct {
 	Ident
