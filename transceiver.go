@@ -1,7 +1,6 @@
 package cible
 
 import (
-	"fmt"
 	"io"
 )
 
@@ -18,16 +17,10 @@ type Transceiver struct {
 }
 
 func (me *Transceiver) Transmit(v any) error {
-	if me == nil {
-		return fmt.Errorf("transceiver not set")
-	}
 	return me.Encode(v)
 }
 
 func (me *Transceiver) Receive(v any) error {
-	if me == nil {
-		return fmt.Errorf("transceiver not set")
-	}
 	return me.Decode(v)
 }
 
