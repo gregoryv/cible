@@ -102,7 +102,7 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 					fmt.Println()
 				}
 			case "h", "help":
-				os.Stdout.Write(usage)
+				me.stdout.Write(usage)
 			case "q":
 				c.Out <- NewMessage(Leave(cid))
 				<-time.After(40 * time.Millisecond)
