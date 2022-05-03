@@ -37,7 +37,8 @@ func TestServer(t *testing.T) {
 
 	red.Host = srv.Addr().String()
 	redui := NewUI()
-	redui.stdout = &bytes.Buffer{}
+	var buf bytes.Buffer
+	redui.stdout = &buf
 	redui.stdin = &bytes.Buffer{}
 	go redui.Run(ctx, red)
 
@@ -50,6 +51,8 @@ func TestServer(t *testing.T) {
 	blueui.stdin = &bytes.Buffer{}
 	go blueui.Run(ctx, blue)
 
+	// GAME PLAY
+	// this does get us coverage but it doesn't verify anything
 	// let them connect
 	<-time.After(200 * time.Millisecond)
 	// move
@@ -64,7 +67,6 @@ func TestServer(t *testing.T) {
 	redui.Do("h") // help
 	redui.Do("q") // leave game
 	//blueui.DoWait("q", "200ms")
-
 }
 
 func TestServer_Run(t *testing.T) {

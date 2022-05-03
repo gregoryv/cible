@@ -115,7 +115,6 @@ func (me *Server) communicate(tr *Transceiver) error {
 		x, known := NewNamedEvent(msg.EventName)
 		if !known {
 			continue
-
 		}
 
 		dec := gob.NewDecoder(bytes.NewReader(msg.Body))
