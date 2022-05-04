@@ -4,13 +4,23 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestUI_Run(t *testing.T) {
 	ui := NewUI()
-	if err := ui.Run(context.Background(), NewClient()); err == nil {
-		t.Error("expected error on client failure")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond)
+	go ui.Run(ctx)
+	select {
+	case <-ctx.Done():
+		t.Fail()
+	case m := <-ui.out:
+		// got first join message
+		if m.EventName != "cible.EventJoin" {
+			t.Error("expected EventJoin got: ", m.String())
+		}
 	}
+	cancel()
 }
 
 func TestUI_OtherPlayerSays(t *testing.T) {

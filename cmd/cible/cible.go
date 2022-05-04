@@ -46,12 +46,17 @@ func main() {
 	c := NewClient()
 	c.Host = bind
 	ctx := context.Background()
-	ui := NewUI()
-	if err := ui.Run(ctx, c); err != nil {
+	if err := c.Connect(ctx); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
+	ui := NewUI()
+	ui.Use(c)
+	if err := ui.Run(ctx); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func configureLog(debugFlag bool) (cleanup func()) {

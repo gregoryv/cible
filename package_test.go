@@ -37,14 +37,14 @@ func xTestServer(t *testing.T) {
 
 	red.Host = srv.Addr().String()
 	redui := NewUI()
-	go redui.Run(ctx, red)
+	go redui.Run(ctx)
 
 	// blue bot
 	blue := NewClient()
 	blue.Logger = t
 	blue.Host = srv.Addr().String()
 	blueui := NewUI()
-	go blueui.Run(ctx, blue)
+	go blueui.Run(ctx)
 
 	// GAME PLAY
 	// this does get us coverage but it doesn't verify anything

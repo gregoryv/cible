@@ -17,33 +17,38 @@ func NewUI() *UI {
 	return &UI{
 		Logger: logger.Silent,
 		IO:     NewRWCache(NewStdIO()),
+		out:    make(chan Message, 1),
+		in:     make(chan Message, 1),
 	}
 }
 
 type UI struct {
 	logger.Logger
-	*Client
+	out chan Message
+	in  chan Message
 
 	// cache last input/output to simplify tests
 	IO *RWCache
 }
 
-func (me *UI) Run(ctx context.Context, c *Client) error {
-	out := me.IO
-	out.Write([]byte("\033c"))
-	out.Write(logo)
+func (me *UI) Use(c *Client) {
+	close(me.out)
+	close(me.in)
+	me.out = c.Out
+	me.in = c.In
+}
 
-	// connect client
-	if err := c.Connect(ctx); err != nil {
-		return err
-	}
+func (u *UI) Run(ctx context.Context) error {
+	u.ShowIntro()
 
 	// create player and join game
 	p := Player{Name: Name(os.Getenv("USER"))}
 	j := &EventJoin{Player: p}
-	c.Out <- NewMessage(j)
 
-	msg := <-c.In
+	send := u.out
+	send <- NewMessage(j)
+
+	msg := <-u.in
 	if err := Decode(j, &msg); err != nil {
 		return err
 	}
@@ -51,19 +56,19 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 	cid := j.Ident
 	// uggly way to set current pos, todo fix it
 	m := MoveCharacter(cid, N)
-	c.Out <- NewMessage(m)
+	send <- NewMessage(m)
 	m.Direction = S
-	c.Out <- NewMessage(m)
+	send <- NewMessage(m)
 
-	writePrompt := func() { fmt.Fprintf(out, "%s> ", cid) }
+	writePrompt := func() { fmt.Fprintf(u, "%s> ", cid) }
 	playerInput := make(chan string, 1)
 	go func() {
 		for {
 			writePrompt()
-			scanner := bufio.NewScanner(me.IO)
+			scanner := bufio.NewScanner(u.IO)
 			scanner.Scan()
 			if err := scanner.Err(); err != nil {
-				me.Log(err)
+				u.Log(err)
 				os.Exit(1)
 			}
 			playerInput <- scanner.Text()
@@ -75,16 +80,16 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 		select {
 		case <-ctx.Done():
 			return nil
-		case m := <-c.In:
+		case m := <-u.in:
 			e, known := NewNamedEvent(m.EventName)
 			if !known {
 				continue
 			}
 			Decode(e, &m)
 			if e, ok := e.(interface{ AffectUI(*UI) }); ok {
-				e.AffectUI(me)
+				e.AffectUI(u)
 			} else {
-				fmt.Fprintf(out, "\n%s%v%s\n", yellow, e, reset)
+				fmt.Fprintf(u, "\n%s%v%s\n", yellow, e, reset)
 			}
 			writePrompt()
 
@@ -94,28 +99,36 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 				// ignore
 			case "n", "w", "s", "e":
 				mv := MoveCharacter(cid, nav[input])
-				c.Out <- NewMessage(mv)
+				send <- NewMessage(mv)
 
 			case "l":
 				// todo first position
 				if m.Tile != nil {
-					out.Write([]byte(m.Tile.Long))
+					u.Write([]byte(m.Tile.Long))
 					fmt.Println()
 				}
 			case "h", "help":
-				out.Write(usage)
+				u.Write(usage)
 			case "q":
-				c.Out <- NewMessage(Leave(cid))
+				send <- NewMessage(Leave(cid))
 				<-time.After(40 * time.Millisecond)
-				c.Close()
-				fmt.Fprintln(out, "\nBye!")
+				fmt.Fprintln(u, "\nBye!")
 				return nil
 			default:
 				e := &EventSay{Ident: cid, Text: input}
-				c.Out <- NewMessage(e)
+				send <- NewMessage(e)
 			}
 		}
 	}
+}
+
+func (me *UI) Write(p []byte) (int, error) {
+	return me.IO.Write(p)
+}
+
+func (u *UI) ShowIntro() {
+	u.Write([]byte("\033c"))
+	u.Write(logo)
 }
 
 func (me *UI) Do(v string) {
