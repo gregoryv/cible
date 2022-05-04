@@ -62,22 +62,23 @@ func (u *UI) Run(ctx context.Context) error {
 
 	writePrompt := func() { fmt.Fprintf(u, "%s> ", cid) }
 	playerInput := make(chan string, 1)
+
+	scanErr := make(chan error)
 	go func() {
-		for {
-			writePrompt()
-			scanner := bufio.NewScanner(u.IO)
-			scanner.Scan()
-			if err := scanner.Err(); err != nil {
-				u.Log(err)
-				os.Exit(1)
-			}
+		scanner := bufio.NewScanner(u.IO)
+		writePrompt()
+		for scanner.Scan() {
 			playerInput <- scanner.Text()
+			writePrompt()
 		}
+		scanErr <- scanner.Err()
 	}()
 
 	// handle incoming messages
 	for {
 		select {
+		case err := <-scanErr:
+			return err
 		case <-ctx.Done():
 			return nil
 		case m := <-u.in:
