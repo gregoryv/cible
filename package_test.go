@@ -16,7 +16,7 @@ import (
 func TestServer(t *testing.T) {
 	srv := NewServer()
 	srv.Logger = t
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
 	// start server
 	go srv.Run(ctx, startNewGame(t))
 	pause("10ms")
@@ -36,8 +36,9 @@ func TestServer(t *testing.T) {
 	red.Do("HellOOO!!") // speak
 	red.Do("l")         // look around
 	red.Do("h")         // help
-	red.Do("q")         // leave game
-	blue.DoWait("q", "200ms")
+	blue.DoWait("q", "100ms")
+	cancel()
+	<-time.After(100 * time.Millisecond)
 }
 
 func newUI(t *testing.T, srv *Server) *UI {
