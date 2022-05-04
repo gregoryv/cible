@@ -16,14 +16,16 @@ import (
 func NewUI() *UI {
 	return &UI{
 		Logger: logger.Silent,
-		IO:     NewStdIO(),
+		IO:     NewRWCache(NewStdIO()),
 	}
 }
 
 type UI struct {
 	logger.Logger
 	*Client
-	IO
+
+	// cache last input/output to simplify tests
+	IO *RWCache
 }
 
 func (me *UI) Run(ctx context.Context, c *Client) error {
@@ -143,6 +145,32 @@ func (me *UI) OtherPlayer(id Ident, text string) {
 // ----------------------------------------
 
 type IO io.ReadWriter
+
+func NewRWCache(rw io.ReadWriter) *RWCache {
+	return &RWCache{
+		ReadWriter: rw,
+	}
+}
+
+type RWCache struct {
+	io.ReadWriter
+	LastRead  []byte
+	LastWrite []byte
+}
+
+func (me *RWCache) Read(p []byte) (int, error) {
+	n, err := me.ReadWriter.Read(p)
+	me.LastRead = p
+	return n, err
+}
+
+func (me *RWCache) Write(p []byte) (int, error) {
+	n, err := me.ReadWriter.Write(p)
+	me.LastWrite = p
+	return n, err
+}
+
+// ----------------------------------------
 
 func NewBufIO() *BufIO {
 	return &BufIO{

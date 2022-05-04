@@ -17,11 +17,9 @@ func TestUI_Run(t *testing.T) {
 
 func TestUI_OtherPlayerSays(t *testing.T) {
 	ui := NewUI()
-	io := NewBufIO()
-	ui.IO = io
 
 	ui.OtherPlayerSays("cid", "hello")
-	got, exp := io.output.String(), "hello"
+	got, exp := string(ui.IO.LastWrite), "hello"
 	if !strings.Contains(got, exp) {
 		t.Errorf("%s\nmissing %s", got, exp)
 	}
@@ -29,11 +27,9 @@ func TestUI_OtherPlayerSays(t *testing.T) {
 
 func TestUI_OtherPlayer(t *testing.T) {
 	ui := NewUI()
-	io := NewBufIO()
-	ui.IO = io
 
 	ui.OtherPlayer("cid", "left")
-	got, exp := io.output.String(), "left"
+	got, exp := string(ui.IO.LastWrite), "left"
 	if !strings.Contains(got, exp) {
 		t.Errorf("%s\nmissing %s", got, exp)
 	}

@@ -37,7 +37,6 @@ func xTestServer(t *testing.T) {
 
 	red.Host = srv.Addr().String()
 	redui := NewUI()
-	redui.IO = NewBufIO()
 	go redui.Run(ctx, red)
 
 	// blue bot
@@ -45,7 +44,6 @@ func xTestServer(t *testing.T) {
 	blue.Logger = t
 	blue.Host = srv.Addr().String()
 	blueui := NewUI()
-	blueui.IO = NewBufIO()
 	go blueui.Run(ctx, blue)
 
 	// GAME PLAY
