@@ -13,7 +13,7 @@ import (
 	"github.com/gregoryv/logger"
 )
 
-func xTestServer(t *testing.T) {
+func TestServer(t *testing.T) {
 	g := startNewGame(t)
 	srv := NewServer()
 	srv.Logger = t
@@ -36,7 +36,12 @@ func xTestServer(t *testing.T) {
 	pause("10ms")
 
 	red.Host = srv.Addr().String()
+	if err := red.Connect(ctx); err != nil {
+		t.Fatal(err)
+	}
 	redui := NewUI()
+	redui.Use(red)
+	redui.IO = NewRWCache(NewBufIO())
 	go redui.Run(ctx)
 
 	// blue bot
@@ -44,6 +49,8 @@ func xTestServer(t *testing.T) {
 	blue.Logger = t
 	blue.Host = srv.Addr().String()
 	blueui := NewUI()
+	blueui.Use(blue)
+	blueui.IO = NewRWCache(NewBufIO())
 	go blueui.Run(ctx)
 
 	// GAME PLAY
@@ -56,12 +63,9 @@ func xTestServer(t *testing.T) {
 	redui.Do("")          // say nothing
 	redui.Do("HellOOO!!") // speak
 	redui.Do("l")         // look around
-	// try to hack
-	red.Out <- NewMessage(&badEvent{})
-
-	redui.Do("h") // help
-	redui.Do("q") // leave game
-	//blueui.DoWait("q", "200ms")
+	redui.Do("h")         // help
+	redui.Do("q")         // leave game
+	blueui.DoWait("q", "200ms")
 }
 
 func TestServer_Run(t *testing.T) {
