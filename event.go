@@ -148,7 +148,13 @@ func (e *Movement) AffectGame(g *Game) (err error) {
 	}
 	e.Position = c.Position
 	e.Tile = t
+	go c.Transmit(NewMessage(e))
 	return nil
+}
+
+func (e *Movement) AffectUI(u *UI) {
+	u.Character.Position = e.Position
+	u.Tile = e.Tile
 }
 
 func (me *Movement) String() string {

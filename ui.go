@@ -34,6 +34,9 @@ type UI struct {
 
 	out chan Message
 	in  chan Message
+
+	*Character
+	*Tile
 }
 
 func (me *UI) Use(c *Client) {
@@ -57,21 +60,25 @@ func (u *UI) Run(ctx context.Context) error {
 		return err
 	}
 
+	u.Character = j.Character
+
 	cid := j.Ident
 	// uggly way to set current pos, todo fix it
 	m := MoveCharacter(cid, N)
 	send <- NewMessage(m)
+	<-u.in
 	m.Direction = S
 	send <- NewMessage(m)
-
-	writePrompt := func() { fmt.Fprintf(u, "%s> ", cid) }
+	<-u.in
 
 	go func() {
 		scanner := bufio.NewScanner(u.IO)
-		writePrompt()
+		u.WritePrompt()
 		for scanner.Scan() {
-			u.playerInput <- scanner.Text()
-			writePrompt()
+			input := scanner.Text()
+			if input != "" {
+				u.playerInput <- input
+			}
 		}
 	}()
 
@@ -92,7 +99,7 @@ func (u *UI) Run(ctx context.Context) error {
 			} else {
 				p.Printf("\n%s%v%s\n", yellow, e, reset)
 			}
-			writePrompt()
+			u.WritePrompt()
 
 		case input := <-u.playerInput:
 			switch input {
@@ -100,10 +107,9 @@ func (u *UI) Run(ctx context.Context) error {
 				mv := MoveCharacter(cid, nav[input])
 				send <- NewMessage(mv)
 
-			case "l":
-				// todo first position
-				if m.Tile != nil {
-					p.Println(m.Tile.Long)
+			case "l": // use a look event
+				if u.Tile != nil {
+					p.Println(u.Tile.Long)
 				}
 			case "h", "help":
 				u.Write(usage)
@@ -120,6 +126,10 @@ func (u *UI) Run(ctx context.Context) error {
 			}
 		}
 	}
+}
+
+func (me *UI) WritePrompt() {
+	fmt.Fprintf(me.IO, "%s> ", me.Character.Ident)
 }
 
 func (me *UI) Write(p []byte) (int, error) {
