@@ -55,14 +55,29 @@ func (u *UI) Run(ctx context.Context) error {
 	}}
 	send <- NewMessage(e)
 
+	// signal when prompt needs update
+	promptUpdate := make(chan struct{}, 1)
+	go func() {
+		t := time.AfterFunc(200*time.Millisecond,
+			u.WritePrompt,
+		)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-promptUpdate:
+				t.Stop()
+				t = time.AfterFunc(100*time.Millisecond,
+					u.WritePrompt,
+				)
+			}
+		}
+	}()
+
 	go func() {
 		scanner := bufio.NewScanner(u.IO)
-		u.WritePrompt()
 		for scanner.Scan() {
-			input := scanner.Text()
-			if input != "" {
-				u.playerInput <- input
-			}
+			u.playerInput <- scanner.Text()
 		}
 	}()
 
@@ -83,11 +98,12 @@ func (u *UI) Run(ctx context.Context) error {
 			} else {
 				p.Printf("\n%s%v%s\n", yellow, e, reset)
 			}
-			u.WritePrompt()
+			promptUpdate <- struct{}{}
 
 		case input := <-u.playerInput:
 			cid := u.CID()
 			switch input {
+			case "":
 			case "n", "w", "s", "e":
 				mv := MoveCharacter(cid, nav[input])
 				send <- NewMessage(mv)
@@ -104,12 +120,10 @@ func (u *UI) Run(ctx context.Context) error {
 				p.Println("\nBye!")
 				return nil
 			default:
-				if input != "" {
-					e := &EventSay{Ident: cid, Text: input}
-					send <- NewMessage(e)
-				}
+				e := &EventSay{Ident: cid, Text: input}
+				send <- NewMessage(e)
 			}
-			u.WritePrompt()
+			promptUpdate <- struct{}{}
 		}
 	}
 }
