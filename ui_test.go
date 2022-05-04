@@ -7,12 +7,10 @@ import (
 )
 
 func TestUI_Run(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
 	ui := NewUI()
-	if err := ui.Run(ctx, NewClient()); err == nil {
+	if err := ui.Run(context.Background(), NewClient()); err == nil {
 		t.Error("expected error on client failure")
 	}
-	cancel()
 }
 
 func TestUI_OtherPlayerSays(t *testing.T) {
