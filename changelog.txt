@@ -2,7 +2,10 @@
 
 All major changes will be documented in this file.
 
-## [unreleased]
+## [0.1.0] - 2022-05-04
 
-- Add types Player and EventMove
-- Add initial types Game and World with event handling
+- Basic client server in place
+- Characters can move around using n,e,s,w keys
+- Look around using l
+- Quit using q
+
