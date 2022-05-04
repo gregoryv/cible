@@ -14,7 +14,6 @@ import (
 )
 
 func TestServer(t *testing.T) {
-	g := startNewGame(t)
 	srv := NewServer()
 	srv.Logger = t
 	// so we don't log After test is done
@@ -22,50 +21,46 @@ func TestServer(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
 
-	// red bot
-	red := NewClient()
-	red.Logger = t
-
-	// connect if server is down, should not work
-	if err := red.Connect(ctx); err == nil {
-		t.Error("connected to nothing?")
-	}
-
 	// start server
+	g := startNewGame(t)
 	go srv.Run(ctx, g)
 	pause("10ms")
 
-	red.Host = srv.Addr().String()
-	if err := red.Connect(ctx); err != nil {
-		t.Fatal(err)
-	}
-	redui := NewUI()
-	redui.Use(red)
-	redui.IO = NewRWCache(NewBufIO())
-	go redui.Run(ctx)
+	red := newUI(t, srv)
+	go red.Run(ctx)
 
-	// blue bot
-	blue := NewClient()
-	blue.Logger = t
-	blue.Host = srv.Addr().String()
-	blueui := NewUI()
-	blueui.Use(blue)
-	blueui.IO = NewRWCache(NewBufIO())
-	go blueui.Run(ctx)
+	blue := newUI(t, srv)
+	go blue.Run(ctx)
+
+	// let clients connect
+	<-time.After(100 * time.Millisecond)
 
 	// GAME PLAY
 	// this does get us coverage but it doesn't verify anything
 	// let them connect
-	<-time.After(200 * time.Millisecond)
-	// move
-	redui.Do("n")
 
-	redui.Do("")          // say nothing
-	redui.Do("HellOOO!!") // speak
-	redui.Do("l")         // look around
-	redui.Do("h")         // help
-	redui.Do("q")         // leave game
-	blueui.DoWait("q", "200ms")
+	// move
+	red.Do("n")
+
+	red.Do("")          // say nothing
+	red.Do("HellOOO!!") // speak
+	red.Do("l")         // look around
+	red.Do("h")         // help
+	red.Do("q")         // leave game
+	blue.DoWait("q", "200ms")
+}
+
+func newUI(t *testing.T, srv *Server) *UI {
+	c := NewClient()
+	c.Logger = t
+	c.Host = srv.Addr().String()
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	c.Connect(ctx)
+	ui := NewUI()
+	ui.Use(c)
+	ui.IO = NewRWCache(NewBufIO())
+	return ui
 }
 
 func TestServer_Run(t *testing.T) {
