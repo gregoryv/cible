@@ -16,14 +16,9 @@ import (
 func TestServer(t *testing.T) {
 	srv := NewServer()
 	srv.Logger = t
-	// so we don't log After test is done
-	defer func() { srv.Logger = logger.Silent }()
-	ctx, cancel := context.WithCancel(context.Background())
-	t.Cleanup(cancel)
-
+	ctx := context.Background()
 	// start server
-	g := startNewGame(t)
-	go srv.Run(ctx, g)
+	go srv.Run(ctx, startNewGame(t))
 	pause("10ms")
 
 	red := newUI(t, srv)
@@ -36,12 +31,7 @@ func TestServer(t *testing.T) {
 	<-time.After(100 * time.Millisecond)
 
 	// GAME PLAY
-	// this does get us coverage but it doesn't verify anything
-	// let them connect
-
-	// move
-	red.Do("n")
-
+	red.Do("n")         // move north
 	red.Do("")          // say nothing
 	red.Do("HellOOO!!") // speak
 	red.Do("l")         // look around

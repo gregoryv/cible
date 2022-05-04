@@ -17,19 +17,23 @@ import (
 func NewUI() *UI {
 	return &UI{
 		Logger: logger.Silent,
-		IO:     NewRWCache(NewStdIO()),
-		out:    make(chan Message, 1),
-		in:     make(chan Message, 1),
+
+		IO:          NewRWCache(NewStdIO()),
+		playerInput: make(chan string, 1),
+
+		out: make(chan Message, 1),
+		in:  make(chan Message, 1),
 	}
 }
 
 type UI struct {
 	logger.Logger
+	// cache last input/output to simplify tests
+	IO          *RWCache
+	playerInput chan string
+
 	out chan Message
 	in  chan Message
-
-	// cache last input/output to simplify tests
-	IO *RWCache
 }
 
 func (me *UI) Use(c *Client) {
@@ -61,13 +65,12 @@ func (u *UI) Run(ctx context.Context) error {
 	send <- NewMessage(m)
 
 	writePrompt := func() { fmt.Fprintf(u, "%s> ", cid) }
-	playerInput := make(chan string, 1)
 
 	go func() {
 		scanner := bufio.NewScanner(u.IO)
 		writePrompt()
 		for scanner.Scan() {
-			playerInput <- scanner.Text()
+			u.playerInput <- scanner.Text()
 			writePrompt()
 		}
 	}()
@@ -91,10 +94,8 @@ func (u *UI) Run(ctx context.Context) error {
 			}
 			writePrompt()
 
-		case input := <-playerInput:
+		case input := <-u.playerInput:
 			switch input {
-			case "":
-				// ignore
 			case "n", "w", "s", "e":
 				mv := MoveCharacter(cid, nav[input])
 				send <- NewMessage(mv)
@@ -112,8 +113,10 @@ func (u *UI) Run(ctx context.Context) error {
 				p.Println("\nBye!")
 				return nil
 			default:
-				e := &EventSay{Ident: cid, Text: input}
-				send <- NewMessage(e)
+				if input != "" {
+					e := &EventSay{Ident: cid, Text: input}
+					send <- NewMessage(e)
+				}
 			}
 		}
 	}
@@ -128,13 +131,12 @@ func (u *UI) ShowIntro() {
 	u.Write(logo)
 }
 
-func (me *UI) Do(v string) {
-	me.DoWait(v, "")
+func (u *UI) Do(v string) {
+	u.DoWait(v, "")
 }
 
-func (me *UI) DoWait(v, duration string) {
-	me.IO.Write([]byte(v))
-	me.IO.Write([]byte("\n"))
+func (u *UI) DoWait(v, duration string) {
+	u.playerInput <- v
 	dur, err := time.ParseDuration(duration)
 	if err != nil {
 		dur = 20 * time.Millisecond
