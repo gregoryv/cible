@@ -122,14 +122,18 @@ func (me *Server) communicate(tr *Transceiver) error {
 			me.Log(err)
 		}
 
+		// new player joined, set the transceiver for further
+		// communication
 		if e, ok := x.(*EventJoin); ok {
 			e.tr = tr
 		}
 
-		if err := me.game.Do((x).(GameEvent)); err != nil {
-			msg.Body = []byte(err.Error())
+		if e, ok := x.(GameEvent); ok {
+			if err := me.game.Do(e); err != nil {
+				msg.Body = []byte(err.Error())
+			}
 		}
-
+		// ignore other events
 	}
 }
 
