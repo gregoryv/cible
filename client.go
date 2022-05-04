@@ -71,13 +71,6 @@ func (me *Client) Connect(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) CheckState() error {
-	if c.Conn == nil {
-		return fmt.Errorf("client disconnected")
-	}
-	return nil
-}
-
 // ----------------------------------------
 
 func NewMessage[T any](v *T) Message {
