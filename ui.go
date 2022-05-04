@@ -49,27 +49,11 @@ func (me *UI) Use(c *Client) {
 func (u *UI) Run(ctx context.Context) error {
 	u.ShowIntro()
 
-	// create player and join game
-	j := &EventJoin{Player: Player{Name: Name(os.Getenv("USER"))}}
-
 	send := u.out
-	send <- NewMessage(j)
-
-	msg := <-u.in
-	if err := Decode(j, &msg); err != nil {
-		return err
-	}
-
-	u.Character = j.Character
-
-	cid := j.Ident
-	// uggly way to set current pos, todo fix it
-	m := MoveCharacter(cid, N)
-	send <- NewMessage(m)
-	<-u.in
-	m.Direction = S
-	send <- NewMessage(m)
-	<-u.in
+	e := &EventJoin{Player: Player{
+		Name: "x",
+	}}
+	send <- NewMessage(e)
 
 	go func() {
 		scanner := bufio.NewScanner(u.IO)
@@ -102,6 +86,7 @@ func (u *UI) Run(ctx context.Context) error {
 			u.WritePrompt()
 
 		case input := <-u.playerInput:
+			cid := u.CID()
 			switch input {
 			case "n", "w", "s", "e":
 				mv := MoveCharacter(cid, nav[input])
@@ -124,12 +109,20 @@ func (u *UI) Run(ctx context.Context) error {
 					send <- NewMessage(e)
 				}
 			}
+			u.WritePrompt()
 		}
 	}
 }
 
+func (me *UI) CID() Ident {
+	if me.Character == nil {
+		return ""
+	}
+	return me.Character.Ident
+}
+
 func (me *UI) WritePrompt() {
-	fmt.Fprintf(me.IO, "%s> ", me.Character.Ident)
+	fmt.Fprintf(me.IO, "%s> ", me.CID())
 }
 
 func (me *UI) Write(p []byte) (int, error) {
