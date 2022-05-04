@@ -2,6 +2,7 @@ package cible
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -15,20 +16,18 @@ import (
 func NewUI() *UI {
 	return &UI{
 		Logger: logger.Silent,
-		stdout: os.Stdout,
-		stdin:  os.Stdin,
+		IO:     NewStdIO(),
 	}
 }
 
 type UI struct {
 	logger.Logger
 	*Client
-	stdout io.Writer
-	stdin  io.ReadWriter // readwriter so we can test
+	IO
 }
 
 func (me *UI) Run(ctx context.Context, c *Client) error {
-	out := me.stdout
+	out := me.IO
 	out.Write([]byte("\033c"))
 	out.Write(logo)
 
@@ -59,7 +58,7 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 	go func() {
 		for {
 			writePrompt()
-			scanner := bufio.NewScanner(me.stdin)
+			scanner := bufio.NewScanner(me.IO)
 			scanner.Scan()
 			if err := scanner.Err(); err != nil {
 				me.Log(err)
@@ -98,11 +97,11 @@ func (me *UI) Run(ctx context.Context, c *Client) error {
 			case "l":
 				// todo first position
 				if m.Tile != nil {
-					me.stdout.Write([]byte(m.Tile.Long))
+					out.Write([]byte(m.Tile.Long))
 					fmt.Println()
 				}
 			case "h", "help":
-				me.stdout.Write(usage)
+				out.Write(usage)
 			case "q":
 				c.Out <- NewMessage(Leave(cid))
 				<-time.After(40 * time.Millisecond)
@@ -122,8 +121,8 @@ func (me *UI) Do(v string) {
 }
 
 func (me *UI) DoWait(v, duration string) {
-	me.stdin.Write([]byte(v))
-	me.stdin.Write([]byte("\n"))
+	me.IO.Write([]byte(v))
+	me.IO.Write([]byte("\n"))
 	dur, err := time.ParseDuration(duration)
 	if err != nil {
 		dur = 20 * time.Millisecond
@@ -133,12 +132,48 @@ func (me *UI) DoWait(v, duration string) {
 
 // only for speach
 func (me *UI) OtherPlayerSays(id Ident, text string) {
-	fmt.Fprintf(me.stdout, "\n%s%s: %s%s\n", cyan, id, text, reset)
+	fmt.Fprintf(me.IO, "\n%s%s: %s%s\n", cyan, id, text, reset)
 }
 
 // for notifications
 func (me *UI) OtherPlayer(id Ident, text string) {
-	fmt.Fprintf(me.stdout, "\n%s%s: %s%s\n", yellow, id, text, reset)
+	fmt.Fprintf(me.IO, "\n%s%s: %s%s\n", yellow, id, text, reset)
+}
+
+// ----------------------------------------
+
+type IO io.ReadWriter
+
+func NewBufIO() *BufIO {
+	return &BufIO{
+		input:  &bytes.Buffer{},
+		output: &bytes.Buffer{},
+	}
+}
+
+type BufIO struct {
+	input  *bytes.Buffer
+	output *bytes.Buffer
+}
+
+func (me *BufIO) Read(p []byte) (int, error) {
+	return me.input.Read(p)
+}
+
+func (me *BufIO) Write(p []byte) (int, error) {
+	return me.output.Write(p)
+}
+
+func NewStdIO() *StdIO {
+	return &StdIO{
+		Reader: os.Stdin,
+		Writer: os.Stdout,
+	}
+}
+
+type StdIO struct {
+	io.Reader // input
+	io.Writer // output
 }
 
 var (
