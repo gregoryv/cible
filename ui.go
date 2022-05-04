@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gregoryv/logger"
+	"github.com/gregoryv/nexus"
 	"github.com/gregoryv/vt100"
 )
 
@@ -42,8 +43,7 @@ func (u *UI) Run(ctx context.Context) error {
 	u.ShowIntro()
 
 	// create player and join game
-	p := Player{Name: Name(os.Getenv("USER"))}
-	j := &EventJoin{Player: p}
+	j := &EventJoin{Player: Player{Name: Name(os.Getenv("USER"))}}
 
 	send := u.out
 	send <- NewMessage(j)
@@ -63,7 +63,6 @@ func (u *UI) Run(ctx context.Context) error {
 	writePrompt := func() { fmt.Fprintf(u, "%s> ", cid) }
 	playerInput := make(chan string, 1)
 
-	scanErr := make(chan error)
 	go func() {
 		scanner := bufio.NewScanner(u.IO)
 		writePrompt()
@@ -71,14 +70,12 @@ func (u *UI) Run(ctx context.Context) error {
 			playerInput <- scanner.Text()
 			writePrompt()
 		}
-		scanErr <- scanner.Err()
 	}()
 
+	p, _ := nexus.NewPrinter(u)
 	// handle incoming messages
 	for {
 		select {
-		case err := <-scanErr:
-			return err
 		case <-ctx.Done():
 			return nil
 		case m := <-u.in:
@@ -90,7 +87,7 @@ func (u *UI) Run(ctx context.Context) error {
 			if e, ok := e.(interface{ AffectUI(*UI) }); ok {
 				e.AffectUI(u)
 			} else {
-				fmt.Fprintf(u, "\n%s%v%s\n", yellow, e, reset)
+				p.Printf("\n%s%v%s\n", yellow, e, reset)
 			}
 			writePrompt()
 
@@ -105,15 +102,14 @@ func (u *UI) Run(ctx context.Context) error {
 			case "l":
 				// todo first position
 				if m.Tile != nil {
-					u.Write([]byte(m.Tile.Long))
-					fmt.Println()
+					p.Println(m.Tile.Long)
 				}
 			case "h", "help":
 				u.Write(usage)
 			case "q":
 				send <- NewMessage(Leave(cid))
 				<-time.After(40 * time.Millisecond)
-				fmt.Fprintln(u, "\nBye!")
+				p.Println("\nBye!")
 				return nil
 			default:
 				e := &EventSay{Ident: cid, Text: input}
