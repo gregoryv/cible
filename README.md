@@ -1,5 +1,9 @@
-# InvinCIBLE - a multi user game
+# cible - a multi user game
+
+In cible, players connect to a server and embark on adventures as
+different characters. It's a terminal based multi user dungeon(MUD)
+game, where you control your character with the keyboard.
 
 ## Quick start
 
-    $ go install github.com/gregoryv/cible/cmd/cibtel@latest
+    $ go install github.com/gregoryv/cible/cmd/cible@latest
