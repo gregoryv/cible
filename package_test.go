@@ -110,8 +110,8 @@ func Test_badEvents(t *testing.T) {
 		t.Fatal(err)
 	}
 	cases := []Event{
-		MoveCharacter("Eve", N), // no such playe)
-		Leave("Eve"),            // no such playe)
+		MoveCharacter("Eve", N), // no such character
+		&EventLeave{"Eve"},      // no such character
 		MoveCharacter("god", N), // cannot be move)
 		MoveCharacter(c.Ident, Direction(-1)),
 		&badEvent{err: broken},

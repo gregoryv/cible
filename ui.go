@@ -111,7 +111,7 @@ func (u *UI) Run(ctx context.Context) error {
 			case "h", "help":
 				u.Write(usage)
 			case "q":
-				send <- NewMessage(Leave(cid))
+				send <- NewMessage(&EventLeave{cid})
 				<-time.After(40 * time.Millisecond)
 				p.Println("\nBye!")
 				return nil

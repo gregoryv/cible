@@ -57,12 +57,6 @@ type EventSay struct {
 	Text  string
 }
 
-func Leave(cid Ident) *EventLeave {
-	return &EventLeave{
-		Ident: cid,
-	}
-}
-
 type EventLeave struct {
 	Ident
 }
@@ -78,7 +72,8 @@ type Movement struct {
 	Ident
 	Direction
 
-	Position // set by game
+	// set by game
+	Position
 	*Tile
 }
 
