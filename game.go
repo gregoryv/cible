@@ -76,6 +76,72 @@ eventLoop:
 
 func (g *Game) AffectGame(e interface{}) error {
 	switch e := e.(type) {
+
+	case *EventSay:
+		c, err := g.Characters.Character(e.Ident)
+		if err != nil {
+			return err
+		}
+		go c.TransmitOthers(g, NewMessage(e))
+
+	case *CharacterJoin:
+
+	case *EventJoin:
+		c := &Character{
+			Name: e.Player.Name,
+			Position: Position{
+				Area: "a1", Tile: "01",
+			},
+			tr: e.tr,
+		}
+		g.Characters.Add(c)
+		g.Logf("%s joined game as %s", c.Name, c.Ident)
+		e.Character = c
+
+		// notify others of the new character
+		go c.TransmitOthers(g,
+			NewMessage(&CharacterJoin{Ident: c.Ident}),
+		)
+		return c.Transmit(NewMessage(e)) // back to player
+
+	case *EventLeave:
+		c, err := g.Characters.Character(e.Ident)
+		if err != nil {
+			return err
+		}
+		g.Characters.Remove(c.Ident)
+		g.Logf("%s left, %v remaining", c.Name, g.Characters.Len())
+		go c.TransmitOthers(g, NewMessage(e))
+
+	case *Movement:
+		g.Logf("%s move %s", e.Ident, e.Direction)
+		c, err := g.Character(e.Ident)
+		if err != nil {
+			return err
+		}
+
+		_, t, err := g.Place(c.Position)
+		if err != nil {
+			return err
+		}
+		next, err := link(t, e.Direction)
+		if err != nil {
+			return err
+		}
+		if next != "" {
+			c.Position.Tile = next
+		}
+		e.Position = c.Position
+		e.Tile = t
+		go c.Transmit(NewMessage(e))
+
+	case *EventStopGame:
+		// special event that ends the loop, thus we do things here as
+		// no other events should be affecting the game
+		g.Log("shutting down...")
+
+		return endEventLoop
+
 	case interface{ AffectGame(*Game) error }:
 		return e.AffectGame(g)
 
@@ -86,7 +152,7 @@ func (g *Game) AffectGame(e interface{}) error {
 }
 
 // Do enques the task and waits for it to complete
-func (g *Game) Do(e GameEvent) error {
+func (g *Game) Do(e Event) error {
 	t := NewTask(e)
 	g.Enqueue(t)
 	t.Done()

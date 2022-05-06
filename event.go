@@ -10,10 +10,6 @@ import (
 // wire using some encoding.
 type Event interface{}
 
-type GameEvent interface {
-	AffectGame(*Game) error
-}
-
 // ----------------------------------------
 
 func init() { registerEvent(&EventJoin{}) }
@@ -22,26 +18,7 @@ type EventJoin struct {
 	Player
 	*Character
 
-	tr Transmitter
-}
-
-func (e *EventJoin) AffectGame(g *Game) error {
-	c := &Character{
-		Name: e.Player.Name,
-		Position: Position{
-			Area: "a1", Tile: "01",
-		},
-		tr: e.tr,
-	}
-	g.Characters.Add(c)
-	g.Logf("%s joined game as %s", c.Name, c.Ident)
-	e.Character = c
-
-	// notify others of the new character
-	go c.TransmitOthers(g,
-		NewMessage(&CharacterJoin{Ident: c.Ident}),
-	)
-	return c.Transmit(NewMessage(e)) // back to player
+	tr Transmitter // populated by server
 }
 
 func init() { registerEvent(&CharacterJoin{}) }
@@ -59,15 +36,6 @@ type EventSay struct {
 	Text  string
 }
 
-func (e *EventSay) AffectGame(g *Game) error {
-	c, err := g.Characters.Character(e.Ident)
-	if err != nil {
-		return err
-	}
-	go c.TransmitOthers(g, NewMessage(e))
-	return nil
-}
-
 // ----------------------------------------
 
 func Leave(cid Ident) *EventLeave {
@@ -80,17 +48,6 @@ func init() { registerEvent(&EventLeave{}) }
 
 type EventLeave struct {
 	Ident
-}
-
-func (e *EventLeave) AffectGame(g *Game) error {
-	c, err := g.Characters.Character(e.Ident)
-	if err != nil {
-		return err
-	}
-	g.Characters.Remove(c.Ident)
-	g.Logf("%s left, %v remaining", c.Name, g.Characters.Len())
-	go c.TransmitOthers(g, NewMessage(e))
-	return nil
 }
 
 // ----------------------------------------
@@ -110,30 +67,6 @@ type Movement struct {
 
 	Position // set when done
 	*Tile
-}
-
-func (e *Movement) AffectGame(g *Game) (err error) {
-	g.Logf("%s move %s", e.Ident, e.Direction)
-	c, err := g.Character(e.Ident)
-	if err != nil {
-		return err
-	}
-
-	_, t, err := g.Place(c.Position)
-	if err != nil {
-		return err
-	}
-	next, err := link(t, e.Direction)
-	if err != nil {
-		return err
-	}
-	if next != "" {
-		c.Position.Tile = next
-	}
-	e.Position = c.Position
-	e.Tile = t
-	go c.Transmit(NewMessage(e))
-	return nil
 }
 
 func (me *Movement) String() string {
@@ -157,14 +90,6 @@ func StopGame() *EventStopGame {
 // server.
 
 type EventStopGame struct{}
-
-func (e *EventStopGame) AffectGame(g *Game) error {
-	// special event that ends the loop, thus we do things here as
-	// no other events should be affecting the game
-	g.Log("shutting down...")
-
-	return endEventLoop
-}
 
 // ----------------------------------------
 
