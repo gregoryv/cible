@@ -133,6 +133,10 @@ func (me *Server) communicate(tr *Transceiver) error {
 				msg.Body = []byte(err.Error())
 			}
 		}
+
+		if e, ok := x.(*PlayerJoin); ok {
+			cid = e.Character.Ident
+		}
 		// ignore other events
 	}
 }
