@@ -93,11 +93,7 @@ func (u *UI) Run(ctx context.Context) error {
 				continue
 			}
 			Decode(e, &m)
-			if e, ok := e.(interface{ AffectUI(*UI) }); ok {
-				e.AffectUI(u)
-			} else {
-				p.Printf("\n%s%v%s\n", yellow, e, reset)
-			}
+			u.handleEvent(e)
 			promptUpdate <- struct{}{}
 
 		case input := <-u.playerInput:
@@ -125,6 +121,17 @@ func (u *UI) Run(ctx context.Context) error {
 			}
 			promptUpdate <- struct{}{}
 		}
+	}
+}
+
+func (u *UI) handleEvent(e interface{}) {
+	switch e := e.(type) {
+
+	case interface{ AffectUI(*UI) }:
+		e.AffectUI(u)
+
+	default:
+		u.Println("\n", "unknown event: ", e)
 	}
 }
 
