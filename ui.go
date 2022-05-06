@@ -11,7 +11,6 @@ import (
 
 	"github.com/gregoryv/logger"
 	"github.com/gregoryv/nexus"
-	"github.com/gregoryv/vt100"
 )
 
 func NewUI() *UI {
@@ -195,12 +194,12 @@ func (u *UI) DoWait(v, duration string) {
 
 // only for speach
 func (me *UI) OtherPlayerSays(id Ident, text string) {
-	fmt.Fprintf(me.IO, "\n%s%s: %s%s\n", cyan, id, text, reset)
+	fmt.Fprintf(me.IO, "\n[%s]: %s\n", id, text)
 }
 
 // for notifications
 func (me *UI) OtherPlayer(id Ident, text string) {
-	fmt.Fprintf(me.IO, "\n%s%s: %s%s\n", yellow, id, text, reset)
+	fmt.Fprintf(me.IO, "\n%s %s\n", id, text)
 }
 
 // ----------------------------------------
@@ -264,15 +263,6 @@ type StdIO struct {
 	io.Reader // input
 	io.Writer // output
 }
-
-var (
-	fg     = vt100.ForegroundColors()
-	yellow = fg.Yellow.Bytes()
-	cyan   = fg.Cyan.Bytes()
-
-	vt    = vt100.Attributes()
-	reset = vt.Reset.Bytes()
-)
 
 var nav = map[string]Direction{
 	"n": N,
