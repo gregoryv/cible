@@ -2,7 +2,13 @@
 
 All major changes will be documented in this file.
 
-## [unreleased]
+## [0.2.0] - 2022-05-06
+
+- Show tile desription when moving around
+- Warn when trying to move in wrong direction
+- Include exits when looking around
+
+- Issue: no colors in windows terminal
 
 ## [0.1.0] - 2022-05-04
 
