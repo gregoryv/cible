@@ -135,6 +135,18 @@ func (g *Game) AffectGame(e interface{}) error {
 		e.Tile = t
 		go c.Transmit(NewMessage(e))
 
+	case *EventLook:
+		c, err := g.Character(e.Ident)
+		if err != nil {
+			return err
+		}
+		_, t, err := g.Place(c.Position)
+		if err != nil {
+			return err
+		}
+		e.Body = []byte(t.Long)
+		go c.Transmit(NewMessage(e))
+
 	case *EventStopGame:
 		// special event that ends the loop, thus we do things here as
 		// no other events should be affecting the game

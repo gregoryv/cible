@@ -105,9 +105,8 @@ func (u *UI) Run(ctx context.Context) error {
 				send <- NewMessage(mv)
 
 			case "l": // use a look event
-				if u.Tile != nil {
-					p.Println(u.Tile.Long)
-				}
+				send <- NewMessage(&EventLook{})
+
 			case "h", "help":
 				u.Write(usage)
 			case "q":
@@ -139,6 +138,10 @@ func (u *UI) HandleEvent(e interface{}) {
 
 	case *EventLeave:
 		u.OtherPlayer(e.Ident, "left game")
+
+	case *EventLook:
+		u.Write(e.Body)
+		u.Println()
 
 	case *Movement:
 		if u.Character.Position.Equal(e.Position) {

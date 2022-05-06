@@ -25,6 +25,7 @@ func init() {
 	registerEvent(&EventSay{})
 	registerEvent(&EventLeave{})
 	registerEvent(&Movement{})
+	registerEvent(&EventLook{})
 
 	// Do Not register EventStopGame as it would allow a client to
 	// stop the server.
@@ -76,6 +77,13 @@ type Movement struct {
 	// set by game
 	Position
 	*Tile
+}
+
+type EventLook struct {
+	// set by server
+	Ident // character who is looking
+
+	Body []byte
 }
 
 func (me *Movement) String() string {
