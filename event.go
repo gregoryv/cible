@@ -72,10 +72,6 @@ func (e *EventSay) AffectGame(g *Game) error {
 	return nil
 }
 
-func (e *EventSay) AffectUI(ui *UI) {
-	ui.OtherPlayerSays(e.Ident, e.Text)
-}
-
 // ----------------------------------------
 
 func Leave(cid Ident) *EventLeave {
