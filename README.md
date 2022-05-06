@@ -7,5 +7,13 @@ game, where you control your character with the keyboard.
 ## Quick start
 
     $ go install github.com/gregoryv/cible/cmd/cible@latest
+	$ cible -h
+    Usage: cible [OPTIONS]
+    
+    Options
+        -b, --bind : ":8089"
+        -d, --debug
+        -s, --server
+        -h, --help
 
 
