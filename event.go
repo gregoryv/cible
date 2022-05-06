@@ -54,10 +54,6 @@ type CharacterJoined struct {
 	Ident
 }
 
-func (e *CharacterJoined) AffectUI(ui *UI) {
-	ui.OtherPlayer(e.Ident, "joined")
-}
-
 // ----------------------------------------
 
 func init() { registerEvent(&EventSay{}) }

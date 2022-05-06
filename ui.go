@@ -127,6 +127,9 @@ func (u *UI) Run(ctx context.Context) error {
 func (u *UI) handleEvent(e interface{}) {
 	switch e := e.(type) {
 
+	case CharacterJoined:
+		u.OtherPlayer(e.Ident, "joined")
+
 	case EventJoin:
 		u.Character = e.Character
 		// u.Tile = e.Tile // todo
