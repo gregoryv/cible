@@ -143,6 +143,12 @@ func (me *UI) Write(p []byte) (int, error) {
 	return me.IO.Write(p)
 }
 
+func (me *UI) Println(v ...interface{}) (int, error) {
+	p, err := nexus.NewPrinter(me.IO)
+	p.Println(v...)
+	return int(p.Written), *err
+}
+
 func (u *UI) ShowIntro() {
 	u.Write([]byte("\033c"))
 	u.Write(logo)
