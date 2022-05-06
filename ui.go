@@ -127,17 +127,20 @@ func (u *UI) Run(ctx context.Context) error {
 func (u *UI) handleEvent(e interface{}) {
 	switch e := e.(type) {
 
-	case EventSay:
+	case *EventSay:
 		u.OtherPlayerSays(e.Ident, e.Text)
 
-	case CharacterJoin:
+	case *CharacterJoin:
 		u.OtherPlayer(e.Ident, "joined")
 
-	case EventJoin:
+	case *EventJoin:
 		u.Character = e.Character
 		// u.Tile = e.Tile // todo
 
-	case Movement:
+	case *EventLeave:
+		u.OtherPlayer(e.Ident, "left game")
+
+	case *Movement:
 		if u.Character.Position.Equal(e.Position) {
 			u.Println("cannot move in that direction")
 			return
@@ -150,7 +153,7 @@ func (u *UI) handleEvent(e interface{}) {
 		e.AffectUI(u)
 
 	default:
-		u.Println("\n", "unknown event: ", e)
+		u.Println("\n", "unknown event: ", fmt.Sprintf("%T", e))
 	}
 }
 

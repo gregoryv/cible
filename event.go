@@ -14,10 +14,6 @@ type GameEvent interface {
 	AffectGame(*Game) error
 }
 
-type UIEvent interface {
-	AffectUI(*UI)
-}
-
 // ----------------------------------------
 
 func init() { registerEvent(&EventJoin{}) }
@@ -95,10 +91,6 @@ func (e *EventLeave) AffectGame(g *Game) error {
 	g.Logf("%s left, %v remaining", c.Name, g.Characters.Len())
 	go c.TransmitOthers(g, NewMessage(e))
 	return nil
-}
-
-func (e *EventLeave) AffectUI(ui *UI) {
-	ui.OtherPlayer(e.Ident, "left game")
 }
 
 // ----------------------------------------
