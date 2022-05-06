@@ -6,11 +6,18 @@ import (
 	"log"
 )
 
-// Events follow a command pattern so we can send events accross the
-// wire using some encoding.
+func NewNamedEvent(name string) (Event, bool) {
+	if fn, found := eventConstructors[name]; !found {
+		log.Println(name, "NOT REGISTERED")
+		return nil, false
+	} else {
+		return fn(), true
+	}
+}
+
 type Event interface{}
 
-// ----------------------------------------
+var eventConstructors = make(map[string]func() Event)
 
 func init() {
 	registerEvent(&EventJoin{})
@@ -18,7 +25,21 @@ func init() {
 	registerEvent(&EventSay{})
 	registerEvent(&EventLeave{})
 	registerEvent(&Movement{})
+
+	// Do Not register EventStopGame as it would allow a client to
+	// stop the server.
 }
+
+// register pointer to events
+func registerEvent[T Event](t *T) {
+	gob.Register(*t)
+	eventConstructors[fmt.Sprintf("%T", *t)] = func() Event {
+		var x T
+		return &x
+	}
+}
+
+// ----------------------------------------
 
 type EventJoin struct {
 	Player
@@ -57,7 +78,7 @@ type Movement struct {
 	Ident
 	Direction
 
-	Position // set when done
+	Position // set by game
 	*Tile
 }
 
@@ -72,32 +93,8 @@ func link(t *Tile, d Direction) (Ident, error) {
 	return t.Nav[int(d)], nil
 }
 
-// Do Not register this event as it would allow a client to stop the
-// server.
-
 type EventStopGame struct{}
 
 // ----------------------------------------
 
 var endEventLoop = fmt.Errorf("end event loop")
-
-// value must be interface{}, but also implement Event
-func NewNamedEvent(name string) (interface{}, bool) {
-	if fn, found := eventConstructors[name]; !found {
-		log.Println(name, "NOT REGISTERED")
-		return nil, false
-	} else {
-		return fn(), true
-	}
-}
-
-// register pointer to events
-func registerEvent[T any](t *T) {
-	gob.Register(*t)
-	eventConstructors[fmt.Sprintf("%T", *t)] = func() interface{} {
-		var x T
-		return &x
-	}
-}
-
-var eventConstructors = make(map[string]func() interface{})
