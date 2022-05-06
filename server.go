@@ -124,7 +124,7 @@ func (me *Server) communicate(tr *Transceiver) error {
 
 		// new player joined, set the transceiver for further
 		// communication
-		if e, ok := x.(*EventJoin); ok {
+		if e, ok := x.(*PlayerJoin); ok {
 			e.tr = tr
 		}
 

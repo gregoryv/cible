@@ -20,7 +20,7 @@ type Event interface{}
 var eventConstructors = make(map[string]func() Event)
 
 func init() {
-	registerEvent(&EventJoin{})
+	registerEvent(&PlayerJoin{})
 	registerEvent(&CharacterJoin{})
 	registerEvent(&EventSay{})
 	registerEvent(&EventLeave{})
@@ -41,9 +41,9 @@ func registerEvent[T Event](t *T) {
 
 // ----------------------------------------
 
-type EventJoin struct {
+type PlayerJoin struct {
 	Player
-	*Character
+	*Character // populated by game
 
 	tr Transmitter // populated by server
 }

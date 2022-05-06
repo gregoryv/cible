@@ -38,8 +38,8 @@ func (me *Task) setErr(v error) {
 
 // gomerge src: joinleave.go
 
-func Join(p Player) *EventJoin {
-	return &EventJoin{
+func Join(p Player) *PlayerJoin {
+	return &PlayerJoin{
 		Player: p,
 	}
 }

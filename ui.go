@@ -50,7 +50,7 @@ func (u *UI) Run(ctx context.Context) error {
 	u.ShowIntro()
 
 	send := u.out
-	e := &EventJoin{Player: Player{
+	e := &PlayerJoin{Player: Player{
 		Name: "x",
 	}}
 	send <- NewMessage(e)
@@ -133,7 +133,7 @@ func (u *UI) HandleEvent(e interface{}) {
 	case *CharacterJoin:
 		u.OtherPlayer(e.Ident, "joined")
 
-	case *EventJoin:
+	case *PlayerJoin:
 		u.Character = e.Character
 		// u.Tile = e.Tile // todo
 
