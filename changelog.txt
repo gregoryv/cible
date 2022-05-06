@@ -4,6 +4,7 @@ All major changes will be documented in this file.
 
 ## [unreleased]
 
+- Include short description when looking around
 - Remove colors
 
 ## [0.2.0] - 2022-05-06

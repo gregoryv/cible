@@ -177,6 +177,8 @@ func (me *UI) Println(v ...interface{}) (int, error) {
 func (u *UI) ShowIntro() {
 	u.Write([]byte("\033c"))
 	u.Write(logo)
+	u.Println("Welcome, to learn more ask for help!")
+	u.Println()
 }
 
 func (u *UI) Do(v string) {

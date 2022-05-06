@@ -148,6 +148,9 @@ func (g *Game) AffectGame(e interface{}) error {
 		}
 
 		var buf bytes.Buffer
+		buf.WriteString("\n")
+		buf.WriteString(string(t.Short))
+		buf.WriteString("\n")
 		buf.WriteString(string(t.Long))
 		buf.WriteString("\nExits: ")
 		for d, loc := range t.Nav {
