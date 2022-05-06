@@ -93,7 +93,7 @@ func (u *UI) Run(ctx context.Context) error {
 				continue
 			}
 			Decode(e, &m)
-			u.handleEvent(e)
+			u.HandleEvent(e)
 			promptUpdate <- struct{}{}
 
 		case input := <-u.playerInput:
@@ -124,7 +124,7 @@ func (u *UI) Run(ctx context.Context) error {
 	}
 }
 
-func (u *UI) handleEvent(e interface{}) {
+func (u *UI) HandleEvent(e interface{}) {
 	switch e := e.(type) {
 
 	case *EventSay:
