@@ -157,16 +157,6 @@ func (e *Movement) AffectGame(g *Game) (err error) {
 	return nil
 }
 
-func (e *Movement) AffectUI(u *UI) {
-	if u.Character.Position.Equal(e.Position) {
-		u.Println("cannot move in that direction")
-		return
-	}
-	u.Character.Position = e.Position
-	u.Tile = e.Tile
-	u.Println(e.Tile.Short)
-}
-
 func (me *Movement) String() string {
 	return fmt.Sprintf("%s => %s", me.Direction, me.Position)
 }
