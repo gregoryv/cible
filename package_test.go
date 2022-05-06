@@ -123,7 +123,7 @@ func Test_badEvents(t *testing.T) {
 			}
 		})
 	}
-	g.Do(StopGame())
+	g.Do(&EventStopGame{})
 	if err := g.Do(MoveCharacter(c.Ident, N)); err == nil {
 		t.Error("games is stopped but event was done")
 	}
@@ -158,7 +158,7 @@ func TestDirection(t *testing.T) {
 
 func BenchmarkMoveCharacter_1_player(b *testing.B) {
 	g := startNewGame(b)
-	defer g.Do(StopGame())
+	defer g.Do(&EventStopGame{})
 
 	e := Join(Player{Name: "John"})
 	g.Do(e)
@@ -171,7 +171,7 @@ func BenchmarkMoveCharacter_1_player(b *testing.B) {
 
 func BenchmarkMoveCharacter_1000_player(b *testing.B) {
 	g := startNewGame(b)
-	defer g.Do(StopGame())
+	defer g.Do(&EventStopGame{})
 
 	// Join all players first
 	for i := 0; i < 1000; i++ {

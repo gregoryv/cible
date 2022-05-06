@@ -72,12 +72,6 @@ func link(t *Tile, d Direction) (Ident, error) {
 	return t.Nav[int(d)], nil
 }
 
-// ----------------------------------------
-
-func StopGame() *EventStopGame {
-	return &EventStopGame{}
-}
-
 // Do Not register this event as it would allow a client to stop the
 // server.
 
