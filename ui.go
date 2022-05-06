@@ -101,7 +101,7 @@ func (u *UI) Run(ctx context.Context) error {
 			switch input {
 			case "":
 			case "n", "w", "s", "e":
-				mv := MoveCharacter(cid, nav[input])
+				mv := &Movement{Direction: nav[input]}
 				send <- NewMessage(mv)
 
 			case "l": // use a look event

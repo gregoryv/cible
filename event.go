@@ -61,18 +61,11 @@ type EventLeave struct {
 	Ident
 }
 
-func MoveCharacter(id Ident, d Direction) *Movement {
-	return &Movement{
-		Ident:     id,
-		Direction: d,
-	}
-}
-
 type Movement struct {
-	Ident
 	Direction
 
 	// set by game
+	Ident
 	Position
 	*Tile
 }
@@ -82,3 +75,5 @@ func (me *Movement) String() string {
 }
 
 type EventStopGame struct{}
+
+type cid Ident

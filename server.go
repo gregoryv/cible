@@ -112,29 +112,32 @@ func (me *Server) communicate(tr *Transceiver) error {
 		}
 		me.Logf("recv %s", msg.String())
 
-		x, known := NewEvent(msg.EventName)
+		e, known := NewEvent(msg.EventName)
 		if !known {
 			continue
 		}
 
 		dec := gob.NewDecoder(bytes.NewReader(msg.Body))
-		if err := dec.Decode(x); err != nil {
+		if err := dec.Decode(e); err != nil {
 			me.Log(err)
 		}
 
 		// new player joined, set the transceiver for further
 		// communication
-		if e, ok := x.(*PlayerJoin); ok {
-			e.tr = tr
+		switch e := e.(type) {
+		case *PlayerJoin:
+			e.tr = tr // make sure game can communicate
+		case interface{ SetIdent(Ident) }:
+			e.SetIdent(cid)
 		}
 
-		if e, ok := x.(Event); ok {
+		if e, ok := e.(Event); ok {
 			if err := me.game.Do(e); err != nil {
 				msg.Body = []byte(err.Error())
 			}
 		}
 
-		if e, ok := x.(*PlayerJoin); ok {
+		if e, ok := e.(*PlayerJoin); ok {
 			cid = e.Character.Ident
 		}
 		// ignore other events
