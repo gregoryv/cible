@@ -45,14 +45,14 @@ eventLoop:
 
 		case task := <-g.ch: // blocks
 			if g.LogAllEvents {
-				if e, ok := task.GameEvent.(fmt.Stringer); ok {
+				if e, ok := task.Event.(fmt.Stringer); ok {
 					g.Log(e.String())
 				} else {
-					g.Logf("%T", task.GameEvent)
+					g.Logf("%T", task.Event)
 				}
 			}
 			// One event affects the game
-			err := task.GameEvent.AffectGame(g)
+			err := g.AffectGame(task.Event)
 			if err != nil {
 				if errors.Is(endEventLoop, err) {
 					task.setErr(nil)
@@ -71,6 +71,17 @@ eventLoop:
 	}
 	close(g.ch)
 	g.Log("game stopped")
+	return nil
+}
+
+func (g *Game) AffectGame(e interface{}) error {
+	switch e := e.(type) {
+	case interface{ AffectGame(*Game) error }:
+		return e.AffectGame(g)
+
+	default:
+		return fmt.Errorf("unknown event %T", e)
+	}
 	return nil
 }
 
