@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func NewNamedEvent(name string) (Event, bool) {
+func NewEvent(name string) (Event, bool) {
 	if fn, found := eventConstructors[name]; !found {
 		log.Println(name, "NOT REGISTERED")
 		return nil, false

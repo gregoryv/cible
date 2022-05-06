@@ -88,7 +88,7 @@ func (u *UI) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return nil
 		case m := <-u.in:
-			e, known := NewNamedEvent(m.EventName)
+			e, known := NewEvent(m.EventName)
 			if !known {
 				continue
 			}

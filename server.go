@@ -112,7 +112,7 @@ func (me *Server) communicate(tr *Transceiver) error {
 		}
 		me.Logf("recv %s", msg.String())
 
-		x, known := NewNamedEvent(msg.EventName)
+		x, known := NewEvent(msg.EventName)
 		if !known {
 			continue
 		}
