@@ -1,6 +1,7 @@
 package cible
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -133,6 +134,7 @@ func (g *Game) AffectGame(e interface{}) error {
 		}
 		e.Position = c.Position
 		e.Tile = t
+		e.Body = []byte(t.Short + "...")
 		go c.Transmit(NewMessage(e))
 
 	case *EventLook:
@@ -144,7 +146,19 @@ func (g *Game) AffectGame(e interface{}) error {
 		if err != nil {
 			return err
 		}
-		e.Body = []byte(t.Long)
+
+		var buf bytes.Buffer
+		buf.WriteString(string(t.Long))
+		buf.WriteString("\nExits: ")
+		for d, loc := range t.Nav {
+			if loc != "" {
+				buf.WriteString(Direction(d).String())
+				buf.WriteString(" ")
+			}
+		}
+
+		e.Body = buf.Bytes()
+
 		go c.Transmit(NewMessage(e))
 
 	case *EventStopGame:

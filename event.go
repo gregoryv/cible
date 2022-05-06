@@ -77,6 +77,7 @@ type Movement struct {
 	// set by game
 	Position
 	*Tile
+	Body []byte
 }
 
 type EventLook struct {

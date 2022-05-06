@@ -36,7 +36,6 @@ type UI struct {
 	in  chan Message
 
 	*Character
-	*Tile
 }
 
 func (me *UI) Use(c *Client) {
@@ -134,7 +133,6 @@ func (u *UI) HandleEvent(e interface{}) {
 
 	case *PlayerJoin:
 		u.Character = e.Character
-		// u.Tile = e.Tile // todo
 
 	case *EventLeave:
 		u.OtherPlayer(e.Ident, "left game")
@@ -149,8 +147,7 @@ func (u *UI) HandleEvent(e interface{}) {
 			return
 		}
 		u.Character.Position = e.Position
-		u.Tile = e.Tile
-		u.Println(e.Tile.Short)
+		u.Println(string(e.Body))
 
 	default:
 		u.Println("\n", "unknown event: ", fmt.Sprintf("%T", e))
