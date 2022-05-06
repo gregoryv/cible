@@ -12,7 +12,13 @@ type Event interface{}
 
 // ----------------------------------------
 
-func init() { registerEvent(&EventJoin{}) }
+func init() {
+	registerEvent(&EventJoin{})
+	registerEvent(&CharacterJoin{})
+	registerEvent(&EventSay{})
+	registerEvent(&EventLeave{})
+	registerEvent(&Movement{})
+}
 
 type EventJoin struct {
 	Player
@@ -21,22 +27,14 @@ type EventJoin struct {
 	tr Transmitter // populated by server
 }
 
-func init() { registerEvent(&CharacterJoin{}) }
-
 type CharacterJoin struct {
 	Ident
 }
-
-// ----------------------------------------
-
-func init() { registerEvent(&EventSay{}) }
 
 type EventSay struct {
 	Ident // character who is speaking
 	Text  string
 }
-
-// ----------------------------------------
 
 func Leave(cid Ident) *EventLeave {
 	return &EventLeave{
@@ -44,13 +42,9 @@ func Leave(cid Ident) *EventLeave {
 	}
 }
 
-func init() { registerEvent(&EventLeave{}) }
-
 type EventLeave struct {
 	Ident
 }
-
-// ----------------------------------------
 
 func MoveCharacter(id Ident, d Direction) *Movement {
 	return &Movement{
@@ -58,8 +52,6 @@ func MoveCharacter(id Ident, d Direction) *Movement {
 		Direction: d,
 	}
 }
-
-func init() { registerEvent(&Movement{}) }
 
 type Movement struct {
 	Ident
