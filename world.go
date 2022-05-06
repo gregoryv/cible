@@ -36,7 +36,9 @@ than the other walls.`,
 		Ident: "03",
 		Short: "Small area",
 		Nav:   Nav{W: "02"},
-	}
+
+		Long: `A small bedlike area on your left is filled with hay
+and contains traces of animals sleeping there.`}
 
 	return &Area{
 		Ident: "a1",
