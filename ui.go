@@ -149,9 +149,6 @@ func (u *UI) HandleEvent(e interface{}) {
 		u.Tile = e.Tile
 		u.Println(e.Tile.Short)
 
-	case interface{ AffectUI(*UI) }:
-		e.AffectUI(u)
-
 	default:
 		u.Println("\n", "unknown event: ", fmt.Sprintf("%T", e))
 	}
