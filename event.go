@@ -43,29 +43,37 @@ func registerEvent[T Event](t *T) {
 
 type PlayerJoin struct {
 	Player
-	*Character // populated by game
+	// set by game
+	*Character
 
-	tr Transmitter // populated by server
+	// set by server
+	tr Transmitter
 }
 
 type EventJoin struct {
+	// set by game
 	Ident
 }
 
 type EventSay struct {
+	Text string
+
+	// set by server
 	Ident // character who is speaking
-	Text  string
 }
 
 type EventLeave struct {
+	// set by server
 	Ident
 }
 
 type Movement struct {
 	Direction
 
-	// set by game
+	// set by server
 	Ident
+
+	// set by game
 	Position
 	*Tile
 }
@@ -75,5 +83,3 @@ func (me *Movement) String() string {
 }
 
 type EventStopGame struct{}
-
-type cid Ident
