@@ -21,7 +21,7 @@ var eventConstructors = make(map[string]func() Event)
 
 func init() {
 	registerEvent(&PlayerJoin{})
-	registerEvent(&CharacterJoin{})
+	registerEvent(&EventJoin{})
 	registerEvent(&EventSay{})
 	registerEvent(&EventLeave{})
 	registerEvent(&Movement{})
@@ -48,7 +48,7 @@ type PlayerJoin struct {
 	tr Transmitter // populated by server
 }
 
-type CharacterJoin struct {
+type EventJoin struct {
 	Ident
 }
 

@@ -84,7 +84,7 @@ func (g *Game) AffectGame(e interface{}) error {
 		}
 		go c.TransmitOthers(g, NewMessage(e))
 
-	case *CharacterJoin:
+	case *EventJoin:
 
 	case *PlayerJoin:
 		c := &Character{
@@ -100,7 +100,7 @@ func (g *Game) AffectGame(e interface{}) error {
 
 		// notify others of the new character
 		go c.TransmitOthers(g,
-			NewMessage(&CharacterJoin{Ident: c.Ident}),
+			NewMessage(&EventJoin{Ident: c.Ident}),
 		)
 		return c.Transmit(NewMessage(e)) // back to player
 

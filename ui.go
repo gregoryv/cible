@@ -130,7 +130,7 @@ func (u *UI) HandleEvent(e interface{}) {
 	case *EventSay:
 		u.OtherPlayerSays(e.Ident, e.Text)
 
-	case *CharacterJoin:
+	case *EventJoin:
 		u.OtherPlayer(e.Ident, "joined")
 
 	case *PlayerJoin:
