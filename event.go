@@ -43,14 +43,14 @@ func (e *EventJoin) AffectGame(g *Game) error {
 
 	// notify others of the new character
 	go c.TransmitOthers(g,
-		NewMessage(&CharacterJoined{Ident: c.Ident}),
+		NewMessage(&CharacterJoin{Ident: c.Ident}),
 	)
 	return c.Transmit(NewMessage(e)) // back to player
 }
 
-func init() { registerEvent(&CharacterJoined{}) }
+func init() { registerEvent(&CharacterJoin{}) }
 
-type CharacterJoined struct {
+type CharacterJoin struct {
 	Ident
 }
 
