@@ -48,11 +48,6 @@ func (e *EventJoin) AffectGame(g *Game) error {
 	return c.Transmit(NewMessage(e)) // back to player
 }
 
-func (e *EventJoin) AffectUI(u *UI) {
-	u.Character = e.Character
-	// u.Tile = e.Tile // todo
-}
-
 func init() { registerEvent(&CharacterJoined{}) }
 
 type CharacterJoined struct {

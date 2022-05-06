@@ -126,6 +126,11 @@ func (u *UI) Run(ctx context.Context) error {
 
 func (u *UI) handleEvent(e interface{}) {
 	switch e := e.(type) {
+
+	case EventJoin:
+		u.Character = e.Character
+		// u.Tile = e.Tile // todo
+
 	case Movement:
 		if u.Character.Position.Equal(e.Position) {
 			u.Println("cannot move in that direction")
