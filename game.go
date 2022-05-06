@@ -183,6 +183,15 @@ func (g *Game) Character(id Ident) (*Character, error) {
 	return g.Characters.Character(id)
 }
 
+var endEventLoop = fmt.Errorf("end event loop")
+
+func link(t *Tile, d Direction) (Ident, error) {
+	if d < 0 || int(d) > len(t.Nav) {
+		return "", fmt.Errorf("bad direction")
+	}
+	return t.Nav[int(d)], nil
+}
+
 // ----------------------------------------
 
 type Characters interface {

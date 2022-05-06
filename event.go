@@ -86,15 +86,4 @@ func (me *Movement) String() string {
 	return fmt.Sprintf("%s => %s", me.Direction, me.Position)
 }
 
-func link(t *Tile, d Direction) (Ident, error) {
-	if d < 0 || int(d) > len(t.Nav) {
-		return "", fmt.Errorf("bad direction")
-	}
-	return t.Nav[int(d)], nil
-}
-
 type EventStopGame struct{}
-
-// ----------------------------------------
-
-var endEventLoop = fmt.Errorf("end event loop")
