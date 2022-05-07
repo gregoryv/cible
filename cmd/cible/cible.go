@@ -17,7 +17,7 @@ var mlog = logger.Wrap(log.Default())
 func main() {
 	var (
 		cli       = cmdline.NewBasicParser()
-		bind      = cli.Option("-b, --bind").String(":8089")
+		bind      = cli.Option("-b, --bind").String("192.168.1.72:8089")
 		debugFlag = cli.Flag("-d, --debug")
 		srv       = cli.Flag("-s, --server")
 	)
