@@ -116,7 +116,7 @@ func (u *UI) Run(ctx context.Context) error {
 				send <- NewMessage(&EventLook{})
 
 			case "h", "help":
-				u.Write(usage)
+				u.CenterPrintln(u.boxed(usage, 40))
 
 			case "q":
 				send <- NewMessage(&EventLeave{})
@@ -232,6 +232,30 @@ func (me *UI) Println(v ...interface{}) (int, error) {
 	p, err := nexus.NewPrinter(me.IO)
 	p.Println(v...)
 	return int(p.Written), *err
+}
+
+func (u *UI) boxed(p []byte, width int) []byte {
+	var buf bytes.Buffer
+	buf.WriteString(frameLine(width))
+	scanner := bufio.NewScanner(bytes.NewReader(p))
+	for scanner.Scan() {
+		line := scanner.Text()
+		buf.WriteString("| ")
+		buf.WriteString(line)
+		suffix := strings.Repeat(" ", width-len(line)-4)
+		buf.WriteString(suffix)
+		buf.WriteString(" |\n")
+	}
+	buf.WriteString(frameLine(width))
+	return buf.Bytes()
+}
+
+func frameLine(width int) string {
+	var buf bytes.Buffer
+	buf.WriteString("+")
+	buf.WriteString(strings.Repeat("-", width-2))
+	buf.WriteString("+\n")
+	return buf.String()
 }
 
 // ----------------------------------------

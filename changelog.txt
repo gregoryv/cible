@@ -2,6 +2,10 @@
 
 All major changes will be documented in this file.
 
+## [unreleased
+
+- Display help in a framed box
+
 ## [0.3.0] - 2022-05-07
 
 - Add EventDisconnect, currently a noop
