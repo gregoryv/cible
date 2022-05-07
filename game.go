@@ -296,7 +296,7 @@ func (me *Character) TransmitOthers(g *Game, m Message) error {
 		if c.Ident == me.Ident {
 			continue
 		}
-		g.Log("transmitting %s to %s", m.String(), c.Ident)
+		g.Logf("transmit %s to %s", m.String(), c.Ident)
 		c.Transmit(m)
 	}
 	return nil

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -93,8 +94,12 @@ type Message struct {
 
 func (m *Message) String() string {
 	id, _ := uuid.Parse(m.Id)
+	name := m.EventName
+	if strings.HasPrefix(name, "cible.") {
+		name = name[6:]
+	}
 	return fmt.Sprintf(
-		"%s[%v] %v bytes", m.EventName, id.ID(), m.Size(),
+		"%s[%v] %v bytes", name, id.ID(), m.Size(),
 	)
 }
 
