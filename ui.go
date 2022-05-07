@@ -2,9 +2,11 @@ package cible
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gregoryv/logger"
@@ -164,6 +166,10 @@ func (u *UI) HandleEvent(e interface{}) {
 	}
 }
 
+func (me *UI) WritePrompt() {
+	fmt.Fprintf(me.IO, "%s> ", me.CID())
+}
+
 func (me *UI) CID() Ident {
 	if me.Character == nil {
 		return ""
@@ -171,12 +177,8 @@ func (me *UI) CID() Ident {
 	return me.Character.Ident
 }
 
-func (me *UI) WritePrompt() {
-	fmt.Fprintf(me.IO, "%s> ", me.CID())
-}
-
 func (u *UI) ShowIntro() {
-	u.Write(logo)
+	u.CenterPrintln(logo)
 	u.Println("Welcome, to learn more ask for help!")
 	u.Println()
 }
@@ -212,6 +214,18 @@ func (me *UI) OtherPlayer(id Ident, text string) {
 
 func (me *UI) Write(p []byte) (int, error) {
 	return me.IO.Write(p)
+}
+
+func (u *UI) CenterPrintln(p []byte) {
+	scanner := bufio.NewScanner(bytes.NewReader(p))
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(line) < u.cols {
+			prefix := strings.Repeat(" ", (u.cols-len(line))/2)
+			u.Write([]byte(prefix))
+		}
+		u.Println(line)
+	}
 }
 
 func (me *UI) Println(v ...interface{}) (int, error) {
