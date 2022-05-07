@@ -2,10 +2,8 @@ package cible
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"time"
 
@@ -177,16 +175,6 @@ func (me *UI) WritePrompt() {
 	fmt.Fprintf(me.IO, "%s> ", me.CID())
 }
 
-func (me *UI) Write(p []byte) (int, error) {
-	return me.IO.Write(p)
-}
-
-func (me *UI) Println(v ...interface{}) (int, error) {
-	p, err := nexus.NewPrinter(me.IO)
-	p.Println(v...)
-	return int(p.Written), *err
-}
-
 func (u *UI) ShowIntro() {
 	u.Write(logo)
 	u.Println("Welcome, to learn more ask for help!")
@@ -222,67 +210,17 @@ func (me *UI) OtherPlayer(id Ident, text string) {
 	fmt.Fprintf(me.IO, "\n%s %s\n", id, text)
 }
 
-// ----------------------------------------
-
-type IO io.ReadWriter
-
-func NewRWCache(rw io.ReadWriter) *RWCache {
-	return &RWCache{
-		ReadWriter: rw,
-	}
+func (me *UI) Write(p []byte) (int, error) {
+	return me.IO.Write(p)
 }
 
-type RWCache struct {
-	io.ReadWriter
-	LastRead  []byte
-	LastWrite []byte
-}
-
-func (me *RWCache) Read(p []byte) (int, error) {
-	n, err := me.ReadWriter.Read(p)
-	me.LastRead = p
-	return n, err
-}
-
-func (me *RWCache) Write(p []byte) (int, error) {
-	n, err := me.ReadWriter.Write(p)
-	me.LastWrite = p
-	return n, err
+func (me *UI) Println(v ...interface{}) (int, error) {
+	p, err := nexus.NewPrinter(me.IO)
+	p.Println(v...)
+	return int(p.Written), *err
 }
 
 // ----------------------------------------
-
-func NewBufIO() *BufIO {
-	return &BufIO{
-		input:  &bytes.Buffer{},
-		output: &bytes.Buffer{},
-	}
-}
-
-type BufIO struct {
-	input  *bytes.Buffer
-	output *bytes.Buffer
-}
-
-func (me *BufIO) Read(p []byte) (int, error) {
-	return me.input.Read(p)
-}
-
-func (me *BufIO) Write(p []byte) (int, error) {
-	return me.output.Write(p)
-}
-
-func NewStdIO() *StdIO {
-	return &StdIO{
-		Reader: os.Stdin,
-		Writer: os.Stdout,
-	}
-}
-
-type StdIO struct {
-	io.Reader // input
-	io.Writer // output
-}
 
 var nav = map[string]Direction{
 	"n": N,
