@@ -11,9 +11,15 @@ import (
 
 	"github.com/gregoryv/logger"
 	"github.com/gregoryv/nexus"
+	"github.com/nathan-fiscaletti/consolesize-go"
 )
 
 func NewUI() *UI {
+	cols, rows := consolesize.GetConsoleSize()
+	if cols <= 0 {
+		cols = 72 // default when testing
+		rows = 20
+	}
 	return &UI{
 		Logger: logger.Silent,
 
@@ -22,6 +28,9 @@ func NewUI() *UI {
 
 		out: make(chan Message, 1),
 		in:  make(chan Message, 1),
+
+		cols: cols,
+		rows: rows,
 	}
 }
 
@@ -35,6 +44,8 @@ type UI struct {
 	in  chan Message
 
 	*Character
+
+	cols, rows int
 }
 
 func (me *UI) Use(c *Client) {
@@ -45,6 +56,7 @@ func (me *UI) Use(c *Client) {
 }
 
 func (u *UI) Run(ctx context.Context) error {
+	u.clearScreen()
 	u.ShowIntro()
 
 	send := u.out
@@ -176,10 +188,15 @@ func (me *UI) Println(v ...interface{}) (int, error) {
 }
 
 func (u *UI) ShowIntro() {
-	u.Write([]byte("\033c"))
 	u.Write(logo)
 	u.Println("Welcome, to learn more ask for help!")
 	u.Println()
+}
+
+func (u *UI) clearScreen() {
+	for i := u.rows; i > 0; i-- {
+		u.Println()
+	}
 }
 
 func (u *UI) Do(v string) {
