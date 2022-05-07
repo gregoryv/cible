@@ -48,9 +48,9 @@ func (u *UI) Run(ctx context.Context) error {
 	u.ShowIntro()
 
 	send := u.out
-	e := &PlayerJoin{Player: Player{
-		Name: "x",
-	}}
+	player := Player{}
+	player.SetName(os.Getenv("USER"))
+	e := &PlayerJoin{Player: player}
 	send <- NewMessage(e)
 
 	// signal when prompt needs update

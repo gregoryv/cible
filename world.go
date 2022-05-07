@@ -112,6 +112,11 @@ const (
 )
 
 type Name string
+
+func (me *Name) SetName(v string) {
+	*me = Name(v)
+}
+
 type Short string
 type Long string
 type Title string
