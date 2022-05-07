@@ -113,7 +113,9 @@ func (u *UI) Run(ctx context.Context) error {
 				return nil
 
 			default:
-				send <- NewMessage(&EventSay{Text: input})
+				if input != "" {
+					send <- NewMessage(&EventSay{Text: input})
+				}
 			}
 			promptUpdate <- struct{}{}
 		}
