@@ -95,7 +95,6 @@ func (u *UI) Run(ctx context.Context) error {
 			promptUpdate <- struct{}{}
 
 		case input := <-u.playerInput:
-			cid := u.CID()
 			switch input {
 			case "":
 			case "n", "w", "s", "e":
@@ -108,7 +107,7 @@ func (u *UI) Run(ctx context.Context) error {
 				u.Write(usage)
 
 			case "q":
-				send <- NewMessage(&EventLeave{cid})
+				send <- NewMessage(&EventLeave{})
 				<-time.After(40 * time.Millisecond)
 				p.Println("\nBye!")
 				return nil
