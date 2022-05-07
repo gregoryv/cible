@@ -4,6 +4,7 @@ All major changes will be documented in this file.
 
 ## [unreleased]
 
+- Add EventDisconnect, currently a noop
 - Set player name to environment variable USER
 - Include short description when looking around
 - Remove colors

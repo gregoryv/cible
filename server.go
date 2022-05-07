@@ -98,7 +98,7 @@ func (me *Server) communicate(tr *Transceiver) error {
 		if e := recover(); e != nil {
 			me.Log(e)
 		}
-		me.game.Do(&EventLeave{cid})
+		me.game.Do(&EventDisconnect{cid})
 		me.Log(cid, " disconnected")
 	}()
 

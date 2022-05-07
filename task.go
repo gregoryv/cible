@@ -1,6 +1,7 @@
 package cible
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -18,6 +19,13 @@ type Task struct {
 
 	once   sync.Once
 	failed chan error
+}
+
+func (me *Task) String() string {
+	if e, ok := me.Event.(fmt.Stringer); ok {
+		return fmt.Sprintf("%T %s", me.Event, e.String())
+	}
+	return fmt.Sprintf("%T", me.Event)
 }
 
 // Done blocks until event is handled, can be called multiple

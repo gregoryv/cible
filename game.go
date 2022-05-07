@@ -46,11 +46,7 @@ eventLoop:
 
 		case task := <-g.ch: // blocks
 			if g.LogAllEvents {
-				if e, ok := task.Event.(fmt.Stringer); ok {
-					g.Log(e.String())
-				} else {
-					g.Logf("%T", task.Event)
-				}
+				g.Log(task.String())
 			}
 			// One event affects the game
 			err := g.AffectGame(task.Event)
@@ -59,7 +55,7 @@ eventLoop:
 					task.setErr(nil)
 					break eventLoop
 				}
-				g.Log("event: ", err)
+				g.Logf("%T %v", task.Event, err)
 			}
 
 			// Make sure any event can be cleaned up. Triggering
@@ -170,6 +166,9 @@ func (g *Game) AffectGame(e interface{}) error {
 		g.Log("shutting down...")
 
 		return endEventLoop
+
+	case *EventDisconnect:
+		// todo
 
 	case interface{ AffectGame(*Game) error }:
 		return e.AffectGame(g)

@@ -26,6 +26,7 @@ func init() {
 	registerEvent(&EventLeave{})
 	registerEvent(&Movement{})
 	registerEvent(&EventLook{})
+	registerEvent(&EventDisconnect{})
 
 	// Do Not register EventStopGame as it would allow a client to
 	// stop the server.
@@ -64,6 +65,11 @@ type EventSay struct {
 }
 
 type EventLeave struct {
+	// set by server
+	Ident
+}
+
+type EventDisconnect struct {
 	// set by server
 	Ident
 }
