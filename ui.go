@@ -99,22 +99,22 @@ func (u *UI) Run(ctx context.Context) error {
 			switch input {
 			case "":
 			case "n", "w", "s", "e":
-				mv := &Movement{Direction: nav[input]}
-				send <- NewMessage(mv)
+				send <- NewMessage(&Movement{Direction: nav[input]})
 
-			case "l": // use a look event
+			case "l":
 				send <- NewMessage(&EventLook{})
 
 			case "h", "help":
 				u.Write(usage)
+
 			case "q":
 				send <- NewMessage(&EventLeave{cid})
 				<-time.After(40 * time.Millisecond)
 				p.Println("\nBye!")
 				return nil
+
 			default:
-				e := &EventSay{Ident: cid, Text: input}
-				send <- NewMessage(e)
+				send <- NewMessage(&EventSay{Text: input})
 			}
 			promptUpdate <- struct{}{}
 		}
