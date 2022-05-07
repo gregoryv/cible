@@ -110,10 +110,10 @@ func Test_badEvents(t *testing.T) {
 		t.Fatal(err)
 	}
 	cases := []Event{
-		&Movement{Direction: N},               // no such character
-		&EventLeave{"Eve"},                    // no such character
-		&Movement{Ident: "god", Direction: N}, // cannot be move)
-		&Movement{Ident: c.Ident, Direction: Direction(-1)},
+		&EventMove{Direction: N},               // no such character
+		&EventLeave{"Eve"},                     // no such character
+		&EventMove{Ident: "god", Direction: N}, // cannot be move)
+		&EventMove{Ident: c.Ident, Direction: Direction(-1)},
 		&badEvent{err: broken},
 	}
 	for _, c := range cases {
@@ -124,7 +124,7 @@ func Test_badEvents(t *testing.T) {
 		})
 	}
 	g.Do(&EventStopGame{})
-	if err := g.Do(&Movement{Ident: c.Ident, Direction: N}); err == nil {
+	if err := g.Do(&EventMove{Ident: c.Ident, Direction: N}); err == nil {
 		t.Error("games is stopped but event was done")
 	}
 
@@ -164,8 +164,8 @@ func BenchmarkMoveCharacter_1_player(b *testing.B) {
 	g.Do(e)
 	cid := e.Ident
 	for i := 0; i < b.N; i++ {
-		g.Do(&Movement{Ident: cid, Direction: N})
-		g.Do(&Movement{Ident: cid, Direction: S})
+		g.Do(&EventMove{Ident: cid, Direction: N})
+		g.Do(&EventMove{Ident: cid, Direction: S})
 	}
 }
 
@@ -185,8 +185,8 @@ func BenchmarkMoveCharacter_1000_player(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		cid := Ident(fmt.Sprintf("John%v", rand.Intn(1000)))
-		g.Do(&Movement{Ident: cid, Direction: N})
-		g.Do(&Movement{Ident: cid, Direction: S})
+		g.Do(&EventMove{Ident: cid, Direction: N})
+		g.Do(&EventMove{Ident: cid, Direction: S})
 	}
 }
 

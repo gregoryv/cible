@@ -98,7 +98,7 @@ func (u *UI) Run(ctx context.Context) error {
 			switch input {
 			case "":
 			case "n", "w", "s", "e":
-				send <- NewMessage(&Movement{Direction: nav[input]})
+				send <- NewMessage(&EventMove{Direction: nav[input]})
 
 			case "l":
 				send <- NewMessage(&EventLook{})
@@ -141,7 +141,7 @@ func (u *UI) HandleEvent(e interface{}) {
 		u.Write(e.Body)
 		u.Println()
 
-	case *Movement:
+	case *EventMove:
 		if u.Character.Position.Equal(e.Position) {
 			u.Println("cannot move in that direction")
 			return

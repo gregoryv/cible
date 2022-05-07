@@ -110,7 +110,7 @@ func (g *Game) AffectGame(e interface{}) error {
 		g.Logf("%s left, %v remaining", c.Name, g.Characters.Len())
 		go c.TransmitOthers(g, NewMessage(e))
 
-	case *Movement:
+	case *EventMove:
 		g.Logf("%s move %s", e.Ident, e.Direction)
 		c, err := g.Character(e.Ident)
 		if err != nil {

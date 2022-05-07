@@ -24,7 +24,7 @@ func init() {
 	registerEvent(&EventJoin{})
 	registerEvent(&EventSay{})
 	registerEvent(&EventLeave{})
-	registerEvent(&Movement{})
+	registerEvent(&EventMove{})
 	registerEvent(&EventLook{})
 	registerEvent(&EventDisconnect{})
 
@@ -74,7 +74,8 @@ type EventDisconnect struct {
 	Ident
 }
 
-type Movement struct {
+// Your character EventMove in the game
+type EventMove struct {
 	Direction
 
 	// set by server
@@ -86,15 +87,15 @@ type Movement struct {
 	Body []byte
 }
 
+func (me *EventMove) String() string {
+	return fmt.Sprintf("%s => %s", me.Direction, me.Position)
+}
+
 type EventLook struct {
 	// set by server
 	Ident // character who is looking
 
 	Body []byte
-}
-
-func (me *Movement) String() string {
-	return fmt.Sprintf("%s => %s", me.Direction, me.Position)
 }
 
 type EventStopGame struct{}
