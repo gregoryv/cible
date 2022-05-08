@@ -4,6 +4,7 @@ All major changes will be documented in this file.
 
 ## [unreleased]
 
+- Describe tile shortly when moving
 
 ## [0.4.0] - 2022-05-08
 

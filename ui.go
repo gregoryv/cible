@@ -165,7 +165,7 @@ func (u *UI) HandleEvent(e interface{}) {
 		u.OtherPlayer(e.Name, "left game")
 
 	case *EventLook:
-		u.showTile(&e.Tile)
+		u.showTile(&e.Tile, true)
 
 	case *EventMove:
 		if u.Character.Position.Equal(e.Position) {
@@ -173,7 +173,7 @@ func (u *UI) HandleEvent(e interface{}) {
 			return
 		}
 		u.Character.Position = e.Position
-		u.Println(string(e.Body))
+		u.showTile(e.Tile, false)
 
 	default:
 		u.Println("\n", "unknown event: ", fmt.Sprintf("%T", e))
@@ -239,13 +239,15 @@ func (me *UI) OtherPlayer(name Name, text string) {
 	fmt.Fprintf(me.IO, "\n%s %s\n", name, text)
 }
 
-func (u *UI) showTile(t *Tile) {
+func (u *UI) showTile(t *Tile, long bool) {
 	u.Write(Center(Boxed(CenterIn([]byte(t.Short), 36), 40)))
-	u.Println()
-	u.Println()
-	u.Write(Indent(
-		bytes.TrimSpace([]byte(t.Long)),
-	))
+	if long {
+		u.Println()
+		u.Println()
+		u.Write(Indent(
+			bytes.TrimSpace([]byte(t.Long)),
+		))
+	}
 	u.Println()
 	u.Println()
 	u.Write(Indent(exits(t.Nav)))
