@@ -109,7 +109,7 @@ func (u *UI) Run(ctx context.Context) error {
 		case input := <-u.playerInput:
 			switch input {
 			case "":
-			case "n", "w", "s", "e":
+			case "n", "ne", "e", "se", "s", "sw", "w", "nw":
 				send <- NewMessage(&EventMove{Direction: nav[input]})
 
 			case "l":
@@ -261,19 +261,27 @@ func frameLine(width int) string {
 // ----------------------------------------
 
 var nav = map[string]Direction{
-	"n": N,
-	"e": E,
-	"s": S,
-	"w": W,
+	"n":  N,
+	"ne": NE,
+	"e":  E,
+	"se": SE,
+	"s":  S,
+	"sw": SW,
+	"w":  W,
+	"nw": NW,
 }
 
 var usage = []byte(`
 Navigation
 
-n - north
-e - east
-s - south
-w - west
+n  - north
+ne - north-east
+e  - east
+se - south-east
+s  - south
+sw - south-west
+w  - west
+nw - north-west
 
 l - look around
 q - quit

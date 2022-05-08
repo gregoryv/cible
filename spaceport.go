@@ -3,47 +3,57 @@ package cible
 func Spaceport() *Area {
 	t1 := &Tile{
 		Short: "Center Stateroom",
-		Long:  `...`,
-	}
+
+		Long: `In the center a large tree with pinkish fruits is
+growing, surrounded by benches. The large stateroom is bright and the
+ceiling transparently shows the galaxy augmented with names of nearest
+starsystems.
+
+To the east the great memorial wall with it's soft and rock like
+surface, reminds you of the venturesome life in space.`}
 
 	t2 := &Tile{
 		Short: "South Stateroom",
-		Long:  `...`,
+		Long:  `Open space`,
 	}
 
 	t3 := &Tile{
-		Short: "South-west Stateroom",
-		Long:  `...`,
+		Short: "Tech room",
+
+		Long: ` Historical information about the Genetic Low Orbital
+Computer is posted on the wall. Tech pillars with charging ports and
+terminals are vacant for use.`,
+		//
 	}
 
 	t4 := &Tile{
 		Short: "West Stateroom",
-		Long:  `...`,
+		Long:  `Couple of drink and food dispnesers are humming.`,
 	}
 
 	t5 := &Tile{
-		Short: "North-west Stateroom",
-		Long:  `...`,
+		Short: "Sitting room",
+		Long:  `A lounge with some tables and chairs.`,
 	}
 
 	t6 := &Tile{
-		Short: "North Stateroom",
-		Long:  `...`,
+		Short: "News room",
+		Long:  `On the north wall news are displayed on a multi screen setup.`,
 	}
 
 	t7 := &Tile{
 		Short: "North-east Stateroom",
-		Long:  `...`,
+		Long:  `Open space`,
 	}
 
 	t8 := &Tile{
-		Short: "East Stateroom",
-		Long:  `...`,
+		Short: "Rest room",
+		Long:  `Multiple toilets are available, some are occupied or just broken`,
 	}
 
 	t9 := &Tile{
 		Short: "South-east Stateroom",
-		Long:  `...`,
+		Long:  `Open space`,
 	}
 
 	area := &Area{
