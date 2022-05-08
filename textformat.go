@@ -11,18 +11,33 @@ type TextFormat struct {
 }
 
 func (f *TextFormat) Indent(p []byte) []byte {
-	s := f.cols / 8
-	indent := strings.Repeat(" ", s)
+	indent := f.Prefix(p)
 
 	scanner := bufio.NewScanner(bytes.NewReader(p))
 	var buf bytes.Buffer
 	for scanner.Scan() {
 		line := scanner.Text()
-		buf.WriteString(indent)
+		buf.Write(indent)
 		buf.WriteString(line)
 		buf.WriteString("\n")
 	}
 	return bytes.TrimRight(buf.Bytes(), "\n")
+}
+
+func (f *TextFormat) Prefix(p []byte) []byte {
+	scanner := bufio.NewScanner(bytes.NewReader(p))
+	var size int
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(line) > size {
+			size = len(line)
+		}
+	}
+	margin := (f.cols - size) / 2
+	if margin > 0 {
+		return []byte(strings.Repeat(" ", margin))
+	}
+	return []byte{}
 }
 
 func (f *TextFormat) Center(p []byte) []byte {

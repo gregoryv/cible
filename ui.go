@@ -223,7 +223,9 @@ func (u *UI) showTile(t *Tile) {
 	u.Write(Center(Boxed(CenterIn([]byte(t.Short), 36), 40)))
 	u.Println()
 	u.Println()
-	u.Write(Indent(bytes.TrimSpace([]byte(t.Long))))
+	u.Write(Indent(
+		bytes.TrimSpace([]byte(t.Long)),
+	))
 	u.Println()
 	u.Println()
 	u.Write(Indent("Exits: "))
