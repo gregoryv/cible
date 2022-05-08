@@ -29,8 +29,9 @@ func NewUI() *UI {
 		out: make(chan Message, 1),
 		in:  make(chan Message, 1),
 
-		cols: cols,
-		rows: rows,
+		cols:       cols,
+		rows:       rows,
+		TextFormat: &TextFormat{cols: cols},
 	}
 }
 
@@ -46,6 +47,7 @@ type UI struct {
 	*Character
 
 	cols, rows int
+	*TextFormat
 }
 
 func (me *UI) Use(c *Client) {
@@ -177,8 +179,9 @@ func (me *UI) CID() Ident {
 }
 
 func (u *UI) ShowIntro() {
-	u.CenterPrintln(logo)
-	u.Println("Welcome, to learn more ask for help!")
+	u.Write(u.Center(logo))
+	u.Println()
+	u.Write(u.Center([]byte("Welcome, to learn more ask for help!")))
 	u.Println()
 }
 
@@ -232,31 +235,9 @@ func (me *UI) Write(p []byte) (int, error) {
 	return me.IO.Write(p)
 }
 
-func (u *UI) Indent(p []byte) []byte {
-	s := u.cols / 8
-	indent := strings.Repeat(" ", s)
-
-	scanner := bufio.NewScanner(bytes.NewReader(p))
-	var buf bytes.Buffer
-	for scanner.Scan() {
-		line := scanner.Text()
-		buf.WriteString(indent)
-		buf.WriteString(line)
-		buf.WriteString("\n")
-	}
-	return bytes.TrimRight(buf.Bytes(), "\n")
-}
-
 func (u *UI) CenterPrintln(p []byte) {
-	scanner := bufio.NewScanner(bytes.NewReader(p))
-	for scanner.Scan() {
-		line := scanner.Text()
-		if len(line) < u.cols {
-			prefix := strings.Repeat(" ", (u.cols-len(line))/2)
-			u.Write([]byte(prefix))
-		}
-		u.Println(line)
-	}
+	u.Write(u.Center(p))
+	u.Println()
 }
 
 func (me *UI) Println(v ...interface{}) (int, error) {
