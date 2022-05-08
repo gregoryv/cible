@@ -118,7 +118,7 @@ func (u *UI) Run(ctx context.Context) error {
 				send <- NewMessage(&EventLook{})
 
 			case "h", "help":
-				u.CenterPrintln(u.boxed(usage, 40))
+				u.showUsage()
 
 			case "q":
 				send <- NewMessage(&EventLeave{})
@@ -178,6 +178,11 @@ func (me *UI) CID() Ident {
 	return me.Character.Ident
 }
 
+func (u *UI) showUsage() {
+	u.Write(u.Center(u.boxed(usage, 40)))
+	u.Println()
+}
+
 func (u *UI) ShowIntro() {
 	u.Write(u.Center(logo))
 	u.Println()
@@ -215,7 +220,8 @@ func (me *UI) OtherPlayer(id Ident, text string) {
 }
 
 func (u *UI) showTile(t *Tile) {
-	u.CenterPrintln(u.boxed([]byte(t.Short), 40))
+	u.Write(u.Center(u.boxed([]byte(t.Short), 40)))
+	u.Println()
 	u.Println()
 	u.Write(u.Indent(bytes.TrimSpace([]byte(t.Long))))
 	u.Println()
@@ -233,11 +239,6 @@ func (u *UI) showTile(t *Tile) {
 
 func (me *UI) Write(p []byte) (int, error) {
 	return me.IO.Write(p)
-}
-
-func (u *UI) CenterPrintln(p []byte) {
-	u.Write(u.Center(p))
-	u.Println()
 }
 
 func (me *UI) Println(v ...interface{}) (int, error) {
