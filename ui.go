@@ -150,22 +150,7 @@ func (u *UI) HandleEvent(e interface{}) {
 		u.OtherPlayer(e.Ident, "left game")
 
 	case *EventLook:
-
-		u.Println()
-		t := e.Tile
-		u.Println(t.Short)
-		u.Println()
-		u.Println(t.Long)
-
-		u.Print("\nExits: ")
-		for d, loc := range t.Nav {
-			if loc != "" {
-				u.Print(Direction(d).String())
-				u.Print(" ")
-			}
-		}
-		u.Println()
-		u.Println()
+		u.showTile(&e.Tile)
 
 	case *EventMove:
 		if u.Character.Position.Equal(e.Position) {
@@ -226,8 +211,40 @@ func (me *UI) OtherPlayer(id Ident, text string) {
 	fmt.Fprintf(me.IO, "\n%s %s\n", id, text)
 }
 
+func (u *UI) showTile(t *Tile) {
+	u.CenterPrintln(u.boxed([]byte(t.Short), 40))
+	u.Println()
+	u.Write(u.Indent(bytes.TrimSpace([]byte(t.Long))))
+	u.Println()
+	u.Println()
+	u.Write(u.Indent([]byte("Exits: ")))
+	for d, loc := range t.Nav {
+		if loc != "" {
+			u.Print(Direction(d).String())
+			u.Print(" ")
+		}
+	}
+	u.Println()
+	u.Println()
+}
+
 func (me *UI) Write(p []byte) (int, error) {
 	return me.IO.Write(p)
+}
+
+func (u *UI) Indent(p []byte) []byte {
+	s := u.cols / 8
+	indent := strings.Repeat(" ", s)
+
+	scanner := bufio.NewScanner(bytes.NewReader(p))
+	var buf bytes.Buffer
+	for scanner.Scan() {
+		line := scanner.Text()
+		buf.WriteString(indent)
+		buf.WriteString(line)
+		buf.WriteString("\n")
+	}
+	return bytes.TrimRight(buf.Bytes(), "\n")
 }
 
 func (u *UI) CenterPrintln(p []byte) {

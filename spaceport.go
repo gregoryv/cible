@@ -4,9 +4,11 @@ func Spaceport() *Area {
 	t1 := &Tile{
 		Short: "Center Stateroom",
 
-		Long: `In the center a large tree with pinkish fruits is
-growing, surrounded by benches. The large stateroom is bright and the
-ceiling transparently shows the galaxy augmented with names of nearest
+		Long: `
+
+In the center a large tree with pinkish fruits is growing, surrounded
+by benches. The large stateroom is bright and the ceiling
+transparently shows the galaxy augmented with names of nearest
 starsystems.
 
 To the east the great memorial wall with it's soft and rock like
@@ -20,9 +22,11 @@ surface, reminds you of the venturesome life in space.`}
 	t3 := &Tile{
 		Short: "Tech room",
 
-		Long: ` Historical information about the Genetic Low Orbital
-Computer is posted on the wall. Tech pillars with charging ports and
-terminals are vacant for use.`,
+		Long: `
+
+Historical information about the Genetic Low Orbital Computer is
+posted on the wall. Tech pillars with charging ports and terminals are
+vacant for use.`,
 		//
 	}
 
