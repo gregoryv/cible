@@ -168,7 +168,7 @@ func (u *UI) HandleEvent(e interface{}) {
 }
 
 func (me *UI) WritePrompt() {
-	fmt.Fprintf(me.IO, "%s> ", me.CID())
+	fmt.Fprintf(me.IO, "%s> ", me.CharacterName())
 }
 
 func (me *UI) CID() Ident {
@@ -176,6 +176,13 @@ func (me *UI) CID() Ident {
 		return ""
 	}
 	return me.Character.Ident
+}
+
+func (me *UI) CharacterName() Name {
+	if me.Character == nil {
+		return ""
+	}
+	return me.Character.Name
 }
 
 func (u *UI) showUsage() {
