@@ -17,3 +17,15 @@ game, where you control your character with the keyboard.
         -h, --help
 
 
+To play a local game start a server first
+
+    $ cible -s
+
+then in another terminal run the client
+
+    $ USER=majorPain cible
+	
+
+## Download
+
+Binaries are available at https://www.7de.se/dl
