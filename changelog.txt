@@ -2,6 +2,9 @@
 
 All major changes will be documented in this file.
 
+## [unreleased]
+
+
 ## [0.4.0] - 2022-05-08
 
 - Notify others when character is nearby or goes away
