@@ -6,10 +6,11 @@ func Spaceport() *Area {
 
 		Long: `
 
-In the center a large tree with pinkish fruits is growing, surrounded
-by benches. The large stateroom is bright and the ceiling
-transparently shows the galaxy augmented with names of nearest
-starsystems.
+A large tree with pinkish fruits grows in the center. Surrounded by
+benches with soft padding. The large stateroom is bright and the
+ceiling transparently shows the galaxy augmented with names of nearest
+starsystems. Alpha Centauri, Barnard's Star and Luhman 16 all sparkle
+in bright colors.
 
 To the east the great memorial wall with it's soft and rock like
 surface, reminds you of the venturesome life in space.`}
@@ -75,7 +76,6 @@ vacant for use.`,
 		t6, N,
 	)
 	t2.Link(
-		t1, N,
 		t3, W,
 		t9, E,
 	)
