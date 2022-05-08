@@ -131,6 +131,7 @@ func (g *Game) AffectGame(e interface{}) error {
 		_, t, _ = g.Place(c.Position)
 		e.Body = []byte(t.Short + "...")
 		go c.Transmit(NewMessage(e))
+		go c.TransmitOthers(g, NewMessage(&EventApproach{Name: c.Name}))
 
 	case *EventLook:
 		c, err := g.Character(e.Ident)

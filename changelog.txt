@@ -4,6 +4,7 @@ All major changes will be documented in this file.
 
 ## [unreleased
 
+- Notify others when character is nearby
 - Tidy tile output
 - Simplify creating areas and linking tiles
 - Add navigation in ne, se, sw and nw directions

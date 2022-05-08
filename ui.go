@@ -137,6 +137,8 @@ func (u *UI) Run(ctx context.Context) error {
 
 func (u *UI) HandleEvent(e interface{}) {
 	switch e := e.(type) {
+	case *EventApproach:
+		u.OtherPlayer(e.Name, "is near")
 
 	case *EventSay:
 		u.OtherPlayerSays(e.Name, e.Text)
