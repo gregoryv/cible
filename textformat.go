@@ -44,10 +44,22 @@ var DefaultTextFormat = &TextFormat{
 	cols: 72,
 }
 
-func Center(p []byte) []byte {
-	return DefaultTextFormat.Center(p)
+func Center(p interface{}) []byte {
+	switch p := p.(type) {
+	case []byte:
+		return DefaultTextFormat.Center(p)
+	case string:
+		return DefaultTextFormat.Center([]byte(p))
+	}
+	panic("Center string or []byte only")
 }
 
-func Indent(p []byte) []byte {
-	return DefaultTextFormat.Indent(p)
+func Indent(p interface{}) []byte {
+	switch p := p.(type) {
+	case []byte:
+		return DefaultTextFormat.Indent(p)
+	case string:
+		return DefaultTextFormat.Indent([]byte(p))
+	}
+	panic("Indent string or []byte only")
 }

@@ -186,7 +186,7 @@ func (u *UI) showUsage() {
 func (u *UI) ShowIntro() {
 	u.Write(Center(logo))
 	u.Println()
-	u.Write(Center([]byte("Welcome, to learn more ask for help!")))
+	u.Write(Center("Welcome, to learn more ask for help!"))
 	u.Println()
 }
 
@@ -226,7 +226,7 @@ func (u *UI) showTile(t *Tile) {
 	u.Write(Indent(bytes.TrimSpace([]byte(t.Long))))
 	u.Println()
 	u.Println()
-	u.Write(Indent([]byte("Exits: ")))
+	u.Write(Indent("Exits: "))
 	for d, loc := range t.Nav {
 		if loc != "" {
 			u.Print(Direction(d).String())
