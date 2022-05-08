@@ -73,6 +73,7 @@ func (g *Game) AffectGame(e interface{}) error {
 		if err != nil {
 			return err
 		}
+		e.Name = c.Name
 		go c.TransmitOthers(g, NewMessage(e))
 
 	case *EventJoin:
@@ -91,7 +92,10 @@ func (g *Game) AffectGame(e interface{}) error {
 
 		// notify others of the new character
 		go c.TransmitOthers(g,
-			NewMessage(&EventJoin{Ident: c.Ident}),
+			NewMessage(&EventJoin{
+				Ident: c.Ident,
+				Name:  c.Name,
+			}),
 		)
 		return c.Transmit(NewMessage(e)) // back to player
 
@@ -100,6 +104,7 @@ func (g *Game) AffectGame(e interface{}) error {
 		if err != nil {
 			return err
 		}
+		e.Name = c.Name
 		g.Characters.Remove(c.Ident)
 		g.Logf("%s left, %v remaining", c.Name, g.Characters.Len())
 		go c.TransmitOthers(g, NewMessage(e))

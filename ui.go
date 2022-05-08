@@ -140,16 +140,16 @@ func (u *UI) HandleEvent(e interface{}) {
 	switch e := e.(type) {
 
 	case *EventSay:
-		u.OtherPlayerSays(e.Ident, e.Text)
+		u.OtherPlayerSays(e.Name, e.Text)
 
 	case *EventJoin:
-		u.OtherPlayer(e.Ident, "joined")
+		u.OtherPlayer(e.Name, "joined")
 
 	case *PlayerJoin:
 		u.Character = e.Character
 
 	case *EventLeave:
-		u.OtherPlayer(e.Ident, "left game")
+		u.OtherPlayer(e.Name, "left game")
 
 	case *EventLook:
 		u.showTile(&e.Tile)
@@ -217,13 +217,13 @@ func (u *UI) DoWait(v, duration string) {
 }
 
 // only for speach
-func (me *UI) OtherPlayerSays(id Ident, text string) {
-	fmt.Fprintf(me.IO, "\n[%s]: %s\n", id, text)
+func (me *UI) OtherPlayerSays(name Name, text string) {
+	fmt.Fprintf(me.IO, "\n %s: %s\n", name, text)
 }
 
 // for notifications
-func (me *UI) OtherPlayer(id Ident, text string) {
-	fmt.Fprintf(me.IO, "\n%s %s\n", id, text)
+func (me *UI) OtherPlayer(name Name, text string) {
+	fmt.Fprintf(me.IO, "\n%s %s\n", name, text)
 }
 
 func (u *UI) showTile(t *Tile) {

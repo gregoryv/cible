@@ -6,19 +6,6 @@ import (
 	"log"
 )
 
-func NewEvent(name string) (Event, bool) {
-	if fn, found := eventConstructors[name]; !found {
-		log.Println(name, "NOT REGISTERED")
-		return nil, false
-	} else {
-		return fn(), true
-	}
-}
-
-type Event interface{}
-
-var eventConstructors = make(map[string]func() Event)
-
 func init() {
 	registerEvent(&PlayerJoin{})
 	registerEvent(&EventJoin{})
@@ -27,21 +14,17 @@ func init() {
 	registerEvent(&EventMove{})
 	registerEvent(&EventLook{})
 	registerEvent(&EventDisconnect{})
+	registerEvent(&EventRenameCharacter{})
 
 	// Do Not register EventStopGame as it would allow a client to
 	// stop the server.
 }
 
-// register pointer to events
-func registerEvent[T Event](t *T) {
-	gob.Register(*t)
-	eventConstructors[fmt.Sprintf("%T", *t)] = func() Event {
-		var x T
-		return &x
-	}
-}
-
 // ----------------------------------------
+
+type EventRenameCharacter struct {
+	Ident // current
+}
 
 type PlayerJoin struct {
 	Player
@@ -55,18 +38,21 @@ type PlayerJoin struct {
 type EventJoin struct {
 	// set by game
 	Ident
+	Name
 }
 
 type EventSay struct {
 	Text string
 
-	// set by server
-	Ident // character who is speaking
+	// set by server, character who is speaking
+	Ident
+	Name
 }
 
 type EventLeave struct {
 	// set by server
 	Ident
+	Name
 }
 
 type EventDisconnect struct {
@@ -99,3 +85,27 @@ type EventLook struct {
 }
 
 type EventStopGame struct{}
+
+// ----------------------------------------
+
+func NewEvent(name string) (Event, bool) {
+	if fn, found := eventConstructors[name]; !found {
+		log.Println(name, "NOT REGISTERED")
+		return nil, false
+	} else {
+		return fn(), true
+	}
+}
+
+type Event interface{}
+
+var eventConstructors = make(map[string]func() Event)
+
+// register pointer to events
+func registerEvent[T Event](t *T) {
+	gob.Register(*t)
+	eventConstructors[fmt.Sprintf("%T", *t)] = func() Event {
+		var x T
+		return &x
+	}
+}
