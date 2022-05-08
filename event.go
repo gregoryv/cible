@@ -39,6 +39,8 @@ type PlayerJoin struct {
 
 	// set by server
 	tr Transmitter
+
+	Title // of the area
 }
 
 type EventJoin struct {

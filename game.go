@@ -89,6 +89,8 @@ func (g *Game) AffectGame(e interface{}) error {
 		g.Characters.Add(c)
 		g.Logf("%s joined game as %s", c.Name, c.Ident)
 		e.Character = c
+		a, _, _ := g.Place(c.Position)
+		e.Title = a.Title
 
 		// notify others of the new character
 		go c.TransmitOthers(g,

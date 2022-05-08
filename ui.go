@@ -150,7 +150,16 @@ func (u *UI) HandleEvent(e interface{}) {
 		u.OtherPlayer(e.Name, "joined game")
 
 	case *PlayerJoin:
+		// when you coint
 		u.Character = e.Character
+		u.Write(Center(
+			[]byte(
+				"You have entered the " + e.Title + " area",
+			),
+		))
+		u.Println()
+		u.Println()
+		u.Println()
 
 	case *EventLeave:
 		u.OtherPlayer(e.Name, "left game")
@@ -197,8 +206,8 @@ func (u *UI) showUsage() {
 func (u *UI) ShowIntro() {
 	u.Write(Center(logo))
 	u.Println()
-	u.Write(Center("Welcome, to learn more ask for help!"))
-	u.Println()
+	u.Write(Center("To learn more, just ask for help!"))
+	u.Println(strings.Repeat("\n", 8))
 }
 
 func (u *UI) clearScreen() {
@@ -246,7 +255,6 @@ func (u *UI) showTile(t *Tile) {
 
 func exits(n Nav) []byte {
 	var buf bytes.Buffer
-	buf.WriteString("Exits: ")
 	for d, loc := range n {
 		if loc != "" {
 			buf.WriteString(Direction(d).String())
