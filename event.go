@@ -14,17 +14,12 @@ func init() {
 	registerEvent(&EventMove{})
 	registerEvent(&EventLook{})
 	registerEvent(&EventDisconnect{})
-	registerEvent(&EventRenameCharacter{})
 
 	// Do Not register EventStopGame as it would allow a client to
 	// stop the server.
 }
 
 // ----------------------------------------
-
-type EventRenameCharacter struct {
-	Ident // current
-}
 
 type PlayerJoin struct {
 	Player
@@ -46,12 +41,16 @@ type EventSay struct {
 
 	// set by server, character who is speaking
 	Ident
+
+	// set by game
 	Name
 }
 
 type EventLeave struct {
 	// set by server
 	Ident
+
+	// set by game
 	Name
 }
 
