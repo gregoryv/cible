@@ -127,8 +127,8 @@ func (me *Server) communicate(tr *Transceiver) error {
 		switch e := e.(type) {
 		case *PlayerJoin:
 			e.tr = tr // make sure game can communicate
-		case interface{ SetIdent(Ident) }:
-			e.SetIdent(cid)
+		case interface{ SetIdent(string) }:
+			e.SetIdent(string(cid))
 		}
 
 		if e, ok := e.(Event); ok {

@@ -9,14 +9,18 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[N-0]
-	_ = x[E-1]
-	_ = x[S-2]
-	_ = x[W-3]
+	_ = x[NE-1]
+	_ = x[E-2]
+	_ = x[SE-3]
+	_ = x[S-4]
+	_ = x[SW-5]
+	_ = x[W-6]
+	_ = x[NW-7]
 }
 
-const _Direction_name = "NESW"
+const _Direction_name = "NNEESESSWWNW"
 
-var _Direction_index = [...]uint8{0, 1, 2, 3, 4}
+var _Direction_index = [...]uint8{0, 1, 3, 4, 6, 7, 9, 10, 12}
 
 func (i Direction) String() string {
 	if i < 0 || i >= Direction(len(_Direction_index)-1) {

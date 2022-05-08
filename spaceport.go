@@ -53,7 +53,13 @@ func Spaceport() *Area {
 	area.AddTile(t1, t2, t3, t4, t5, t6, t7, t8, t9)
 
 	// link only when they have ids, which is assigned by Area.AddTile
-	t1.Link(t2, S)
+	t1.Link(
+		t2, S,
+		t3, SW,
+		t4, W,
+		t5, NW,
+		t6, N,
+	)
 	t2.Link(t3, W)
 	t3.Link(t4, N)
 	t4.Link(t5, N)

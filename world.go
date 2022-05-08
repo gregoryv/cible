@@ -2,7 +2,6 @@ package cible
 
 import (
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -62,20 +61,25 @@ func (t *Tile) String() string {
 	return fmt.Sprintf("%s %s", t.Ident, t.Short)
 }
 
-func (me *Tile) Link(t *Tile, d Direction) {
-	if me.Nav[d] != "" {
-		panic(
-			fmt.Sprintf(
-				"cannot link %s, %s already linked to %v",
-				me.String(), d.String(), me.Nav[d],
-			),
-		)
+func (me *Tile) Link(to ...interface{}) {
+	for i := 0; i < len(to); i += 2 {
+		t := to[i].(*Tile)
+		d := to[i+1].(Direction)
+		if me.Nav[d] != "" {
+			panic(
+				fmt.Sprintf(
+					"cannot link %s, %s already linked to %v",
+					me.String(), d.String(), me.Nav[d],
+				),
+			)
+		}
+		// link in both directions
+		me.Nav[d] = t.Ident
+		t.Nav[opposite[d]] = me.Ident
 	}
-	log.Printf("me.Nav[%s]=%s", d, me.Nav[d])
-	me.Nav[d] = t.Ident
 }
 
-type Nav [4]Ident
+type Nav [8]Ident
 
 func (n Nav) String() string {
 	var res []string
@@ -91,10 +95,25 @@ type Direction int
 
 const (
 	N Direction = iota
+	NE
 	E
+	SE
 	S
+	SW
 	W
+	NW
 )
+
+var opposite = [8]Direction{
+	N:  S,
+	NE: SW,
+	E:  W,
+	SE: NW,
+	S:  N,
+	SW: NE,
+	W:  E,
+	NW: SE,
+}
 
 type Name string
 

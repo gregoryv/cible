@@ -87,7 +87,7 @@ func (g *Game) AffectGame(e interface{}) error {
 		c := &Character{
 			Name: e.Player.Name,
 			Position: Position{
-				Area: "a1", Tile: "01",
+				Area: "a1", Tile: "t1",
 			},
 			tr: e.tr,
 		}
