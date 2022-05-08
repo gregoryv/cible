@@ -26,18 +26,7 @@ func (f *TextFormat) Indent(p []byte) []byte {
 }
 
 func (f *TextFormat) Center(p []byte) []byte {
-	scanner := bufio.NewScanner(bytes.NewReader(p))
-	var buf bytes.Buffer
-	for scanner.Scan() {
-		line := scanner.Text()
-		if len(line) < f.cols {
-			prefix := strings.Repeat(" ", (f.cols-len(line))/2)
-			buf.WriteString(prefix)
-			buf.WriteString(line)
-		}
-		buf.WriteString("\n")
-	}
-	return bytes.TrimRight(buf.Bytes(), "\n")
+	return CenterIn(p, f.cols)
 }
 
 var DefaultTextFormat = &TextFormat{
@@ -62,4 +51,19 @@ func Indent(p interface{}) []byte {
 		return DefaultTextFormat.Indent([]byte(p))
 	}
 	panic("Indent string or []byte only")
+}
+
+func CenterIn(p []byte, width int) []byte {
+	scanner := bufio.NewScanner(bytes.NewReader(p))
+	var buf bytes.Buffer
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(line) < width {
+			prefix := strings.Repeat(" ", (width-len(line))/2)
+			buf.WriteString(prefix)
+			buf.WriteString(line)
+		}
+		buf.WriteString("\n")
+	}
+	return bytes.TrimRight(buf.Bytes(), "\n")
 }

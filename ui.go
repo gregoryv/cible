@@ -179,7 +179,7 @@ func (me *UI) CID() Ident {
 }
 
 func (u *UI) showUsage() {
-	u.Write(Center(u.boxed(usage, 40)))
+	u.Write(Center(Boxed(usage, 40)))
 	u.Println()
 }
 
@@ -220,7 +220,7 @@ func (me *UI) OtherPlayer(id Ident, text string) {
 }
 
 func (u *UI) showTile(t *Tile) {
-	u.Write(Center(u.boxed([]byte(t.Short), 40)))
+	u.Write(Center(Boxed(CenterIn([]byte(t.Short), 36), 40)))
 	u.Println()
 	u.Println()
 	u.Write(Indent(bytes.TrimSpace([]byte(t.Long))))
@@ -252,10 +252,10 @@ func (me *UI) Print(v ...interface{}) (int, error) {
 	return int(p.Written), *err
 }
 
-func (u *UI) boxed(p []byte, width int) []byte {
+func Boxed(p []byte, width int) []byte {
+	scanner := bufio.NewScanner(bytes.NewReader(p))
 	var buf bytes.Buffer
 	buf.WriteString(frameLine(width))
-	scanner := bufio.NewScanner(bytes.NewReader(p))
 	for scanner.Scan() {
 		line := scanner.Text()
 		buf.WriteString("| ")

@@ -11,7 +11,7 @@ import (
 func NewGame() *Game {
 	c := NewCharactersMap()
 	c.Add(&Character{
-		Ident: "god",
+		Ident: "tiq-07", // todo implement bot as separate process
 		IsBot: true,
 	})
 	return &Game{
