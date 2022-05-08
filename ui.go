@@ -228,15 +228,21 @@ func (u *UI) showTile(t *Tile) {
 	))
 	u.Println()
 	u.Println()
-	u.Write(Indent("Exits: "))
-	for d, loc := range t.Nav {
+	u.Write(Indent(exits(t.Nav)))
+	u.Println()
+	u.Println()
+}
+
+func exits(n Nav) []byte {
+	var buf bytes.Buffer
+	buf.WriteString("Exits: ")
+	for d, loc := range n {
 		if loc != "" {
-			u.Print(Direction(d).String())
-			u.Print(" ")
+			buf.WriteString(Direction(d).String())
+			buf.WriteString(" ")
 		}
 	}
-	u.Println()
-	u.Println()
+	return bytes.TrimRight(buf.Bytes(), " ")
 }
 
 func (me *UI) Write(p []byte) (int, error) {
