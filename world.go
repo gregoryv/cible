@@ -2,48 +2,13 @@ package cible
 
 import (
 	"fmt"
+	"log"
 	"strings"
 )
 
 func Earth() World {
 	return World{
-		Areas: Areas{myCave()},
-	}
-}
-
-func myCave() *Area {
-	t1 := &Tile{
-		Ident: "01",
-		Short: "Cave entrance",
-		Nav:   Nav{N: "02"},
-
-		Long: `Hidden behind bushes the opening is barely visible.`,
-		//
-	}
-
-	t2 := &Tile{
-		Ident: "02",
-		Short: "Fire room",
-		Nav:   Nav{E: "03", S: "01"},
-
-		Long: `A small streek of light comes in from a hole in the
-ceiling. The entrance is a dark patch on the west wall, dryer
-than the other walls.`,
-		//
-	}
-
-	t3 := &Tile{
-		Ident: "03",
-		Short: "Small area",
-		Nav:   Nav{W: "02"},
-
-		Long: `A small bedlike area on your left is filled with hay
-and contains traces of animals sleeping there.`}
-
-	return &Area{
-		Ident: "a1",
-		Title: "Cave of Indy",
-		Tiles: Tiles{t1, t2, t3},
+		Areas: Areas{Spaceport()},
 	}
 }
 
@@ -77,6 +42,13 @@ func (a *Area) Tile(id Ident) (*Tile, error) {
 	return nil, fmt.Errorf("tile %q not found", id)
 }
 
+func (a *Area) AddTile(tiles ...*Tile) {
+	for _, t := range tiles {
+		a.Tiles = append(a.Tiles, t)
+		t.Ident.SetIdent(fmt.Sprintf("t%d", len(a.Tiles)))
+	}
+}
+
 type Tiles []*Tile
 
 type Tile struct {
@@ -88,6 +60,19 @@ type Tile struct {
 
 func (t *Tile) String() string {
 	return fmt.Sprintf("%s %s", t.Ident, t.Short)
+}
+
+func (me *Tile) Link(t *Tile, d Direction) {
+	if me.Nav[d] != "" {
+		panic(
+			fmt.Sprintf(
+				"cannot link %s, %s already linked to %v",
+				me.String(), d.String(), me.Nav[d],
+			),
+		)
+	}
+	log.Printf("me.Nav[%s]=%s", d, me.Nav[d])
+	me.Nav[d] = t.Ident
 }
 
 type Nav [4]Ident

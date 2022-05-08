@@ -320,4 +320,4 @@ func (p *Position) Equal(v Position) bool {
 
 type Ident string
 
-func (me *Ident) SetIdent(v Ident) { *me = v }
+func (me *Ident) SetIdent(v string) { *me = Ident(v) }

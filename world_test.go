@@ -16,3 +16,7 @@ func TestAreas(t *testing.T) {
 		}
 	})
 }
+
+func TestTile(t *testing.T) {
+	_ = Spaceport()
+}

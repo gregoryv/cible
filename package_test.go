@@ -138,7 +138,7 @@ func Test_cancelGame(t *testing.T) {
 }
 
 func Test_cave(t *testing.T) {
-	for _, tile := range myCave().Tiles {
+	for _, tile := range Spaceport().Tiles {
 		t.Log(tile, tile.Nav)
 	}
 }
