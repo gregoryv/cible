@@ -14,12 +14,17 @@ func init() {
 	registerEvent(&EventMove{})
 	registerEvent(&EventLook{})
 	registerEvent(&EventDisconnect{})
+	registerEvent(&EventApproach{})
 
 	// Do Not register EventStopGame as it would allow a client to
 	// stop the server.
 }
 
 // ----------------------------------------
+
+type EventApproach struct {
+	Name
+}
 
 type PlayerJoin struct {
 	Player

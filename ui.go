@@ -64,8 +64,7 @@ func (u *UI) Run(ctx context.Context) error {
 	send := u.out
 	player := Player{}
 	player.SetName(os.Getenv("USER"))
-	e := &PlayerJoin{Player: player}
-	send <- NewMessage(e)
+	send <- NewMessage(&PlayerJoin{Player: player})
 
 	// signal when prompt needs update
 	promptUpdate := make(chan struct{}, 1)
