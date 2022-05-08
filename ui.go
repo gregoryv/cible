@@ -137,6 +137,9 @@ func (u *UI) Run(ctx context.Context) error {
 
 func (u *UI) HandleEvent(e interface{}) {
 	switch e := e.(type) {
+	case *EventGoAway:
+		u.OtherPlayer(e.Name, "went away")
+
 	case *EventApproach:
 		u.OtherPlayer(e.Name, "is near")
 
@@ -144,7 +147,7 @@ func (u *UI) HandleEvent(e interface{}) {
 		u.OtherPlayerSays(e.Name, e.Text)
 
 	case *EventJoin:
-		u.OtherPlayer(e.Name, "joined")
+		u.OtherPlayer(e.Name, "joined game")
 
 	case *PlayerJoin:
 		u.Character = e.Character

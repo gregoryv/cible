@@ -15,6 +15,7 @@ func init() {
 	registerEvent(&EventLook{})
 	registerEvent(&EventDisconnect{})
 	registerEvent(&EventApproach{})
+	registerEvent(&EventGoAway{})
 
 	// Do Not register EventStopGame as it would allow a client to
 	// stop the server.
@@ -22,6 +23,11 @@ func init() {
 
 // ----------------------------------------
 
+type EventGoAway struct {
+	Name
+}
+
+// when character enters a tile
 type EventApproach struct {
 	Name
 }

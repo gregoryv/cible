@@ -124,6 +124,9 @@ func (g *Game) AffectGame(e interface{}) error {
 		if err != nil {
 			return err
 		}
+		// must do this Before setting next position
+		c.TransmitOthers(g, NewMessage(&EventGoAway{Name: c.Name}))
+
 		if next != "" {
 			c.Position.Tile = next
 		}
