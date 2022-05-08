@@ -9,16 +9,11 @@ import (
 )
 
 func NewGame() *Game {
-	c := NewCharactersMap()
-	c.Add(&Character{
-		Ident: "tiq-07", // todo implement bot as separate process
-		IsBot: true,
-	})
 	return &Game{
 		World:      Earth(),
 		MaxTasks:   10,
 		Logger:     logger.Silent,
-		Characters: c,
+		Characters: NewCharactersMap(),
 	}
 }
 
