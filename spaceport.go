@@ -74,7 +74,11 @@ vacant for use.`,
 		t5, NW,
 		t6, N,
 	)
-	t2.Link(t3, W)
+	t2.Link(
+		t1, N,
+		t3, W,
+		t9, E,
+	)
 	t3.Link(t4, N)
 	t4.Link(t5, N)
 	t5.Link(t6, E)

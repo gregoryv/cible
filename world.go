@@ -66,6 +66,9 @@ func (me *Tile) Link(to ...interface{}) {
 		t := to[i].(*Tile)
 		d := to[i+1].(Direction)
 		if me.Nav[d] != "" {
+			if me.Nav[d] == t.Ident {
+				continue // already linked
+			}
 			panic(
 				fmt.Sprintf(
 					"cannot link %s, %s already linked to %v",
