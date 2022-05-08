@@ -39,3 +39,15 @@ func (f *TextFormat) Center(p []byte) []byte {
 	}
 	return bytes.TrimRight(buf.Bytes(), "\n")
 }
+
+var DefaultTextFormat = &TextFormat{
+	cols: 72,
+}
+
+func Center(p []byte) []byte {
+	return DefaultTextFormat.Center(p)
+}
+
+func Indent(p []byte) []byte {
+	return DefaultTextFormat.Indent(p)
+}

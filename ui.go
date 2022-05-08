@@ -20,6 +20,8 @@ func NewUI() *UI {
 		cols = 72 // default when testing
 		rows = 20
 	}
+	DefaultTextFormat.cols = cols
+
 	return &UI{
 		Logger: logger.Silent,
 
@@ -29,9 +31,8 @@ func NewUI() *UI {
 		out: make(chan Message, 1),
 		in:  make(chan Message, 1),
 
-		cols:       cols,
-		rows:       rows,
-		TextFormat: &TextFormat{cols: cols},
+		cols: cols,
+		rows: rows,
 	}
 }
 
@@ -47,7 +48,6 @@ type UI struct {
 	*Character
 
 	cols, rows int
-	*TextFormat
 }
 
 func (me *UI) Use(c *Client) {
@@ -179,14 +179,14 @@ func (me *UI) CID() Ident {
 }
 
 func (u *UI) showUsage() {
-	u.Write(u.Center(u.boxed(usage, 40)))
+	u.Write(Center(u.boxed(usage, 40)))
 	u.Println()
 }
 
 func (u *UI) ShowIntro() {
-	u.Write(u.Center(logo))
+	u.Write(Center(logo))
 	u.Println()
-	u.Write(u.Center([]byte("Welcome, to learn more ask for help!")))
+	u.Write(Center([]byte("Welcome, to learn more ask for help!")))
 	u.Println()
 }
 
@@ -220,13 +220,13 @@ func (me *UI) OtherPlayer(id Ident, text string) {
 }
 
 func (u *UI) showTile(t *Tile) {
-	u.Write(u.Center(u.boxed([]byte(t.Short), 40)))
+	u.Write(Center(u.boxed([]byte(t.Short), 40)))
 	u.Println()
 	u.Println()
-	u.Write(u.Indent(bytes.TrimSpace([]byte(t.Long))))
+	u.Write(Indent(bytes.TrimSpace([]byte(t.Long))))
 	u.Println()
 	u.Println()
-	u.Write(u.Indent([]byte("Exits: ")))
+	u.Write(Indent([]byte("Exits: ")))
 	for d, loc := range t.Nav {
 		if loc != "" {
 			u.Print(Direction(d).String())
