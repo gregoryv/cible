@@ -95,7 +95,7 @@ type EventLook struct {
 	// set by server
 	Ident // character who is looking
 
-	Body []byte
+	Tile
 }
 
 type EventStopGame struct{}

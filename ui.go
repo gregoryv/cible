@@ -150,7 +150,21 @@ func (u *UI) HandleEvent(e interface{}) {
 		u.OtherPlayer(e.Ident, "left game")
 
 	case *EventLook:
-		u.Write(e.Body)
+
+		u.Println()
+		t := e.Tile
+		u.Println(t.Short)
+		u.Println()
+		u.Println(t.Long)
+
+		u.Print("\nExits: ")
+		for d, loc := range t.Nav {
+			if loc != "" {
+				u.Print(Direction(d).String())
+				u.Print(" ")
+			}
+		}
+		u.Println()
 		u.Println()
 
 	case *EventMove:
@@ -231,6 +245,11 @@ func (u *UI) CenterPrintln(p []byte) {
 func (me *UI) Println(v ...interface{}) (int, error) {
 	p, err := nexus.NewPrinter(me.IO)
 	p.Println(v...)
+	return int(p.Written), *err
+}
+func (me *UI) Print(v ...interface{}) (int, error) {
+	p, err := nexus.NewPrinter(me.IO)
+	p.Print(v...)
 	return int(p.Written), *err
 }
 

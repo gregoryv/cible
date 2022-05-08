@@ -1,7 +1,6 @@
 package cible
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -143,20 +142,7 @@ func (g *Game) AffectGame(e interface{}) error {
 			return err
 		}
 
-		var buf bytes.Buffer
-		buf.WriteString("\n")
-		buf.WriteString(string(t.Short))
-		buf.WriteString("\n")
-		buf.WriteString(string(t.Long))
-		buf.WriteString("\nExits: ")
-		for d, loc := range t.Nav {
-			if loc != "" {
-				buf.WriteString(Direction(d).String())
-				buf.WriteString(" ")
-			}
-		}
-
-		e.Body = buf.Bytes()
+		e.Tile = *t
 
 		go c.Transmit(NewMessage(e))
 
