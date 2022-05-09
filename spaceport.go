@@ -33,7 +33,7 @@ vacant for use.`,
 
 	t4 := &Tile{
 		Short: "West Stateroom",
-		Long:  `Couple of drink and food dispnesers are humming.`,
+		Long:  `Couple of drink and food dispensers are humming.`,
 	}
 
 	t5 := &Tile{

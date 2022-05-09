@@ -243,6 +243,7 @@ func (me *UI) OtherPlayer(name Name, text string) {
 }
 
 func (u *UI) showTile(t *Tile, long bool) {
+	u.Println()
 	u.Write(Center(Boxed(CenterIn([]byte(t.Short), 36), 40)))
 	if long {
 		u.Println()
