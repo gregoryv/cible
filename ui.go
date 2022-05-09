@@ -95,7 +95,9 @@ func (u *UI) Run(ctx context.Context) error {
 
 	p, _ := nexus.NewPrinter(u)
 	// handle incoming messages
+loop:
 	for {
+		promptUpdate <- struct{}{}
 		select {
 		case <-ctx.Done():
 			return nil
@@ -106,7 +108,6 @@ func (u *UI) Run(ctx context.Context) error {
 			}
 			Decode(e, &m)
 			u.HandleEvent(e)
-			promptUpdate <- struct{}{}
 
 		case input := <-u.playerInput:
 			switch input {
@@ -130,17 +131,34 @@ func (u *UI) Run(ctx context.Context) error {
 				return nil
 
 			default:
-				if input != "" {
-					send <- NewMessage(&EventSay{Text: input})
+				fields := strings.Fields(input)
+				switch fields[0] {
+				case "p":
+					if len(fields) == 1 {
+						u.Println("pickup what?")
+						continue loop
+					}
+					send <- NewMessage(&EventPickup{
+						Item: Item{
+							Name: Name(fields[1]),
+						},
+					})
+
+				default:
+					if input != "" {
+						send <- NewMessage(&EventSay{Text: input})
+					}
 				}
 			}
-			promptUpdate <- struct{}{}
 		}
 	}
 }
 
 func (u *UI) HandleEvent(e interface{}) {
 	switch e := e.(type) {
+	case *EventInventoryUpdate:
+		u.Character.Inventory = e.Inventory // memleak?
+
 	case *EventGoAway:
 		u.OtherPlayer(e.Name, "went away")
 

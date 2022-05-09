@@ -16,12 +16,23 @@ func init() {
 	registerEvent(&EventDisconnect{})
 	registerEvent(&EventApproach{})
 	registerEvent(&EventGoAway{})
+	registerEvent(&EventPickup{})
+	registerEvent(&EventInventoryUpdate{})
 
 	// Do Not register EventStopGame as it would allow a client to
 	// stop the server.
 }
 
 // ----------------------------------------
+
+type EventInventoryUpdate struct {
+	*Inventory
+}
+
+type EventPickup struct {
+	Ident
+	Item
+}
 
 type EventGoAway struct {
 	Name

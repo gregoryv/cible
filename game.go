@@ -26,6 +26,8 @@ type Game struct {
 
 	ch chan *Task
 	logger.Logger
+
+	ballFound bool
 }
 
 func (g *Game) Run(ctx context.Context) error {
@@ -157,13 +159,25 @@ func (g *Game) AffectGame(e interface{}) error {
 			Area: "a1",
 			Tile: "t9",
 		}
-		if c.Position.Equal(ipos) {
+		if !g.ballFound && c.Position.Equal(ipos) { // todo game items should be shared
 			e.Loose = Items{Item{
 				Name:  "ball",
 				Count: 1,
 			}}
 		}
 		go c.Transmit(NewMessage(e))
+
+	case *EventPickup:
+		c, err := g.Character(e.Ident)
+		if err != nil {
+			return err
+		}
+		e.Item.Count = 1
+		if e.Item.Name == "ball" {
+			g.ballFound = true
+		}
+		c.Inventory.AddItem(e.Item)
+		c.Transmit(NewMessage(&EventInventoryUpdate{c.Inventory}))
 
 	case *EventStopGame:
 		// special event that ends the loop, thus we do things here as

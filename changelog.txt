@@ -4,6 +4,7 @@ All major changes will be documented in this file.
 
 ## [unreleased]
 
+- Add items that can be picked up, one ball only
 - Add inventory
 - Add area title and tile id to prompt
 - Describe tile shortly when moving

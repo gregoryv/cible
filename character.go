@@ -1,5 +1,7 @@
 package cible
 
+import "strings"
+
 type Character struct {
 	Ident
 	Name
@@ -74,6 +76,14 @@ type Inventory struct {
 }
 
 func (me *Inventory) AddItem(v Item) {
+	v.Name = Name(strings.Title(string(v.Name)))
+	for i, item := range me.Items {
+		if item.Name == v.Name {
+			me.Items[i].Count++
+			return
+		}
+	}
+
 	me.Items = append(me.Items, v)
 }
 
