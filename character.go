@@ -5,6 +5,7 @@ type Character struct {
 	Name
 	Position
 	IsBot
+	Inventory
 
 	tr Transmitter // set by server for communication
 }
@@ -48,3 +49,18 @@ func (p *Position) Equal(v Position) bool {
 type Ident string
 
 func (me *Ident) SetIdent(v string) { *me = Ident(v) }
+
+type Inventory struct {
+	Items
+}
+
+func (me *Inventory) AddItem(v Item) {
+	me.Items = append(me.Items, v)
+}
+
+type Items []Item
+
+type Item struct {
+	Name
+	Count uint
+}
