@@ -125,7 +125,7 @@ func (me *Server) communicate(tr *Transceiver) error {
 		// new player joined, set the transceiver for further
 		// communication
 		switch e := e.(type) {
-		case *PlayerJoin:
+		case *EventJoinGame:
 			e.tr = tr // make sure game can communicate
 		case interface{ SetIdent(string) }:
 			e.SetIdent(string(cid))
@@ -137,7 +137,7 @@ func (me *Server) communicate(tr *Transceiver) error {
 			}
 		}
 
-		if e, ok := e.(*PlayerJoin); ok {
+		if e, ok := e.(*EventJoinGame); ok {
 			cid = e.Character.Ident
 		}
 		// ignore other events

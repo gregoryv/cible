@@ -64,7 +64,7 @@ func (u *UI) Run(ctx context.Context) error {
 	send := u.out
 	player := Player{}
 	player.SetName(os.Getenv("USER"))
-	send <- NewMessage(&PlayerJoin{Player: player})
+	send <- NewMessage(&EventJoinGame{Player: player})
 
 	// signal when prompt needs update
 	promptUpdate := make(chan struct{}, 1)
@@ -149,7 +149,7 @@ func (u *UI) HandleEvent(e interface{}) {
 	case *EventJoin:
 		u.OtherPlayer(e.Name, "joined game")
 
-	case *PlayerJoin:
+	case *EventJoinGame:
 		// when you coint
 		u.Character = e.Character
 		u.Write(Center(

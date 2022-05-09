@@ -78,7 +78,7 @@ func (g *Game) AffectGame(e interface{}) error {
 
 	case *EventJoin:
 
-	case *PlayerJoin:
+	case *EventJoinGame:
 		c := &Character{
 			Name: e.Player.Name,
 			Position: Position{

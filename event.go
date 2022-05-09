@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	registerEvent(&PlayerJoin{})
+	registerEvent(&EventJoinGame{})
 	registerEvent(&EventJoin{})
 	registerEvent(&EventSay{})
 	registerEvent(&EventLeave{})
@@ -32,7 +32,7 @@ type EventApproach struct {
 	Name
 }
 
-type PlayerJoin struct {
+type EventJoinGame struct {
 	Player
 	// set by game
 	*Character
