@@ -5,7 +5,7 @@ type Character struct {
 	Name
 	Position
 	IsBot
-	Inventory
+	*Inventory
 
 	tr Transmitter // set by server for communication
 }
@@ -49,6 +49,25 @@ func (p *Position) Equal(v Position) bool {
 type Ident string
 
 func (me *Ident) SetIdent(v string) { *me = Ident(v) }
+
+func NewInventory() *Inventory {
+	return &Inventory{
+		Items: Items{
+			Item{
+				Name:  "credit",
+				Count: 200,
+			},
+			Item{
+				Name:  "Communicator",
+				Count: 1,
+			},
+			Item{
+				Name:  "Digipass",
+				Count: 1,
+			},
+		},
+	}
+}
 
 type Inventory struct {
 	Items

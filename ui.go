@@ -117,6 +117,9 @@ func (u *UI) Run(ctx context.Context) error {
 			case "l":
 				send <- NewMessage(&EventLook{})
 
+			case "i":
+				u.showInventory()
+
 			case "h", "help":
 				u.showUsage()
 
@@ -201,6 +204,23 @@ func (me *UI) CharacterName() Name {
 	return me.Character.Name
 }
 
+func (u *UI) showInventory() {
+	u.Println()
+	u.Write(Center(Boxed([]byte("Inventory"), 40)))
+	u.Println()
+	var buf bytes.Buffer
+	for i, item := range u.Character.Inventory.Items {
+		switch {
+		case item.Count > 1:
+			buf.WriteString(fmt.Sprintf("%v. %v %-30s\n", i+1, item.Count, item.Name))
+		case item.Count == 1:
+			buf.WriteString(fmt.Sprintf("%v. %-30s\n", i+1, item.Name))
+		}
+	}
+	u.Write(Indent(buf.Bytes()))
+	u.Println()
+}
+
 func (u *UI) showUsage() {
 	u.Write(Center(Boxed(usage, 40)))
 	u.Println()
@@ -211,6 +231,34 @@ func (u *UI) ShowIntro() {
 	u.Println()
 	u.Write(Center("To learn more, just ask for help!"))
 	u.Println(strings.Repeat("\n", 8))
+}
+
+func (u *UI) showTile(t *Tile, long bool) {
+	u.Println()
+	u.Write(Center(Boxed(CenterIn([]byte(t.Short), 36), 40)))
+	if long {
+		u.Println()
+		u.Println()
+		u.Write(Indent(
+			bytes.TrimSpace([]byte(t.Long)),
+		))
+	}
+	u.Println()
+	u.Println()
+	u.Write(Indent(exits(t.Nav)))
+	u.Println()
+	u.Println()
+}
+
+func exits(n Nav) []byte {
+	var buf bytes.Buffer
+	for d, loc := range n {
+		if loc != "" {
+			buf.WriteString(Direction(d).String())
+			buf.WriteString(" ")
+		}
+	}
+	return bytes.TrimRight(buf.Bytes(), " ")
 }
 
 func (u *UI) clearScreen() {
@@ -242,34 +290,6 @@ func (me *UI) OtherPlayer(name Name, text string) {
 	fmt.Fprintf(me.IO, "\n%s %s\n", name, text)
 }
 
-func (u *UI) showTile(t *Tile, long bool) {
-	u.Println()
-	u.Write(Center(Boxed(CenterIn([]byte(t.Short), 36), 40)))
-	if long {
-		u.Println()
-		u.Println()
-		u.Write(Indent(
-			bytes.TrimSpace([]byte(t.Long)),
-		))
-	}
-	u.Println()
-	u.Println()
-	u.Write(Indent(exits(t.Nav)))
-	u.Println()
-	u.Println()
-}
-
-func exits(n Nav) []byte {
-	var buf bytes.Buffer
-	for d, loc := range n {
-		if loc != "" {
-			buf.WriteString(Direction(d).String())
-			buf.WriteString(" ")
-		}
-	}
-	return bytes.TrimRight(buf.Bytes(), " ")
-}
-
 func (me *UI) Write(p []byte) (int, error) {
 	return me.IO.Write(p)
 }
@@ -279,6 +299,13 @@ func (me *UI) Println(v ...interface{}) (int, error) {
 	p.Println(v...)
 	return int(p.Written), *err
 }
+
+func (me *UI) Printf(format string, v ...interface{}) (int, error) {
+	p, err := nexus.NewPrinter(me.IO)
+	p.Printf(format, v...)
+	return int(p.Written), *err
+}
+
 func (me *UI) Print(v ...interface{}) (int, error) {
 	p, err := nexus.NewPrinter(me.IO)
 	p.Print(v...)
@@ -335,6 +362,8 @@ w  - west
 nw - north-west
 
 l - look around
+i - inventory
+
 q - quit
 h, help - for this help
 `)

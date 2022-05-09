@@ -84,7 +84,8 @@ func (g *Game) AffectGame(e interface{}) error {
 			Position: Position{
 				Area: "a1", Tile: "t1",
 			},
-			tr: e.tr,
+			Inventory: NewInventory(),
+			tr:        e.tr,
 		}
 		g.Characters.Add(c)
 		g.Logf("%s joined game as %s", c.Name, c.Ident)
