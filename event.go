@@ -100,6 +100,8 @@ type EventStopGame struct{}
 
 // ----------------------------------------
 
+// NewEvent returns a new instance of the named event. Returns false
+// if the event has not been registered.
 func NewEvent(name string) (Event, bool) {
 	if fn, found := eventConstructors[name]; !found {
 		log.Println(name, "NOT REGISTERED")
@@ -111,8 +113,6 @@ func NewEvent(name string) (Event, bool) {
 
 type Event interface{}
 
-var eventConstructors = make(map[string]func() Event)
-
 // register pointer to events
 func registerEvent[T Event](t *T) {
 	gob.Register(*t)
@@ -121,3 +121,5 @@ func registerEvent[T Event](t *T) {
 		return &x
 	}
 }
+
+var eventConstructors = make(map[string]func() Event)
