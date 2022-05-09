@@ -349,17 +349,18 @@ var nav = map[string]Direction{
 	"nw": NW,
 }
 
-var usage = []byte(`
-Navigation
+var usage = []byte(`Navigation
 
-n  - north
-ne - north-east
-e  - east
-se - south-east
-s  - south
-sw - south-west
-w  - west
-nw - north-west
+         n
+         |
+     nw  |  ne
+       \ | /
+ w ----- * ----- e
+       / | \
+     sw  |  se
+         |
+         s
+
 
 l - look around
 i - inventory
