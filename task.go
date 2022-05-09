@@ -43,11 +43,3 @@ func (me *Task) Done() error {
 func (me *Task) setErr(v error) {
 	me.failed <- v
 }
-
-// gomerge src: joinleave.go
-
-func Join(p Player) *EventJoinGame {
-	return &EventJoinGame{
-		Player: p,
-	}
-}

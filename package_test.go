@@ -104,8 +104,7 @@ func TestServer_Run(t *testing.T) {
 
 func Test_badEvents(t *testing.T) {
 	g := startNewGame(t)
-	c := Join(Player{Name: "John"})
-
+	c := &EventJoinGame{Player: Player{Name: "John"}}
 	if err := g.Do(c); err != nil {
 		t.Fatal(err)
 	}
@@ -160,7 +159,7 @@ func BenchmarkMoveCharacter_1_player(b *testing.B) {
 	g := startNewGame(b)
 	defer g.Do(&EventStopGame{})
 
-	e := Join(Player{Name: "John"})
+	e := &EventJoinGame{Player: Player{Name: "John"}}
 	g.Do(e)
 	cid := e.Ident
 	for i := 0; i < b.N; i++ {
@@ -175,8 +174,9 @@ func BenchmarkMoveCharacter_1000_player(b *testing.B) {
 
 	// Join all players first
 	for i := 0; i < 1000; i++ {
-		p := Player{Name: Name(fmt.Sprintf("John%v", i))}
-		e := Join(p)
+		var p Player
+		p.SetName(fmt.Sprintf("John%v", i))
+		e := &EventJoinGame{Player: p}
 		if err := g.Do(e); err != nil {
 			b.Fatal(err)
 		}
