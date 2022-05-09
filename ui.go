@@ -171,6 +171,15 @@ func (u *UI) HandleEvent(e interface{}) {
 
 	case *EventLook:
 		u.showTile(&e.Tile, true)
+		u.Println()
+		if len(e.Loose) > 0 {
+			u.Println()
+		}
+		for _, item := range e.Loose {
+			u.Write(Center([]byte("You found a " + item.Name + "!")))
+		}
+		u.showNav(&e.Tile.Nav)
+		u.Println()
 
 	case *EventMove:
 		if u.Character.Position.Equal(e.Position) {
@@ -179,6 +188,7 @@ func (u *UI) HandleEvent(e interface{}) {
 		}
 		u.Character.Position = e.Position
 		u.showTile(e.Tile, false)
+		u.Println()
 		u.Location = fmt.Sprintf("%s/%s", e.Title, e.Position.Tile)
 
 	default:
@@ -243,9 +253,12 @@ func (u *UI) showTile(t *Tile, long bool) {
 			bytes.TrimSpace([]byte(t.Long)),
 		))
 	}
+}
+
+func (u *UI) showNav(n *Nav) {
 	u.Println()
 	u.Println()
-	u.Write(Indent(exits(t.Nav)))
+	u.Write(Indent(exits(*n)))
 	u.Println()
 	u.Println()
 }

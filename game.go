@@ -153,6 +153,16 @@ func (g *Game) AffectGame(e interface{}) error {
 
 		e.Tile = *t
 
+		ipos := Position{
+			Area: "a1",
+			Tile: "t9",
+		}
+		if c.Position.Equal(ipos) {
+			e.Loose = Items{Item{
+				Name:  "ball",
+				Count: 1,
+			}}
+		}
 		go c.Transmit(NewMessage(e))
 
 	case *EventStopGame:

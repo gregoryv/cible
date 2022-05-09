@@ -95,6 +95,8 @@ type EventLook struct {
 	Ident // character who is looking
 
 	Tile
+
+	Loose Items
 }
 
 type EventStopGame struct{}
