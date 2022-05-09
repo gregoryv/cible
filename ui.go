@@ -46,6 +46,7 @@ type UI struct {
 	in  chan Message
 
 	*Character
+	Location string // used in prompt
 
 	cols, rows int
 }
@@ -152,6 +153,7 @@ func (u *UI) HandleEvent(e interface{}) {
 	case *EventJoinGame:
 		// when you coint
 		u.Character = e.Character
+		u.Location = fmt.Sprintf("%s/%s", e.Title, e.Position.Tile)
 		u.Write(Center(
 			[]byte(
 				"You have entered the " + e.Title + " area",
@@ -174,14 +176,15 @@ func (u *UI) HandleEvent(e interface{}) {
 		}
 		u.Character.Position = e.Position
 		u.showTile(e.Tile, false)
+		u.Location = fmt.Sprintf("%s/%s", e.Title, e.Position.Tile)
 
 	default:
 		u.Println("\n", "unknown event: ", fmt.Sprintf("%T", e))
 	}
 }
 
-func (me *UI) WritePrompt() {
-	fmt.Fprintf(me.IO, "%s> ", me.CharacterName())
+func (u *UI) WritePrompt() {
+	fmt.Fprintf(u.IO, "%s@%s> ", u.CharacterName(), strings.ToLower(u.Location))
 }
 
 func (me *UI) CID() Ident {

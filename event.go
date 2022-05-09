@@ -81,6 +81,7 @@ type EventMove struct {
 
 	// set by game
 	Position
+	Title // of the area
 	*Tile
 	Body []byte
 }

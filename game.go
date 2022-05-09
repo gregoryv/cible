@@ -133,8 +133,9 @@ func (g *Game) AffectGame(e interface{}) error {
 			c.Position.Tile = next
 		}
 		e.Position = c.Position
-		_, t, _ = g.Place(c.Position)
+		a, t, _ := g.Place(c.Position)
 		e.Tile = t
+		e.Title = a.Title
 		e.Body = []byte(t.Short + "...")
 		go c.Transmit(NewMessage(e))
 		go c.TransmitOthers(g, NewMessage(&EventApproach{Name: c.Name}))
