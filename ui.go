@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	_ "embed"
 	"fmt"
 	"os"
 	"strings"
@@ -250,6 +251,7 @@ func (u *UI) showUsage() {
 func (u *UI) ShowIntro() {
 	u.Write(Center(logo))
 	u.Println()
+	u.Println()
 	u.Write(Center("To learn more, just ask for help!"))
 	u.Println(strings.Repeat("\n", 8))
 }
@@ -377,30 +379,8 @@ var nav = map[string]Direction{
 	"nw": NW,
 }
 
-var usage = []byte(`Navigation
+//go:embed asset/usage.txt
+var usage []byte
 
-         n
-         |
-     nw  |  ne
-       \ | /
- w ----- * ----- e
-       / | \
-     sw  |  se
-         |
-         s
-
-
-l, look.......: look around you
-i, inventory..: show contents of your inventory
-q, quit.......: ends the game
-h, help.......: show this help
-`)
-
-var logo = []byte(`
-  ____ ___ ____  _     _____ 
- / ___|_ _| __ )| |   | ____|
-| |    | ||  _ \| |   |  _|  
-| |___ | || |_) | |___| |___ 
- \____|___|____/|_____|_____|
-                             
-`)
+//go:embed asset/logo.txt
+var logo []byte

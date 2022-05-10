@@ -1,0 +1,17 @@
+Navigation
+
+         n
+         |
+     nw  |  ne
+       \ | /
+ w ----- * ----- e
+       / | \
+     sw  |  se
+         |
+         s
+
+
+l, look.......: look around you
+i, inventory..: show contents of your inventory
+q, quit.......: ends the game
+h, help.......: show this help
