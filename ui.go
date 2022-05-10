@@ -65,7 +65,9 @@ func (u *UI) Run(ctx context.Context) error {
 	send := u.out
 	player := Player{}
 	player.SetName(os.Getenv("USER"))
-	send <- NewMessage(&EventJoinGame{Player: player})
+	send <- NewMessage(&EventJoinGame{
+		Player: player,
+	})
 
 	// signal when prompt needs update
 	promptUpdate := make(chan struct{}, 1)
@@ -116,20 +118,20 @@ loop:
 
 		case input := <-u.playerInput:
 			switch input {
-			case "":
+			case "": // ignore empty
 			case "n", "ne", "e", "se", "s", "sw", "w", "nw":
 				send <- NewMessage(&EventMove{Direction: nav[input]})
 
-			case "l":
+			case "l", "look":
 				send <- NewMessage(&EventLook{})
 
-			case "i":
+			case "i", "inventory":
 				u.showInventory()
 
 			case "h", "help":
 				u.showUsage()
 
-			case "q":
+			case "q", "quit":
 				send <- NewMessage(&EventLeave{})
 				<-time.After(40 * time.Millisecond)
 				p.Println("\nBye!")
@@ -138,7 +140,7 @@ loop:
 			default:
 				fields := strings.Fields(input)
 				switch fields[0] {
-				case "p":
+				case "p", "pickup":
 					if len(fields) == 1 {
 						u.Println("pickup what?")
 						continue loop
@@ -241,7 +243,7 @@ func (u *UI) showInventory() {
 }
 
 func (u *UI) showUsage() {
-	u.Write(Center(Boxed(usage, 40)))
+	u.Write(Center(Boxed(usage, 55)))
 	u.Println()
 }
 
@@ -334,19 +336,23 @@ func (me *UI) Print(v ...interface{}) (int, error) {
 	return int(p.Written), *err
 }
 
-func Boxed(p []byte, width int) []byte {
+func Boxed(p []byte, minWidth int) []byte {
 	scanner := bufio.NewScanner(bytes.NewReader(p))
 	var buf bytes.Buffer
-	buf.WriteString(frameLine(width))
+	buf.WriteString(frameLine(minWidth))
 	for scanner.Scan() {
 		line := scanner.Text()
 		buf.WriteString("| ")
 		buf.WriteString(line)
-		suffix := strings.Repeat(" ", width-len(line)-4)
+		r := minWidth - len(line) - 4
+		var suffix string
+		if r >= 0 {
+			suffix = strings.Repeat(" ", r)
+		}
 		buf.WriteString(suffix)
 		buf.WriteString(" |\n")
 	}
-	buf.WriteString(frameLine(width))
+	buf.WriteString(frameLine(minWidth))
 	return buf.Bytes()
 }
 
@@ -384,11 +390,10 @@ var usage = []byte(`Navigation
          s
 
 
-l - look around
-i - inventory
-
-q - quit
-h, help - for this help
+l, look.......: look around you
+i, inventory..: show contents of your inventory
+q, quit.......: ends the game
+h, help.......: show this help
 `)
 
 var logo = []byte(`
