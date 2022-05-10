@@ -94,6 +94,7 @@ func (n Nav) String() string {
 	return strings.Join(res, " ")
 }
 
+//go:generate stringer -output direction_string.go -type Direction
 type Direction int
 
 const (
