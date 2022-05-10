@@ -7,7 +7,7 @@ type Character struct {
 	Name
 	Position
 	IsBot
-	*Inventory
+	Inventory
 
 	tr Transmitter // set by server for communication
 }

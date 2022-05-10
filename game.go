@@ -86,7 +86,7 @@ func (g *Game) AffectGame(e interface{}) error {
 			Position: Position{
 				Area: "a1", Tile: "t1",
 			},
-			Inventory: NewInventory(),
+			Inventory: *NewInventory(),
 			tr:        e.tr,
 		}
 		g.Characters.Add(c)
@@ -177,7 +177,7 @@ func (g *Game) AffectGame(e interface{}) error {
 			g.ballFound = true
 		}
 		c.Inventory.AddItem(e.Item)
-		c.Transmit(NewMessage(&EventInventoryUpdate{c.Inventory}))
+		c.Transmit(NewMessage(&EventInventoryUpdate{&c.Inventory}))
 
 	case *EventStopGame:
 		// special event that ends the loop, thus we do things here as

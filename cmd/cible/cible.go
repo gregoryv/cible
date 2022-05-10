@@ -45,6 +45,7 @@ func main() {
 	}
 	c := NewClient()
 	c.Host = bind
+
 	ctx := context.Background()
 	if err := c.Connect(ctx); err != nil {
 		fmt.Println(err)

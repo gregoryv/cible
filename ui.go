@@ -45,7 +45,7 @@ type UI struct {
 	out chan Message
 	in  chan Message
 
-	*Character
+	Character
 	Location string // used in prompt
 
 	cols, rows int
@@ -94,14 +94,19 @@ func (u *UI) Run(ctx context.Context) error {
 	}()
 
 	p, _ := nexus.NewPrinter(u)
-	// handle incoming messages
 loop:
 	for {
+		// notify the prompt to update when the events have stopped
 		promptUpdate <- struct{}{}
+
+		// use a selct so that we only process one event at the time,
+		// either incoming or outgoing
 		select {
 		case <-ctx.Done():
 			return nil
+
 		case m := <-u.in:
+			// handle incoming messages
 			e, known := NewEvent(m.EventName)
 			if !known {
 				continue
@@ -157,7 +162,7 @@ loop:
 func (u *UI) HandleEvent(e interface{}) {
 	switch e := e.(type) {
 	case *EventInventoryUpdate:
-		u.Character.Inventory = e.Inventory // memleak?
+		u.Character.Inventory = *e.Inventory
 
 	case *EventGoAway:
 		u.OtherPlayer(e.Name, "went away")
@@ -172,8 +177,8 @@ func (u *UI) HandleEvent(e interface{}) {
 		u.OtherPlayer(e.Name, "joined game")
 
 	case *EventJoinGame:
-		// when you coint
-		u.Character = e.Character
+		// when you coin
+		u.Character = *e.Character
 		u.Location = fmt.Sprintf("%s/%s", e.Title, e.Position.Tile)
 		u.Write(Center(
 			[]byte(
@@ -215,21 +220,7 @@ func (u *UI) HandleEvent(e interface{}) {
 }
 
 func (u *UI) WritePrompt() {
-	fmt.Fprintf(u.IO, "%s@%s> ", u.CharacterName(), strings.ToLower(u.Location))
-}
-
-func (me *UI) CID() Ident {
-	if me.Character == nil {
-		return ""
-	}
-	return me.Character.Ident
-}
-
-func (me *UI) CharacterName() Name {
-	if me.Character == nil {
-		return ""
-	}
-	return me.Character.Name
+	fmt.Fprintf(u.IO, "%s@%s> ", u.Character.Name, strings.ToLower(u.Location))
 }
 
 func (u *UI) showInventory() {
