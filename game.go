@@ -10,7 +10,7 @@ import (
 
 func NewGame() *Game {
 	return &Game{
-		World:      Earth(),
+		World:      NewWorld(),
 		Characters: NewCharactersMap(),
 		Items: Items{
 			{

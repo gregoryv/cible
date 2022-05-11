@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func Earth() World {
+func NewWorld() World {
 	return World{
 		Areas: Areas{Spaceport()},
 	}
