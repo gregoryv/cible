@@ -80,10 +80,3 @@ func (me *Inventory) AddItem(v Item) {
 
 	me.Items = append(me.Items, v)
 }
-
-type Items []Item
-
-type Item struct {
-	Name
-	Count uint
-}

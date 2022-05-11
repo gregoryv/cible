@@ -11,15 +11,23 @@ import (
 func NewGame() *Game {
 	return &Game{
 		World:      Earth(),
-		MaxTasks:   10,
-		Logger:     logger.Silent,
 		Characters: NewCharactersMap(),
+		Items: Items{
+			{
+				Name:     "ball",
+				Count:    1,
+				Position: Position{Area: "a1", Tile: "t9"},
+			},
+		},
+		MaxTasks: 10,
+		Logger:   logger.Silent,
 	}
 }
 
 type Game struct {
 	World
 	Characters
+	Items
 
 	MaxTasks     int
 	LogAllEvents bool
@@ -155,15 +163,8 @@ func (g *Game) AffectGame(e interface{}) error {
 
 		e.Tile = *t
 
-		ipos := Position{
-			Area: "a1",
-			Tile: "t9",
-		}
-		if !g.ballFound && c.Position.Equal(ipos) { // todo game items should be shared
-			e.Loose = Items{Item{
-				Name:  "ball",
-				Count: 1,
-			}}
+		if !g.ballFound && c.Position.Equal(g.Items[0].Position) { // todo game items should be shared
+			e.Loose = g.Items // todo filter only items in current position
 		}
 		go c.Transmit(NewMessage(e))
 
