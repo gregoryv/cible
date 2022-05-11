@@ -82,6 +82,7 @@ func (me *Tile) Link(to ...interface{}) {
 	}
 }
 
+// Nav references tiles based on direction Direction -> Tile.Ident
 type Nav [8]Ident
 
 func (n Nav) String() string {
