@@ -89,6 +89,7 @@ func (u *UI) Run(ctx context.Context) error {
 		}
 	}()
 
+	// scan for player input and feed the user interface event loop
 	go func() {
 		scanner := bufio.NewScanner(u.IO)
 		for scanner.Scan() {
@@ -97,7 +98,8 @@ func (u *UI) Run(ctx context.Context) error {
 	}()
 
 	p, _ := nexus.NewPrinter(u)
-loop:
+
+eventLoop:
 	for {
 		// notify the prompt to update when the events have stopped
 		promptUpdate <- struct{}{}
@@ -144,7 +146,7 @@ loop:
 				case "p", "pickup":
 					if len(fields) == 1 {
 						u.Println("pickup what?")
-						continue loop
+						continue eventLoop
 					}
 					send <- NewMessage(&EventPickup{
 						Item: Item{
