@@ -16,7 +16,7 @@ func NewGame() *Game {
 			{
 				Name:     "ball",
 				Count:    1,
-				Position: Position{Area: "a1", Tile: "t9"},
+				Location: Location{Area: "a1", Tile: "t9"},
 			},
 		},
 		MaxTasks: 10,
@@ -89,7 +89,7 @@ func (g *Game) AffectGame(e interface{}) error {
 	case *EventJoinGame:
 		c := &Character{
 			Name: e.Player.Name,
-			Position: Position{
+			Location: Location{
 				Area: "a1", Tile: "t1",
 			},
 			Inventory: *NewInventory(),
@@ -98,7 +98,7 @@ func (g *Game) AffectGame(e interface{}) error {
 		g.Characters.Add(c)
 		g.Logf("%s joined game as %s", c.Name, c.Ident)
 		e.Character = c
-		a, _, _ := g.Place(c.Position)
+		a, _, _ := g.Place(c.Location)
 		e.Title = a.Title
 
 		// notify others of the new character
@@ -127,7 +127,7 @@ func (g *Game) AffectGame(e interface{}) error {
 			return err
 		}
 
-		_, t, err := g.Place(c.Position)
+		_, t, err := g.Place(c.Location)
 		if err != nil {
 			return err
 		}
@@ -139,10 +139,10 @@ func (g *Game) AffectGame(e interface{}) error {
 		c.TransmitOthers(g, NewMessage(&EventGoAway{Name: c.Name}))
 
 		if next != "" {
-			c.Position.Tile = next
+			c.Location.Tile = next
 		}
-		e.Position = c.Position
-		a, t, _ := g.Place(c.Position)
+		e.Location = c.Location
+		a, t, _ := g.Place(c.Location)
 		e.Tile = t
 		e.Title = a.Title
 		e.Body = []byte(t.Short + "...")
@@ -154,13 +154,13 @@ func (g *Game) AffectGame(e interface{}) error {
 		if err != nil {
 			return err
 		}
-		_, t, err := g.Place(c.Position)
+		_, t, err := g.Place(c.Location)
 		if err != nil {
 			return err
 		}
 
 		e.Tile = *t
-		e.Loose = g.Items.At(c.Position)
+		e.Loose = g.Items.At(c.Location)
 		go c.Transmit(NewMessage(e))
 
 	case *EventPickup:
@@ -169,10 +169,10 @@ func (g *Game) AffectGame(e interface{}) error {
 			return err
 		}
 		e.Item.Count = 1
-		for i, item := range g.Items.At(c.Position) {
+		for i, item := range g.Items.At(c.Location) {
 			if e.Item.Name == item.Name {
-				g.Items[i].Position.Area = ""
-				g.Items[i].Position.Tile = ""
+				g.Items[i].Location.Area = ""
+				g.Items[i].Location.Tile = ""
 				c.Inventory.AddItem(e.Item)
 			}
 		}
@@ -215,12 +215,12 @@ func (g *Game) Enqueue(t *Task) {
 	g.ch <- t
 }
 
-// Place returns the position as area and tile.
-func (g *Game) Place(p Position) (a *Area, t *Tile, err error) {
-	if a, err = g.Area(p.Area); err != nil {
+// Place returns the Location as area and tile.
+func (g *Game) Place(loc Location) (a *Area, t *Tile, err error) {
+	if a, err = g.Area(loc.Area); err != nil {
 		return
 	}
-	t, err = a.Tile(p.Tile)
+	t, err = a.Tile(loc.Tile)
 	return
 }
 
@@ -245,7 +245,7 @@ type Characters interface {
 	Add(*Character)
 	Remove(Ident)
 	Len() int
-	At(Position) []*Character
+	At(Location) []*Character
 }
 
 func NewCharactersMap() *CharactersMap {
@@ -281,10 +281,10 @@ func (me *CharactersMap) Len() int {
 	return len(me.Index)
 }
 
-func (me *CharactersMap) At(p Position) []*Character {
+func (me *CharactersMap) At(loc Location) []*Character {
 	res := make([]*Character, 0)
 	for _, c := range me.Index {
-		if c.Position.Equal(p) {
+		if c.Location.Equal(loc) {
 			res = append(res, c)
 		}
 	}

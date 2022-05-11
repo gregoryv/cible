@@ -184,7 +184,7 @@ func (u *UI) HandleEvent(e interface{}) {
 	case *EventJoinGame:
 		// when you coin
 		u.Character = *e.Character
-		u.Location = fmt.Sprintf("%s/%s", e.Title, e.Position.Tile)
+		u.Location = fmt.Sprintf("%s/%s", e.Title, e.Location.Tile)
 		u.Write(Center(
 			[]byte(
 				"You have entered the " + e.Title + " area",
@@ -210,14 +210,14 @@ func (u *UI) HandleEvent(e interface{}) {
 		u.Println()
 
 	case *EventMove:
-		if u.Character.Position.Equal(e.Position) {
+		if u.Character.Location.Equal(e.Location) {
 			u.Println("cannot move in that direction")
 			return
 		}
-		u.Character.Position = e.Position
+		u.Character.Location = e.Location
 		u.showTile(e.Tile, false)
 		u.Println()
-		u.Location = fmt.Sprintf("%s/%s", e.Title, e.Position.Tile)
+		u.Location = fmt.Sprintf("%s/%s", e.Title, e.Location.Tile)
 
 	default:
 		u.Println("\n", "unknown event: ", fmt.Sprintf("%T", e))

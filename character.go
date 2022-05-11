@@ -5,7 +5,7 @@ import "strings"
 type Character struct {
 	Ident
 	Name
-	Position
+	Location
 	IsBot
 	Inventory
 
@@ -20,7 +20,7 @@ func (me *Character) Transmit(m Message) error {
 }
 
 func (me *Character) TransmitOthers(g *Game, m Message) error {
-	nearby := g.Characters.At(me.Position)
+	nearby := g.Characters.At(me.Location)
 	for _, c := range nearby {
 		if c.Ident == me.Ident {
 			continue
@@ -37,12 +37,12 @@ type Player struct {
 
 type Bot struct{}
 
-type Position struct {
+type Location struct {
 	Area Ident
 	Tile Ident
 }
 
-func (p *Position) Equal(v Position) bool {
+func (p *Location) Equal(v Location) bool {
 	return p.Area == v.Area && p.Tile == v.Tile
 }
 

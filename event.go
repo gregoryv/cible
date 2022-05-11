@@ -91,14 +91,14 @@ type EventMove struct {
 	Ident
 
 	// set by game
-	Position
+	Location
 	Title // of the area
 	*Tile
 	Body []byte
 }
 
 func (me *EventMove) String() string {
-	return fmt.Sprintf("%s => %s", me.Direction, me.Position)
+	return fmt.Sprintf("%s => %s", me.Direction, me.Location)
 }
 
 type EventLook struct {
