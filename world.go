@@ -118,13 +118,3 @@ var opposite = [8]Direction{
 	W:  E,
 	NW: SE,
 }
-
-type Name string
-
-func (me *Name) SetName(v string) {
-	*me = Name(v)
-}
-
-type Short string
-type Long string
-type Title string

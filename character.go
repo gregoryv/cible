@@ -31,8 +31,6 @@ func (me *Character) TransmitOthers(g *Game, m Message) error {
 	return nil
 }
 
-type IsBot bool
-
 type Player struct {
 	Name
 }
@@ -47,10 +45,6 @@ type Position struct {
 func (p *Position) Equal(v Position) bool {
 	return p.Area == v.Area && p.Tile == v.Tile
 }
-
-type Ident string
-
-func (me *Ident) SetIdent(v string) { *me = Ident(v) }
 
 func NewInventory() *Inventory {
 	return &Inventory{
