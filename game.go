@@ -34,8 +34,6 @@ type Game struct {
 
 	ch chan *Task
 	logger.Logger
-
-	ballFound bool
 }
 
 func (g *Game) Run(ctx context.Context) error {
@@ -162,10 +160,7 @@ func (g *Game) AffectGame(e interface{}) error {
 		}
 
 		e.Tile = *t
-
-		if !g.ballFound && c.Position.Equal(g.Items[0].Position) { // todo game items should be shared
-			e.Loose = g.Items // todo filter only items in current position
-		}
+		e.Loose = g.Items.At(c.Position)
 		go c.Transmit(NewMessage(e))
 
 	case *EventPickup:
@@ -174,10 +169,13 @@ func (g *Game) AffectGame(e interface{}) error {
 			return err
 		}
 		e.Item.Count = 1
-		if e.Item.Name == "ball" {
-			g.ballFound = true
+		for i, item := range g.Items.At(c.Position) {
+			if e.Item.Name == item.Name {
+				g.Items[i].Position.Area = ""
+				g.Items[i].Position.Tile = ""
+				c.Inventory.AddItem(e.Item)
+			}
 		}
-		c.Inventory.AddItem(e.Item)
 		c.Transmit(NewMessage(&EventInventoryUpdate{&c.Inventory}))
 
 	case *EventStopGame:
