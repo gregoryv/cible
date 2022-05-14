@@ -168,14 +168,15 @@ func (g *Game) AffectGame(e interface{}) error {
 		if err != nil {
 			return err
 		}
-		e.Item.Count = 1
-		for i, item := range g.Items.At(c.Location) {
-			if e.Item.Name == item.Name {
-				g.Items[i].Location.Area = ""
-				g.Items[i].Location.Tile = ""
-				c.Inventory.AddItem(e.Item)
-			}
+		item, err := g.Items.At(c.Location).FindByName(e.Item.Name)
+		if err != nil {
+			c.Transmit(NewMessage(e))
+			return nil
 		}
+		item.Location.Area = ""
+		item.Location.Tile = ""
+		e.Item.Count = 1
+		c.Inventory.AddItem(e.Item)
 		c.Transmit(NewMessage(&EventInventoryUpdate{&c.Inventory}))
 
 	case *EventStopGame:

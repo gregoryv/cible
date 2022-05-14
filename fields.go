@@ -10,6 +10,7 @@ type Short string
 type Long string
 type Title string
 type IsBot bool
+type ItemFound bool
 
 type Ident string
 

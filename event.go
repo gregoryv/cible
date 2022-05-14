@@ -38,6 +38,8 @@ type EventExamine struct {
 type EventPickup struct {
 	Ident
 	Item
+
+	ItemFound
 }
 
 type EventGoAway struct {

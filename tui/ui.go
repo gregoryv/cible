@@ -228,6 +228,11 @@ func (u *UI) HandleEvent(e interface{}) {
 		u.Println()
 		u.Location = fmt.Sprintf("%s/%s", e.Title, e.Location.Tile)
 
+	case *EventPickup:
+		if !e.ItemFound {
+			u.Printf("there is no %s\n", e.Item.Name)
+		}
+
 	default:
 		u.Println("\n", "unknown event: ", fmt.Sprintf("%T", e))
 	}
