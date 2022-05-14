@@ -1,4 +1,4 @@
-// Command cibtel provides telnet access to a cible game
+// Command cible starts cible game server or client
 package main
 
 import (
