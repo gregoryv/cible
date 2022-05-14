@@ -7,6 +7,8 @@ type Tile struct {
 	Short
 	Long
 	Nav
+
+	*Cybromat
 }
 
 func (t *Tile) String() string {

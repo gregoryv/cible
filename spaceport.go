@@ -32,6 +32,7 @@ On the south wall you find the Cybromat 100, a automated cyborg
 enhancment machine for small items.
 `,
 		//
+		Cybromat: NewCybromat(), // todo examin interactions
 	}
 
 	t4 := &Tile{

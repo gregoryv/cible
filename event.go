@@ -33,6 +33,9 @@ type EventInventoryUpdate struct {
 type EventExamine struct {
 	Ident
 	Item
+
+	Interactions
+	Note string
 }
 
 type EventPickup struct {

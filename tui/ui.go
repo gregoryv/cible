@@ -150,7 +150,11 @@ eventLoop:
 						u.Println("examine what?")
 						continue eventLoop
 					}
-					send <- NewMessage(&EventExamine{})
+					send <- NewMessage(&EventExamine{
+						Item: Item{
+							Name: Name(fields[1]),
+						},
+					})
 
 				case "p", "pickup":
 					if len(fields) == 1 {
@@ -217,6 +221,23 @@ func (u *UI) HandleEvent(e interface{}) {
 		}
 		u.showNav(&e.Tile.Nav)
 		u.Println()
+
+	case *EventExamine:
+		if e.Note != "" {
+			u.Println(e.Note)
+			return
+		}
+		if len(e.Interactions) > 0 {
+			u.Println()
+			u.Write(Center(Boxed([]byte(e.Item.Name), 40)))
+
+			var buf bytes.Buffer
+			for _, a := range e.Interactions {
+				buf.WriteString(fmt.Sprintln(a.ShortAction, ", ", a.Action))
+			}
+			u.Write(Center(buf.Bytes()))
+			u.Println()
+		}
 
 	case *EventMove:
 		if u.Character.Location.Equal(e.Location) {

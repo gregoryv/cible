@@ -163,6 +163,22 @@ func (g *Game) AffectGame(e interface{}) error {
 		e.Loose = g.Items.At(c.Location)
 		go c.Transmit(NewMessage(e))
 
+	case *EventExamine:
+		c, err := g.Character(e.Ident)
+		if err != nil {
+			return err
+		}
+		_, t, err := g.Place(c.Location)
+		if err != nil {
+			return err
+		}
+		if t.Cybromat != nil && e.Item.Name == "cybromat" {
+			e.Interactions = t.Cybromat.Interactions
+		} else {
+			e.Note = fmt.Sprintf("cannot examine %s", e.Item.Name)
+		}
+		go c.Transmit(NewMessage(e))
+
 	case *EventPickup:
 		c, err := g.Character(e.Ident)
 		if err != nil {
