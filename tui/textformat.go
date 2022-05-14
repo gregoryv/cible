@@ -1,4 +1,4 @@
-package cible
+package tui
 
 import (
 	"bufio"

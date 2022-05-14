@@ -8,6 +8,7 @@ import (
 	"os"
 
 	. "github.com/gregoryv/cible"
+	"github.com/gregoryv/cible/tui"
 	"github.com/gregoryv/cmdline"
 	"github.com/gregoryv/logger"
 )
@@ -52,7 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	ui := NewUI()
+	ui := tui.NewUI()
 	ui.Use(c)
 	if err := ui.Run(ctx); err != nil {
 		fmt.Println(err)

@@ -1,4 +1,4 @@
-package cible
+package cible_test
 
 import (
 	"bytes"
@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/gregoryv/cible"
+	. "github.com/gregoryv/cible/tui" // fix this, don't rely on tui to test this package
 	"github.com/gregoryv/logger"
 )
 

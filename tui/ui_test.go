@@ -1,4 +1,4 @@
-package cible
+package tui
 
 import (
 	"strings"
@@ -6,20 +6,20 @@ import (
 )
 
 func TestUI_OtherPlayerSays(t *testing.T) {
-	ui := NewUI()
+	tui := NewUI()
 
-	ui.OtherPlayerSays("cid", "hello")
-	got, exp := string(ui.IO.LastWrite), "hello"
+	tui.OtherPlayerSays("cid", "hello")
+	got, exp := string(tui.IO.LastWrite), "hello"
 	if !strings.Contains(got, exp) {
 		t.Errorf("%s\nmissing %s", got, exp)
 	}
 }
 
 func TestUI_OtherPlayer(t *testing.T) {
-	ui := NewUI()
+	tui := NewUI()
 
-	ui.OtherPlayer("cid", "left")
-	got, exp := string(ui.IO.LastWrite), "left"
+	tui.OtherPlayer("cid", "left")
+	got, exp := string(tui.IO.LastWrite), "left"
 	if !strings.Contains(got, exp) {
 		t.Errorf("%s\nmissing %s", got, exp)
 	}

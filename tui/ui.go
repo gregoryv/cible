@@ -1,4 +1,4 @@
-package cible
+package tui
 
 import (
 	"bufio"
@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	. "github.com/gregoryv/cible"
 	"github.com/gregoryv/logger"
 	"github.com/gregoryv/nexus"
 	"github.com/nathan-fiscaletti/consolesize-go"
