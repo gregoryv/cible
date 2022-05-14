@@ -49,15 +49,15 @@ func (p *Location) Equal(v Location) bool {
 func NewInventory() *Inventory {
 	return &Inventory{
 		Items: Items{
-			Item{
+			&Item{
 				Name:  "credit",
 				Count: 200,
 			},
-			Item{
+			&Item{
 				Name:  "Communicator",
 				Count: 1,
 			},
-			Item{
+			&Item{
 				Name:  "Digipass",
 				Count: 1,
 			},
@@ -78,5 +78,5 @@ func (me *Inventory) AddItem(v Item) {
 		}
 	}
 
-	me.Items = append(me.Items, v)
+	me.Items = append(me.Items, &v)
 }

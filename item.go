@@ -1,6 +1,6 @@
 package cible
 
-type Items []Item
+type Items []*Item
 
 func (me *Items) At(loc Location) Items {
 	res := make(Items, 0)
