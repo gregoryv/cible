@@ -1,5 +1,7 @@
 package cible
 
+import "errors"
+
 type Items []*Item
 
 func (me *Items) At(loc Location) Items {
@@ -11,6 +13,17 @@ func (me *Items) At(loc Location) Items {
 	}
 	return res
 }
+
+func (me Items) FindByName(n Name) (*Item, error) {
+	for _, item := range me {
+		if item.Name == item.Name {
+			return item, nil
+		}
+	}
+	return nil, ErrItemNotFound
+}
+
+var ErrItemNotFound = errors.New("item not found")
 
 type Item struct {
 	Name
