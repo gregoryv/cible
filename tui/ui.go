@@ -145,6 +145,13 @@ eventLoop:
 			default:
 				fields := strings.Fields(input)
 				switch fields[0] {
+				case "x", "examine":
+					if len(fields) == 1 {
+						u.Println("examine what?")
+						continue eventLoop
+					}
+					send <- NewMessage(&EventExamine{})
+
 				case "p", "pickup":
 					if len(fields) == 1 {
 						u.Println("pickup what?")

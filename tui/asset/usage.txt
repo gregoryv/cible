@@ -12,6 +12,7 @@ Navigation
 
 
 l, look.......: look around you
+x, examine....: examin an item
 i, inventory..: show contents of your inventory
 q, quit.......: ends the game
 h, help.......: show this help

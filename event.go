@@ -17,6 +17,7 @@ func init() {
 	registerEvent(&EventApproach{})
 	registerEvent(&EventGoAway{})
 	registerEvent(&EventPickup{})
+	registerEvent(&EventExamine{})
 	registerEvent(&EventInventoryUpdate{})
 
 	// Do Not register EventStopGame as it would allow a client to
@@ -27,6 +28,11 @@ func init() {
 
 type EventInventoryUpdate struct {
 	*Inventory
+}
+
+type EventExamine struct {
+	Ident
+	Item
 }
 
 type EventPickup struct {
