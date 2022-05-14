@@ -1,9 +1,24 @@
 package tui
 
 import (
+	"context"
 	"strings"
 	"testing"
+	"time"
 )
+
+func TestUI_Run(t *testing.T) {
+	ui := NewUI()
+	ctx, _ := context.WithTimeout(
+		context.Background(), 10*time.Millisecond,
+	)
+	go func() {
+		if err := ui.Run(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
+	<-ctx.Done()
+}
 
 func TestUI_OtherPlayerSays(t *testing.T) {
 	tui := NewUI()
