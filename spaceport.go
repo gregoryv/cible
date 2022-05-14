@@ -27,7 +27,10 @@ surface, reminds you of the venturesome life in space.`}
 
 Historical information about the Genetic Low Orbital Computer is
 posted on the wall. Tech pillars with charging ports and terminals are
-vacant for use.`,
+vacant for use.
+On the south wall you find the Cybromat 100, a automated cyborg
+enhancment machine for small items.
+`,
 		//
 	}
 
